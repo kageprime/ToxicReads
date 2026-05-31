@@ -13,7 +13,6 @@ export function getDb() {
   if (!instance) {
     client = createClient({ url: env.databaseUrl, authToken: env.databaseAuthToken });
     instance = drizzle(client, { schema: fullSchema });
-    migrate();
   }
   return instance;
 }
@@ -23,12 +22,4 @@ export function getClient() {
     client = createClient({ url: env.databaseUrl, authToken: env.databaseAuthToken });
   }
   return client;
-}
-
-function migrate() {
-  try {
-    client.execute("ALTER TABLE books ADD COLUMN views INTEGER NOT NULL DEFAULT 0;");
-  } catch {
-    // column already exists
-  }
 }
