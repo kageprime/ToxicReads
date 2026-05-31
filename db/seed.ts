@@ -4,7 +4,7 @@ import { books, localUsers } from "./schema.js";
 import bcrypt from "bcryptjs";
 
 async function seed() {
-  console.log("Seeding BookHaven database...");
+  console.log("Seeding ToxicReads database...");
 
   // 1. Seed admin user
   const existingUsers = await getDb().select().from(localUsers);

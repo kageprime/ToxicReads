@@ -5,8 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
 
-const CHUNK_PREFETCH_THRESHOLD = 3;
-
 export default function Reader() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -16,13 +14,14 @@ export default function Reader() {
   const [showOutline, setShowOutline] = useState(false);
   const [activeChapter, setActiveChapter] = useState(0);
   const [loadedChunks, setLoadedChunks] = useState<Record<number, string>>({});
-  const [maxChunkLoaded, setMaxChunkLoaded] = useState(0);
+  const [token, setToken] = useState<string | null>(null);
+  const [totalChunks, setTotalChunks] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const tokenRef = useRef<string>("");
-  const totalChunksRef = useRef(0);
+  const loadingChunksRef = useRef<Set<number>>(new Set());
+  const hasMoreRef = useRef(false);
 
-  const { data: readData, isLoading, error } = trpc.book.read.useQuery(
+  const { data: readData, isLoading, error, refetch: refetchBook } = trpc.book.read.useQuery(
     { id: parseInt(id || "0") },
     { enabled: !!id && isAuthenticated },
   );
@@ -31,94 +30,105 @@ export default function Reader() {
 
   const book = readData;
 
+  // Auth guard
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navigate("/login");
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  // Bootstrap: load first chunk and set up token
+  // Bootstrap from book.read response
   useEffect(() => {
     if (readData) {
       setLoadedChunks({ 0: readData.chunk });
-      setMaxChunkLoaded(0);
-      tokenRef.current = readData.token;
-      totalChunksRef.current = readData.chunks;
+      setToken(readData.token);
+      setTotalChunks(readData.chunks);
     }
   }, [readData]);
 
-  // Prefetch next chunks via IntersectionObserver on sentinel
+  // Re-fetch book.read when token becomes null (expired)
   useEffect(() => {
+    if (token === null && !isLoading && id) {
+      refetchBook();
+    }
+  }, [token, isLoading, id, refetchBook]);
+
+  // Single persistent observer — rebuilt only when token or loadedChunks changes meaningfully
+  useEffect(() => {
+    if (!token) return;
+
+    const loading = loadingChunksRef.current;
     const sentinel = sentinelRef.current;
-    if (!sentinel || !tokenRef.current) return;
+    if (!sentinel) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const nextChunk = maxChunkLoaded + 1;
-            if (nextChunk < totalChunksRef.current && !loadedChunks[nextChunk]) {
+          if (!entry.isIntersecting) continue;
+          if (!hasMoreRef.current) continue;
+
+          // Read current loadedChunks from a ref to avoid stale closure
+          setLoadedChunks((prev) => {
+            const nextChunk = Object.keys(prev).length;
+            if (nextChunk >= totalChunks) {
+              hasMoreRef.current = false;
+              return prev;
+            }
+
+            // Load the next chunk if not already loading
+            if (!loading.has(nextChunk)) {
+              loading.add(nextChunk);
               readChunk.mutate(
-                { token: tokenRef.current, chunk: nextChunk },
+                { token, chunk: nextChunk },
                 {
                   onSuccess: (data) => {
-                    setLoadedChunks((prev) => ({ ...prev, [data.index]: data.chunk }));
-                    setMaxChunkLoaded((prev) => Math.max(prev, data.index));
+                    loading.delete(data.index);
+                    setLoadedChunks((p) => ({ ...p, [data.index]: data.chunk }));
                   },
                   onError: () => {
-                    // Token likely expired; refresh the whole book
-                    tokenRef.current = "";
+                    loading.delete(nextChunk);
+                    setToken(null);
                   },
                 },
               );
             }
-            // Prefetch one more ahead
-            const aheadChunk = nextChunk + 1;
-            if (aheadChunk < totalChunksRef.current && !loadedChunks[aheadChunk]) {
+
+            // Also prefetch one more ahead
+            const ahead = nextChunk + 1;
+            if (ahead < totalChunks && !loading.has(ahead)) {
+              loading.add(ahead);
               readChunk.mutate(
-                { token: tokenRef.current, chunk: aheadChunk },
+                { token, chunk: ahead },
                 {
                   onSuccess: (data) => {
-                    setLoadedChunks((prev) => ({ ...prev, [data.index]: data.chunk }));
-                    setMaxChunkLoaded((prev) => Math.max(prev, data.index));
+                    loading.delete(data.index);
+                    setLoadedChunks((p) => ({ ...p, [data.index]: data.chunk }));
+                  },
+                  onError: () => {
+                    loading.delete(ahead);
                   },
                 },
               );
             }
-          }
+
+            return prev;
+          });
         }
       },
-      { rootMargin: "200px 0px" },
+      { rootMargin: "400px 0px" },
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [maxChunkLoaded, loadedChunks, readChunk]);
+  }, [token, readChunk, totalChunks]);
 
-  // Re-fetch book.read when token expires
-  const { refetch: refetchBook } = trpc.book.read.useQuery(
-    { id: parseInt(id || "0") },
-    { enabled: false },
-  );
-
-  useEffect(() => {
-    if (!tokenRef.current && !isLoading && readData) {
-      refetchBook();
-    }
-  }, [tokenRef.current, isLoading, readData, refetchBook]);
+  // Determine if more chunks exist after each loadedChunks update
+  hasMoreRef.current = Object.keys(loadedChunks).length < totalChunks;
 
   const allContent = useMemo(() => {
-    const parts: string[] = [];
-    for (let i = 0; i <= maxChunkLoaded; i++) {
-      if (loadedChunks[i]) parts.push(loadedChunks[i]);
-    }
-    // Also include any higher chunks that may have been loaded out of order
-    for (const [idx, text] of Object.entries(loadedChunks)) {
-      const n = parseInt(idx);
-      if (n > maxChunkLoaded) parts.push(text);
-    }
-    return parts.join("");
-  }, [loadedChunks, maxChunkLoaded]);
+    const indices = Object.keys(loadedChunks).map(Number).sort((a, b) => a - b);
+    return indices.map((i) => loadedChunks[i]).join("");
+  }, [loadedChunks]);
 
   const paragraphs = useMemo(() => allContent.split("\n\n"), [allContent]);
   const outline = useMemo(() => allContent ? parseOutline(allContent) : [], [allContent]);
@@ -175,7 +185,7 @@ export default function Reader() {
   useEffect(() => {
     return () => {
       setLoadedChunks({});
-      tokenRef.current = "";
+      setToken(null);
     };
   }, []);
 
@@ -204,6 +214,7 @@ export default function Reader() {
   const borderColor = theme === "dark" ? "#333" : "#e8e4df";
   const outlineBg = theme === "dark" ? "#141414" : "#fff";
   const watermarkColor = theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+  const loadedCount = Object.keys(loadedChunks).length;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: bgColor, position: "relative" }}>
@@ -311,8 +322,8 @@ export default function Reader() {
               )}
             </div>
 
-            {/* Sentinel for chunk prefetching */}
-            {maxChunkLoaded < totalChunksRef.current - 1 && (
+            {/* Sentinel — triggers next chunk load */}
+            {hasMoreRef.current && (
               <div ref={sentinelRef} style={{ height: 1 }} />
             )}
           </article>
@@ -321,7 +332,7 @@ export default function Reader() {
 
       {/* Progress indicator */}
       <div className="fixed bottom-0 left-0 right-0 h-1" style={{ backgroundColor: borderColor }}>
-        <div style={{ width: `${Math.min(100, ((maxChunkLoaded + 1) / Math.max(totalChunksRef.current, 1)) * 100)}%`, height: "100%", backgroundColor: theme === "dark" ? "#666" : "#ccc" }} />
+        <div style={{ width: `${Math.min(100, (loadedCount / Math.max(totalChunks, 1)) * 100)}%`, height: "100%", backgroundColor: theme === "dark" ? "#666" : "#ccc" }} />
       </div>
     </div>
   );
