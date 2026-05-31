@@ -6,7 +6,7 @@ export default defineConfig({
   out: "./db/migrations",
   dialect: "sqlite",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? (() => { throw new Error("DATABASE_URL is required"); })(),
+    url: process.env.TURSO_DATABASE_URL ?? (() => { throw new Error("TURSO_DATABASE_URL is not set"); })(),
     authToken: process.env.DATABASE_AUTH_TOKEN,
   },
 });

@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { createClient } from "@libsql/client";
 
-const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || (() => { throw new Error("DATABASE_URL or TURSO_DATABASE_URL is required"); })();
-const authToken = process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN || undefined;
+const dbUrl = process.env.TURSO_DATABASE_URL ?? (() => { throw new Error("TURSO_DATABASE_URL is not set"); })();
+const authToken = process.env.TURSO_AUTH_TOKEN ?? undefined;
 
 async function resetDb() {
   const client = createClient({ url: dbUrl, authToken });
