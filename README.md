@@ -1,109 +1,132 @@
-# Personal Blog Fullstack Template
+# ToxicReads
 
-A fullstack bilingual (中文 / English) personal blog + portfolio named **NEURAL ATELIER**. Three-column editorial layout (sidebar / posts feed / right rail), light & dark themes, Kimi OAuth + local username/password auth, and an admin-only authoring flow.
+A fullstack digital book marketplace with a built-in reading interface, admin CMS, mock payment system, and content protections. Built for browsing, purchasing, and reading ebooks in the browser.
 
 ## Features
 
-- Three-column editorial layout: profile sidebar, post feed, CV rail
-- Bilingual content (zh / en) for every post, bio paragraph, and CV entry — language toggle in the header
-- Light / dark theme toggle that writes CSS variables to `document.documentElement`
-- Admin-only post authoring (`/admin/new-post`) with image upload to `public/images/`
-- Public guestbook (`/guestbook`) writing to the `contacts` table
-- Editable profile bio, CV entries, and avatar through the settings modal (admin only)
-- Dual auth: Kimi OAuth and local username/password — first local user is auto-promoted to admin
-- Animated three.js shader backdrop behind the layout
+- **Browse & Discover** — Catalog page with search/filter by title, author, condition, and price range
+- **Book Detail Page** — Cover, description, metadata, similar books, and purchase flow
+- **Reader Interface** — Chunked content loading with configurable font size, light/dark themes, document outline sidebar with chapter navigation, and progress indicator
+- **Content Protections** — 5KB chunked serving via signed 5-minute JWT tokens, per-user rate limiting (10 reads/hour/book), watermark overlay with username/date, disabled copy/cut/context-menu, `user-select: none`
+- **Mock Payment** — Card form modal with 1.5s simulated processing; cards ending in `0000` are declined
+- **Free Books** — Books priced at $0 or $0.00 are directly readable without purchase
+- **Auth** — Local username/password registration and login with JWT in httpOnly cookies
+- **User Submissions** — Users can submit books for review with cover image and content file upload (docx/pdf/epub)
+- **Admin Dashboard** — Pending submissions (bulk approve/reject), all books (inline edit, delete), purchases log
+- **Responsive** — Mobile-friendly layout with collapsible sidebar, responsive grids, and adaptive reader controls
+- **Theming** — Light/dark toggle with CSS custom properties
 
 ## Tech Stack
 
-- React 19 + TypeScript + Vite
-- Tailwind CSS v3 + shadcn/ui
-- tRPC 11 + Hono + Drizzle ORM + MySQL
-- Kimi OAuth 2.0 **and** local username/password authentication (both enabled)
-- React Router v7
-- three.js for the ambient hero shader
+- React 19 + TypeScript + Vite 7
+- React Router 7
+- Tailwind CSS
+- Lucide React icons
+- GSAP for animations
+- Three.js (ShaderCanvas on landing page)
+- Hono backend injected via Vite dev server
+- tRPC v11 for API
+- Drizzle ORM + libsql (Turso)
+- SQLite (dev) / Turso (production)
 
 ## Quick Start
 
-1. Clone / extract this template
+1. Clone the repo
 2. Install dependencies: `npm install`
-3. Copy `.env.example` to `.env` and fill in `DATABASE_URL` and Kimi OAuth credentials
-4. Run database migrations: `npx drizzle-kit push`
-5. Seed starter content (posts, profile bio, CV entries): `npx tsx db/seed.ts`
-6. Run the dev server: `npm run dev`
-7. Build for production: `npm run build`
+3. Copy `.env` with your Turso credentials:
+   ```
+   TURSO_DATABASE_URL=file:./data/bookhaven.db
+   TURSO_AUTH_TOKEN=
+   APP_SECRET=your-secret-key
+   PORT=3000
+   ```
+4. Seed the database: `npm run db:seed`
+5. Start dev server: `npm run dev` (Vite on port 3000 with Hono backend)
+6. Build for production: `npm run build`
+7. Run production server: `npm run start`
 
-## Configuration
+## Commands
 
-This template does not use `src/config.ts`. All user-visible content is driven by the database and loaded through tRPC. A few static UI strings live inline in components — edit them there:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev (port 3000) with Hono backend |
+| `npm run build` | Build frontend + compile backend |
+| `npm run start` | Run production server (`dist/boot.js`) |
+| `npm run check` | TypeScript typecheck |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier write |
+| `npm run test` | Vitest (api/**/*.test.ts) |
+| `npm run db:generate` | Drizzle Kit generate |
+| `npm run db:push` | Drizzle Kit push |
+| `npm run db:migrate` | Drizzle Kit migrate |
+| `npm run db:seed` | Seed admin user + sample books |
+| `npm run db:reset` | Drop and recreate all tables |
 
-- **`src/App.tsx`** — header wordmark, `LOG IN / 登入`, `ADMIN`, theme / language toggles, `LOADING…`
-- **`src/components/LeftColumn.tsx`** — profile column (bio paragraphs render from `profileBio`)
-- **`src/components/MiddleColumn.tsx`** — post feed (renders from `posts`)
-- **`src/components/RightColumn.tsx`** — CV rail (renders from `cvEntries`)
-- **`src/components/PostDetail.tsx`** — post detail page layout
-- **`src/components/ContactModal.tsx`** — contact form (writes to `contacts`)
-- **`src/components/SettingsModal.tsx`** — admin settings modal (editable profile + avatar)
-- **`src/pages/Guestbook.tsx`** — guestbook page
-- **`src/pages/NewPost.tsx`** — admin-only post editor
-- **`src/pages/Login.tsx`** — sign-in UI (Kimi + local)
-- **`db/seed.ts`** — bootstrap content for posts, bio, CV entries, and avatar
+## Routes
 
-See `info.md` (outer folder) for layout character limits per field.
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | Landing | Marketing page with hero, featured books, how it works |
+| `/home` | HomePage | Browse books catalog |
+| `/book/:id` | BookDetail | Book details + buy |
+| `/read/:id` | Reader | Read purchased/free book |
+| `/login` | Login | Sign in |
+| `/register` | Register | Create account |
+| `/submit-book` | SubmitBook | Submit new book |
+| `/my-submissions` | MySubmissions | Manage submissions |
+| `/my-purchases` | MyPurchases | View purchased books |
+| `/admin` | AdminDashboard | Admin panel |
+| `/add-book` | AddBook | Admin add book |
+| `/profile` | Profile | Account settings |
 
 ## Database Schema
 
-Seven tables, defined in `db/schema.ts`:
+### localUsers
+- id, username, passwordHash, name, role (`user`|`admin`), createdAt
 
-- **`users`** — Kimi OAuth-managed (id, unionId, name, email, avatar, role)
-- **`localUsers`** — local username/password records (id, username, passwordHash, name, role)
-- **`posts`** — bilingual blog posts (id, year, image, sortOrder, zh*/en* title, subtitle, collection, content, detailContent)
-- **`contacts`** — guestbook / contact submissions (id, name, message, createdAt)
-- **`profileBio`** — single-row profile bio (id=1, zhText, enText, email, instagram)
-- **`cvEntries`** — CV rows grouped by category (id, category, zh/en title, subtitle, year, sortOrder)
-- **`siteSettings`** — single-row site settings (id=1, avatarImage)
+### books
+- id, title, author, description, content, price, coverImage, category, condition, sellerId, sellerType, status (`pending`|`approved`|`rejected`), views, createdAt, updatedAt
 
-## Required Assets
+### purchases
+- id, bookId, buyerId, purchasePrice, createdAt
 
-Images are referenced by URL from the database. Seeded defaults live under `public/images/`:
+## API Endpoints (tRPC)
 
-- `/images/portrait.jpg` — default profile avatar (square, 800×800+ recommended)
-- `/images/hero-art.jpg`, `/images/blog-1.jpg`, … — post cover images seeded by `db/seed.ts`
+### Auth
+- `auth.me`, `auth.login`, `auth.register`, `auth.logout`, `auth.updateCredentials`
 
-New post covers should be uploaded through the admin `NewPost` editor rather than edited by hand.
+### Books
+- `book.list`, `book.byId`, `book.pendingList`, `book.adminList`, `book.create`, `book.update`, `book.delete`, `book.approve`, `book.reject`, `book.submit`, `book.updateMySubmission`, `book.deleteMySubmission`, `book.hasPurchased`, `book.read`, `book.readChunk`, `book.incrementView`
 
-## Project Structure
+### Purchases
+- `purchase.buy`, `purchase.myPurchases`, `purchase.adminList`
 
-```
-.
-├── api/                # tRPC routers: auth, local-auth, blog, contact, profile, cv, settings
-├── contracts/          # Shared tRPC types
-├── db/                 # Drizzle schema, migrations, seed
-├── public/             # Static assets (incl. seed images)
-├── src/
-│   ├── components/     # AuthLayout, PostDetail, {Left,Middle,Right}Column,
-│   │                   # ContactModal, SettingsModal, ImageUpload, ShaderCanvas
-│   ├── contexts/       # ThemeContext, LanguageContext
-│   ├── data/           # blogPosts.ts (type definitions)
-│   ├── hooks/          # useAuth
-│   ├── pages/          # Home, Guestbook, NewPost, Login, NotFound
-│   ├── providers/      # trpc
-│   └── App.tsx
-├── Dockerfile
-├── drizzle.config.ts
-├── .backend-features.json  # Declares ["auth", "db"]
-└── .env.example
-```
+## Deployment
 
-## Design
+The project is configured for Vercel:
 
-- Three-column layout: left profile (~260px), middle feed (flex), right CV rail (~260px)
-- Fixed 40px top header; each column scrolls independently
-- Fonts: Inter body, Space Mono for small labels, a custom serif for headlines
-- CSS variables drive the theme (`--bg-warm-white`, `--text-charcoal`, `--accent-teal`, `--border-light`, …)
+- `api/app.ts` — Hono app with all route handlers
+- `api/index.ts` — Vercel serverless entry
+- `api/boot.ts` — Standalone Node server entry
+- `vercel.json` — SPA rewrites, output directory config
 
-## Notes
+Set the following environment variables in Vercel dashboard:
+- `TURSO_DATABASE_URL` — Turso connection string
+- `TURSO_AUTH_TOKEN` — Turso auth token
+- `APP_SECRET` — JWT signing secret
 
-- Don't re-introduce hard-coded post content into components — the DB is the source of truth
-- Both auth flows stay live at the same time (`api/kimi/` and `api/local-auth-router.ts`); the first local user is auto-admin
-- Content edits must go through the admin UI (`SettingsModal`, `NewPost`) or `db/seed.ts`
-- Every bilingual row (`posts`, `profileBio`, `cvEntries`) requires both `zh*` and `en*` fields populated
+## Content Protections
+
+- **Chunked reading** — Content split into 5000-char fragments, served one at a time
+- **Signed tokens** — 5-minute JWT bound to userId + bookId, refreshed on expiry
+- **Rate limiting** — 10 reads per hour per book per user (in-memory sliding window)
+- **Watermark** — Username + date at 5% opacity, rotated -20deg, `pointer-events: none`
+- **Browser protections** — `user-select: none`, disabled copy/cut/context-menu, memory cleared on unmount
+
+## Image Import
+
+Run `npx tsx scripts/import-books.ts` to import `.docx` files from `/books` folder.
+
+## Admin Access
+
+Default admin credentials: **admin / 123456**
