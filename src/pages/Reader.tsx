@@ -372,14 +372,16 @@ export default function Reader() {
               <List size={12} /> <span className="hidden sm:inline">Outline</span>
             </button>
           )}
-          <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Decrease font">A−</button>
-          <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "20px sm:min-w-24px", textAlign: "center" }}>{fontSize}</span>
-          <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Increase font">A+</button>
-          <span className="hidden sm:inline" style={{ fontSize: "10px", color: theme === "dark" ? "#666" : "#999" }}>|</span>
-          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 6px sm:px-10", cursor: "pointer" }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
-            <span className="hidden sm:inline">{theme === "dark" ? "Light" : "Dark"}</span>
-            <span className="sm:hidden">{theme === "dark" ? "☀" : "☾"}</span>
-          </button>
+          <span className="hidden sm:flex items-center gap-0.5 sm:gap-1">
+            <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Decrease font">A−</button>
+            <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "20px sm:min-w-24px", textAlign: "center" }}>{fontSize}</span>
+            <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Increase font">A+</button>
+            <span style={{ fontSize: "10px", color: theme === "dark" ? "#666" : "#999" }}>|</span>
+            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 6px sm:px-10", cursor: "pointer" }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
+              <span className="hidden sm:inline">{theme === "dark" ? "Light" : "Dark"}</span>
+              <span className="sm:hidden">{theme === "dark" ? "☀" : "☾"}</span>
+            </button>
+          </span>
           <button onClick={logout} className="p-1.5 rounded hover:opacity-70 transition-opacity shrink-0">
             <LogOut size={16} style={{ color: textColor }} />
           </button>
@@ -464,8 +466,21 @@ export default function Reader() {
         </main>
       </div>
 
+      {/* Mobile bottom toolbar (font controls) */}
+      <div className="sm:hidden fixed bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}>
+        <div style={{ backgroundColor: headerBg, border: `1px solid ${borderColor}`, borderRadius: "20px", padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}>
+          <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "13px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Decrease font">A−</button>
+          <span style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "22px", textAlign: "center" }}>{fontSize}</span>
+          <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "13px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Increase font">A+</button>
+          <span style={{ fontSize: "14px", color: theme === "dark" ? "#444" : "#ddd" }}>|</span>
+          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "13px", background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
+            {theme === "dark" ? <span style={{ color: "#e8e6e3" }}>☀</span> : <span style={{ color: "#555" }}>☾</span>}
+          </button>
+        </div>
+      </div>
+
       {/* Progress indicator */}
-      <div className="fixed bottom-0 left-0 right-0 h-1" style={{ backgroundColor: borderColor }}>
+      <div className="fixed bottom-0 left-0 right-0 h-1" style={{ backgroundColor: borderColor, marginBottom: "env(safe-area-inset-bottom, 0px)" }}>
         <div style={{ width: `${Math.min(100, (loadedCount / Math.max(totalChunks, 1)) * 100)}%`, height: "100%", backgroundColor: theme === "dark" ? "#666" : "#ccc" }} />
       </div>
     </div>

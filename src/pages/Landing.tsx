@@ -151,17 +151,17 @@ function FeaturedCollections({ books }: { books: Array<{ id: number; title: stri
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {rows.map((row, ri) => (
-            <div key={ri} style={{ display: "flex", gap: 24 }}>
+            <div key={ri} className="flex gap-4 sm:gap-6 overflow-x-auto sm:overflow-visible pb-2" style={{ scrollSnapType: "x mandatory" }}>
               {row.map((book) => (
                 <div key={book.id} onClick={() => navigate(`/book/${book.id}`)} style={{
-                  flex: 1, cursor: "pointer", position: "relative",
+                  flex: "0 0 min(70vw, 200px)", cursor: "pointer", position: "relative", scrollSnapAlign: "start",
                   transition: "transform 0.3s ease",
                 }} onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-4px)"}
                    onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
                   <div style={{ border: `1px solid ${STONE}40`, aspectRatio: "3/4", overflow: "hidden", marginBottom: 8 }}>
-                    <img src={book.coverImage} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={book.coverImage} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
                   </div>
-                  <p style={{ fontSize: 11, fontFamily: "'Georgia', serif", color: INK_BLACK, marginBottom: 2, lineHeight: 1.3 }}>{book.title}</p>
+                  <p style={{ fontSize: 11, fontFamily: "'Georgia', serif", color: INK_BLACK, marginBottom: 2, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
                   <p style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", color: STONE, marginBottom: 2 }}>{book.author}</p>
                   <p style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: BRONZE }}>${book.price}</p>
                 </div>
@@ -249,7 +249,7 @@ function GlobalRoutes() {
           <div style={{ width: 60, height: 1, backgroundColor: BRONZE, marginTop: 16 }} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {routes.map((r, i) => (
             <div key={i} style={{
               padding: 20, border: `1px solid ${STONE}30`, backgroundColor: `${IVORY}80`,

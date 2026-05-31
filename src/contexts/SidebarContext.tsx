@@ -1,31 +1,45 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 
 interface SidebarContextType {
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
+  isMobile: boolean;
 }
 
 const SidebarContext = createContext<SidebarContextType>({
   collapsed: true,
   setCollapsed: () => {},
+  isMobile: false,
 });
+
+const MOBILE_BREAKPOINT = 768;
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(true);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 900) {
-        setCollapsed(true);
-      }
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+      if (e.matches) setCollapsed(true);
     };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  // Close on Escape key (mobile overlay)
+  useEffect(() => {
+    if (!isMobile || collapsed) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCollapsed(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMobile, collapsed]);
+
   return (
-    <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
+    <SidebarContext.Provider value={{ collapsed, setCollapsed, isMobile }}>
       {children}
     </SidebarContext.Provider>
   );

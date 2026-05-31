@@ -3,6 +3,7 @@ import LeftColumn from "./components/LeftColumn";
 import BookList from "./components/BookList";
 import RightColumn from "./components/RightColumn";
 import BookDetail from "./components/BookDetail";
+import BottomNav from "./components/BottomNav";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { trpc } from "@/providers/trpc";
@@ -57,7 +58,7 @@ function HomePage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm-white)" }}>
       <header 
-        className="flex items-center justify-between px-6 z-50" 
+        className="flex items-center justify-between px-4 sm:px-6 z-50" 
         style={{ height: "40px", position: "fixed", top: 0, left: 0, right: 0, backgroundColor: "var(--bg-warm-white)", borderBottom: "1px solid var(--border-light)" }}
       >
         <span style={{ fontSize: "12px", fontWeight: 400, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-charcoal)" }}>
@@ -110,16 +111,18 @@ function BookPage() {
 
 function FloatingOpen() {
   const location = useLocation();
-  const { collapsed, setCollapsed } = useSidebar();
+  const { collapsed, setCollapsed, isMobile } = useSidebar();
 
   if (!collapsed || location.pathname === "/") return null;
 
   return (
     <button
       onClick={() => setCollapsed(false)}
-      className="fixed top-1/2 -translate-y-1/2 z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
+      className="fixed z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
       style={{
         right: "12px",
+        [isMobile ? "bottom" : "top"]: isMobile ? "calc(80px + env(safe-area-inset-bottom, 0px))" : "50%",
+        transform: isMobile ? "none" : "translateY(-50%)",
         backgroundColor: "var(--bg-warm-white)",
         border: "1px solid var(--border-light)",
       }}
@@ -152,6 +155,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <FloatingOpen />
+        <BottomNav />
       </SidebarProvider>
     </ThemeProvider>
   );
