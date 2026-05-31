@@ -121,15 +121,15 @@ export default function BookList({ books }: BookListProps) {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {filteredBooks.map((book, idx) => (
           <article
             key={book.id}
-            style={{ cursor: "pointer", contentVisibility: "auto", containIntrinsicSize: "280px", animation: "fadeIn 0.5s ease-out both", animationDelay: `${Math.min(idx * 0.05, 0.3)}s` }}
+            style={{ cursor: "pointer", contentVisibility: "auto", containIntrinsicSize: "200px", animation: "fadeIn 0.4s ease-out both", animationDelay: `${Math.min(idx * 0.03, 0.2)}s` }}
             onClick={() => navigate(`/book/${book.id}`)}
           >
             <div
-              className="overflow-hidden mb-3"
+              className="overflow-hidden mb-2"
               style={{ border: "1px solid var(--border-light)", aspectRatio: "3/4" }}
               onMouseEnter={() => setHoveredId(book.id)}
               onMouseLeave={() => setHoveredId(null)}
@@ -137,10 +137,10 @@ export default function BookList({ books }: BookListProps) {
               <img
                 src={book.coverImage}
                 alt={book.title}
-                width="280"
-                height="373"
+                width="200"
+                height="267"
                 decoding="async"
-                fetchPriority={idx < 6 ? "high" : "auto"}
+                fetchPriority={idx < 10 ? "high" : "auto"}
                 className="w-full h-full block transition-all duration-300 object-cover"
                 style={{
                   filter: hoveredId === book.id ? "grayscale(100%) brightness(0.9)" : "none",
