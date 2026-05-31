@@ -23,7 +23,7 @@ export async function createContext(
       const claim = await verifyLocalSessionToken(token);
       if (claim) {
         const user = await findLocalUserById(claim.userId);
-        if (user) {
+        if (user && user.tokenVersion === claim.tokenVersion) {
           ctx.user = user;
         }
       }

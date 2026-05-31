@@ -56,6 +56,15 @@ export async function verifyLocalPassword(
   return bcrypt.compare(password, user.passwordHash);
 }
 
+export async function incrementTokenVersion(id: number): Promise<void> {
+  const user = await findLocalUserById(id);
+  if (!user) throw new Error("User not found");
+  await getDb()
+    .update(localUsers)
+    .set({ tokenVersion: (user.tokenVersion ?? 0) + 1 })
+    .where(eq(localUsers.id, id));
+}
+
 export async function updateLocalUser(
   id: number,
   data: {
@@ -69,6 +78,7 @@ export async function updateLocalUser(
   if (data.name !== undefined) updateData.name = data.name;
   if (data.password !== undefined) {
     updateData.passwordHash = await bcrypt.hash(data.password, 12);
+    await incrementTokenVersion(id);
   }
 
   await getDb()

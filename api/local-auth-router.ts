@@ -4,6 +4,8 @@ import { TRPCError } from "@trpc/server";
 import { Session } from "../contracts/constants.js";
 import { getSessionCookieOptions } from "./lib/cookies.js";
 import { createRouter, publicQuery } from "./middleware.js";
+import { checkRateLimit } from "./lib/rate-limiter.js";
+import { env } from "./lib/env.js";
 import {
   findLocalUserByUsername,
   findLocalUserById,
@@ -44,6 +46,12 @@ export const localAuthRouter = createRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
+      const ip = ctx.req.headers.get("x-forwarded-for") || ctx.req.headers.get("cf-connecting-ip") || "unknown";
+      const rlKey = `login:${ip}`;
+      if (!checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts. Try again later." });
+      }
+
       const user = await findLocalUserByUsername(input.username);
       if (!user) {
         throw new TRPCError({
@@ -63,6 +71,7 @@ export const localAuthRouter = createRouter({
       const token = await signLocalSessionToken({
         username: user.username,
         userId: user.id,
+        tokenVersion: user.tokenVersion ?? 0,
       });
 
       const opts = getSessionCookieOptions(ctx.req.headers);
@@ -93,12 +102,18 @@ export const localAuthRouter = createRouter({
         name: z.string().max(255).optional(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
+      const ip = ctx.req.headers.get("x-forwarded-for") || ctx.req.headers.get("cf-connecting-ip") || "unknown";
+      const rlKey = `register:${ip}`;
+      if (!checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many registration attempts. Try again later." });
+      }
+
       const existing = await findLocalUserByUsername(input.username);
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Username already taken",
+          message: "Registration failed. Please try different credentials.",
         });
       }
 
@@ -158,7 +173,7 @@ export const localAuthRouter = createRouter({
         if (existing) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Username already taken",
+            message: "Update failed. Please try different credentials.",
           });
         }
       }
@@ -170,10 +185,11 @@ export const localAuthRouter = createRouter({
         password: input.newPassword,
       });
 
-      // Re-issue session token with new username
+      // Re-issue session token with new username and current tokenVersion
       const newToken = await signLocalSessionToken({
         username: updated.username,
         userId: updated.id,
+        tokenVersion: updated.tokenVersion ?? 0,
       });
 
       const opts = getSessionCookieOptions(ctx.req.headers);

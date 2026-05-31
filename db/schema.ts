@@ -14,6 +14,7 @@ export const localUsers = sqliteTable("localUsers", {
   passwordHash: text("passwordHash").notNull(),
   name: text("name"),
   role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
+  tokenVersion: integer("tokenVersion").notNull().default(0),
   createdAt: integer("createdAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });

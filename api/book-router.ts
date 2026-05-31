@@ -31,6 +31,10 @@ function splitIntoChunks(text: string): string[] {
   return chunks.length > 0 ? chunks : [""];
 }
 
+function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>/g, "").trim();
+}
+
 export const bookRouter = createRouter({
   // ── Public: browse approved books ───────────────────────────
 
@@ -92,6 +96,11 @@ export const bookRouter = createRouter({
   readChunk: authedQuery
     .input(z.object({ token: z.string(), chunk: z.number().min(0) }))
     .mutation(async ({ ctx, input }) => {
+      const rlKey = `read:${ctx.user.id}:chunk`;
+      if (!checkRateLimit(rlKey, READ_LIMIT_PER_HOUR, 3600000)) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Read limit reached. Try again later." });
+      }
+
       const payload = await verifyReadToken(input.token);
       if (!payload || payload.userId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired read session. Please refresh the reader." });
@@ -166,6 +175,10 @@ export const bookRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const book = await createBook({
         ...input,
+        title: stripHtml(input.title),
+        author: stripHtml(input.author),
+        description: stripHtml(input.description),
+        content: stripHtml(input.content),
         sellerId: ctx.user.id,
         sellerType: "user",
         status: "pending",
@@ -194,7 +207,14 @@ export const bookRouter = createRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, ...raw } = input;
+      const data = {
+        ...raw,
+        ...(raw.title !== undefined && { title: stripHtml(raw.title) }),
+        ...(raw.author !== undefined && { author: stripHtml(raw.author) }),
+        ...(raw.description !== undefined && { description: stripHtml(raw.description) }),
+        ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
+      };
       const book = await findBookById(id);
       if (!book) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
@@ -253,6 +273,10 @@ export const bookRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const book = await createBook({
         ...input,
+        title: stripHtml(input.title),
+        author: stripHtml(input.author),
+        description: stripHtml(input.description),
+        content: stripHtml(input.content),
         sellerId: ctx.user.id,
         sellerType: "admin",
         status: "approved",
@@ -275,7 +299,14 @@ export const bookRouter = createRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      const { id, ...data } = input;
+      const { id, ...raw } = input;
+      const data = {
+        ...raw,
+        ...(raw.title !== undefined && { title: stripHtml(raw.title) }),
+        ...(raw.author !== undefined && { author: stripHtml(raw.author) }),
+        ...(raw.description !== undefined && { description: stripHtml(raw.description) }),
+        ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
+      };
       return updateBook(id, data);
     }),
 

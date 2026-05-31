@@ -6,17 +6,19 @@ const JWT_ALG = "HS256";
 export type LocalSessionPayload = {
   username: string;
   userId: number;
+  tokenVersion: number;
 };
+
+const getSecret = () => new TextEncoder().encode(env.appSecret);
 
 export async function signLocalSessionToken(
   payload: LocalSessionPayload,
 ): Promise<string> {
-  const secret = new TextEncoder().encode(env.appSecret);
   return new jose.SignJWT({ ...payload })
     .setProtectedHeader({ alg: JWT_ALG })
     .setIssuedAt()
     .setExpirationTime("1 year")
-    .sign(secret);
+    .sign(getSecret());
 }
 
 export async function verifyLocalSessionToken(
@@ -24,13 +26,16 @@ export async function verifyLocalSessionToken(
 ): Promise<LocalSessionPayload | null> {
   if (!token) return null;
   try {
-    const secret = new TextEncoder().encode(env.appSecret);
-    const { payload } = await jose.jwtVerify(token, secret, {
+    const { payload } = await jose.jwtVerify(token, getSecret(), {
       algorithms: [JWT_ALG],
       clockTolerance: 60,
     });
     if (!payload.username || !payload.userId) return null;
-    return { username: payload.username as string, userId: payload.userId as number };
+    return {
+      username: payload.username as string,
+      userId: payload.userId as number,
+      tokenVersion: (payload.tokenVersion as number) ?? 0,
+    };
   } catch {
     return null;
   }
