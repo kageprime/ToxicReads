@@ -321,7 +321,7 @@ export default function AdminDashboard() {
               <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
             ) : allBooks && allBooks.length > 0 ? (
               <div>
-                <div className="flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
                   <div style={{ width: "40px" }}></div>
                   <div style={{ width: "100px" }}>COVER</div>
                   <div className="flex-1">TITLE / AUTHOR</div>
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
                   <div key={book.id}>
                     {editingBook === book.id ? (
                       <div style={{ padding: "16px", borderBottom: "1px solid var(--border-light)", backgroundColor: "rgba(0,0,0,0.02)" }}>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Title</label>
                             <input value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} style={inputStyle} />
@@ -384,33 +384,41 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-4" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-light)" }}>
-                        <div style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
-                          <img src={book.coverImage} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${book.id}`)} />
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-light)" }}>
+                        <div className="flex items-center gap-3 md:gap-4">
+                          <div style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
+                            <img src={book.coverImage} alt={book.title} style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${book.id}`)} />
+                          </div>
+                          <div className="flex-1 min-w-0 md:hidden">
+                            <p style={{ fontSize: "13px", color: "var(--text-charcoal)", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} onClick={() => navigate(`/book/${book.id}`)}>{book.title}</p>
+                            <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{book.author}</p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="hidden md:block flex-1 min-w-0">
                           <p style={{ fontSize: "13px", color: "var(--text-charcoal)", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} onClick={() => navigate(`/book/${book.id}`)}>{book.title}</p>
                           <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{book.author}</p>
                         </div>
-                        <span style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", width: "60px" }}>${book.price}</span>
-                        <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 6px", width: "70px", textAlign: "center" }}>
-                          {book.status?.toUpperCase()}
-                        </span>
-                        <div style={{ width: "60px", display: "flex", gap: "4px" }}>
-                          <button
-                            onClick={() => startEdit(book)}
-                            style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "none", border: "1px solid var(--border-light)", padding: "4px 6px", cursor: "pointer" }}
-                            title="Edit"
-                          >
-                            <Edit2 size={10} />
-                          </button>
-                          <button
-                            onClick={() => { if (confirm("Delete this book?")) deleteMutation.mutate({ id: book.id }); }}
-                            style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "none", border: "1px solid #E74C3C", padding: "4px 6px", cursor: "pointer" }}
-                            title="Delete"
-                          >
-                            Del
-                          </button>
+                        <div className="flex items-center gap-3 md:gap-4 ml-[52px] md:ml-0">
+                          <span style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", width: "60px" }}>${book.price}</span>
+                          <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 6px", textAlign: "center" }}>
+                            {book.status?.toUpperCase()}
+                          </span>
+                          <div style={{ display: "flex", gap: "4px" }}>
+                            <button
+                              onClick={() => startEdit(book)}
+                              style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "none", border: "1px solid var(--border-light)", padding: "4px 6px", cursor: "pointer" }}
+                              title="Edit"
+                            >
+                              <Edit2 size={10} />
+                            </button>
+                            <button
+                              onClick={() => { if (confirm("Delete this book?")) deleteMutation.mutate({ id: book.id }); }}
+                              style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "none", border: "1px solid #E74C3C", padding: "4px 6px", cursor: "pointer" }}
+                              title="Delete"
+                            >
+                              Del
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -429,7 +437,7 @@ export default function AdminDashboard() {
               <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
             ) : allPurchases && allPurchases.length > 0 ? (
               <div>
-                <div className="flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
                   <div style={{ width: "40px" }}>ID</div>
                   <div style={{ width: "100px" }}>BOOK</div>
                   <div className="flex-1">TITLE</div>
@@ -438,20 +446,32 @@ export default function AdminDashboard() {
                   <div style={{ width: "80px" }}>DATE</div>
                 </div>
                 {allPurchases.map((purchase) => (
-                  <div key={purchase.id} className="flex items-center gap-4" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-light)" }}>
-                    <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", width: "40px" }}>#{purchase.id}</span>
-                    <div style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
+                  <div key={purchase.id} className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-light)" }}>
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <span className="md:hidden" style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>#{purchase.id}</span>
+                      <div style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
+                        <img src={purchase.book?.coverImage || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)} />
+                      </div>
+                      <div className="flex-1 min-w-0 md:hidden">
+                        <p style={{ fontSize: "13px", color: "var(--text-charcoal)", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>{purchase.book?.title}</p>
+                        <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{purchase.book?.author}</p>
+                      </div>
+                    </div>
+                    <span className="hidden md:inline" style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", width: "40px" }}>#{purchase.id}</span>
+                    <div className="hidden md:block" style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
                       <img src={purchase.book?.coverImage || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)} />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="hidden md:block flex-1 min-w-0">
                       <p style={{ fontSize: "13px", color: "var(--text-charcoal)", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>{purchase.book?.title}</p>
                       <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{purchase.book?.author}</p>
                     </div>
-                    <span style={{ fontSize: "11px", color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace", width: "80px" }}>{purchase.buyer?.username || "—"}</span>
-                    <span style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", width: "60px" }}>${purchase.purchasePrice}</span>
-                    <span style={{ fontSize: "10px", color: "var(--text-grey)", width: "80px" }}>
-                      {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : "—"}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2 ml-[52px] md:ml-0 text-xs" style={{ color: "var(--text-grey)" }}>
+                      <span style={{ color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace" }}>{purchase.buyer?.username || "—"}</span>
+                      <span>·</span>
+                      <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)" }}>${purchase.purchasePrice}</span>
+                      <span>·</span>
+                      <span>{purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : "—"}</span>
+                    </div>
                   </div>
                 ))}
               </div>

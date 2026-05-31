@@ -54,20 +54,28 @@ export default function MyPurchases() {
             {purchases.map((purchase) => (
               <div
                 key={purchase.id}
-                className="flex items-center gap-4"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
                 style={{ padding: "16px 0", borderBottom: "1px solid var(--border-light)" }}
               >
-                <img
-                  src={purchase.book?.coverImage || ""}
-                  alt={purchase.book?.title || ""}
-                  style={{ width: "60px", height: "80px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0, cursor: "pointer" }}
-                  onClick={() => navigate(`/book/${purchase.book?.id}`)}
-                />
-                <div className="flex-1 min-w-0">
-                  <p 
-                    style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px", cursor: "pointer" }}
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <img
+                    src={purchase.book?.coverImage || ""}
+                    alt={purchase.book?.title || ""}
+                    style={{ width: "60px", height: "80px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0, cursor: "pointer" }}
                     onClick={() => navigate(`/book/${purchase.book?.id}`)}
-                  >
+                  />
+                  <div className="flex-1 min-w-0 sm:hidden">
+                    <p style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>
+                      {purchase.book?.title}
+                    </p>
+                    <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
+                    <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                      ${purchase.purchasePrice} · {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden sm:block flex-1 min-w-0">
+                  <p style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>
                     {purchase.book?.title}
                   </p>
                   <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
@@ -78,6 +86,7 @@ export default function MyPurchases() {
                 {purchase.book?.content && (
                   <button
                     onClick={() => navigate(`/read/${purchase.book?.id}`)}
+                    className="w-full sm:w-auto ml-[76px] sm:ml-0"
                     style={{
                       fontSize: "10px",
                       fontFamily: "'Space Mono', monospace",

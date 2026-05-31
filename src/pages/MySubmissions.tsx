@@ -84,19 +84,39 @@ export default function MySubmissions() {
             {submissions.map((book) => (
               <div
                 key={book.id}
-                className="flex items-center gap-4"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
                 style={{ padding: "16px 0", borderBottom: "1px solid var(--border-light)" }}
               >
-                <img
-                  src={book.coverImage || ""}
-                  alt={book.title || ""}
-                  style={{ width: "50px", height: "66px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0, cursor: "pointer" }}
-                  onClick={() => navigate(`/book/${book.id}`)}
-                />
-                <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <img
+                    src={book.coverImage || ""}
+                    alt={book.title || ""}
+                    style={{ width: "50px", height: "66px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0, cursor: "pointer" }}
+                    onClick={() => navigate(`/book/${book.id}`)}
+                  />
+                  <div className="flex-1 min-w-0 sm:hidden">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
+                      <span className="shrink-0" style={{
+                        fontSize: "9px",
+                        fontFamily: "'Space Mono', monospace",
+                        color: statusColors[book.status] || "var(--text-grey)",
+                        border: `1px solid ${statusColors[book.status] || "var(--border-light)"}`,
+                        padding: "2px 6px",
+                      }}>
+                        {book.status?.toUpperCase()}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{book.author}</p>
+                    <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                      ${book.price} · {book.content ? "Has content" : "No content"}
+                    </p>
+                  </div>
+                </div>
+                <div className="hidden sm:block flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)" }}>{book.title}</p>
-                    <span style={{
+                    <p style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
+                    <span className="shrink-0" style={{
                       fontSize: "9px",
                       fontFamily: "'Space Mono', monospace",
                       color: statusColors[book.status] || "var(--text-grey)",
@@ -115,6 +135,7 @@ export default function MySubmissions() {
                   <button
                     onClick={() => { if (confirm("Delete this submission?")) deleteMutation.mutate({ id: book.id }); }}
                     disabled={deleteMutation.isPending}
+                    className="w-full sm:w-auto ml-[66px] sm:ml-0"
                     style={{
                       fontSize: "9px",
                       fontFamily: "'Space Mono', monospace",
