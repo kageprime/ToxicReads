@@ -68,7 +68,7 @@ function HomePage() {
 
       <div className="flex" style={{ height: "100vh", paddingTop: "40px" }}>
         <LeftColumn />
-        <main className="flex-1 overflow-y-auto" style={{ borderRight: "1px solid var(--border-light)", marginLeft: "240px" }}>
+        <main className="flex-1 overflow-y-auto ml-0 md:ml-[240px]" style={{ borderRight: "1px solid var(--border-light)" }}>
           {isLoading ? (
             <div className="flex items-center justify-center" style={{ paddingTop: "40vh" }}>
               <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>

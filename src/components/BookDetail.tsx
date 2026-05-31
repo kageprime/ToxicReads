@@ -122,7 +122,7 @@ export default function BookDetail() {
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Cover Image */}
-          <div style={{ border: "1px solid var(--border-light)", flexShrink: 0, width: "280px" }}>
+          <div style={{ border: "1px solid var(--border-light)", flexShrink: 0, width: "100%", maxWidth: "320px" }}>
             <img
               src={book.coverImage}
               alt={book.title}
@@ -275,7 +275,7 @@ export default function BookDetail() {
             <h3 style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
               SIMILAR BOOKS
             </h3>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {similar.map((similarBook) => (
                 <div 
                   key={similarBook.id}

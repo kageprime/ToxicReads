@@ -12,6 +12,7 @@ export default function LeftColumn() {
 
   return (
     <aside
+      className="hidden md:block"
       style={{
         width: "240px",
         borderRight: "1px solid var(--border-light)",
