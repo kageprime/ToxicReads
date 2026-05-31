@@ -18,6 +18,7 @@ import {
 import { hasUserPurchasedBook } from "./queries/purchases.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { signReadToken, verifyReadToken } from "./lib/read-token.js";
+import { upsertProgress, getProgress } from "./queries/reading-progress.js";
 
 const CHUNK_SIZE = 5000;
 const READ_LIMIT_PER_HOUR = 10;
@@ -107,6 +108,25 @@ export const bookRouter = createRouter({
       }
 
       return { chunk: chunks[input.chunk], index: input.chunk };
+    }),
+
+  // ── Authenticated: save/restore reading progress ──────────
+
+  saveProgress: authedQuery
+    .input(z.object({
+      bookId: z.number(),
+      chunk: z.number().min(0),
+      scrollPercent: z.number().min(0).max(100),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await upsertProgress(ctx.user.id, input.bookId, input.chunk, input.scrollPercent);
+      return { success: true };
+    }),
+
+  getProgress: authedQuery
+    .input(z.object({ bookId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return getProgress(ctx.user.id, input.bookId);
     }),
 
   // ── Authenticated: check if user can access a book ───────────

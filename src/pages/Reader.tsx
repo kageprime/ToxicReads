@@ -20,6 +20,11 @@ export default function Reader() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingChunksRef = useRef<Set<number>>(new Set());
   const hasMoreRef = useRef(false);
+  const loadedCountRef = useRef(0);
+  const isRestoringRef = useRef(false);
+  const lastSaveRef = useRef(0);
+  const savedChunkRef = useRef(0);
+  const savedScrollRef = useRef(0);
 
   const { data: readData, isLoading, error, refetch: refetchBook } = trpc.book.read.useQuery(
     { id: parseInt(id || "0") },
@@ -27,6 +32,7 @@ export default function Reader() {
   );
 
   const readChunk = trpc.book.readChunk.useMutation();
+  const saveMutation = trpc.book.saveProgress.useMutation();
 
   const book = readData;
 
@@ -53,6 +59,83 @@ export default function Reader() {
     }
   }, [token, isLoading, id, refetchBook]);
 
+  // Restore saved reading progress (localStorage + server)
+  useEffect(() => {
+    if (!token || !id || !isAuthenticated || !readData) return;
+    const bookId = parseInt(id);
+    let savedChunk = 0;
+    let savedScroll = 0;
+
+    try {
+      const cached = localStorage.getItem(`tr_progress_${bookId}`);
+      if (cached) {
+        const p = JSON.parse(cached);
+        savedChunk = p.chunk || 0;
+        savedScroll = p.scrollPercent || 0;
+      }
+    } catch {}
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/trpc/book.getProgress?batch=1&input=${encodeURIComponent(JSON.stringify([{ bookId }]))}`, { credentials: "include" });
+        const json = await res.json();
+        const server = json?.[0]?.result?.data;
+        if (server && server.chunk > 0 && (!savedChunk || server.updatedAt > savedChunk)) {
+          savedChunk = server.chunk;
+          savedScroll = server.scrollPercent;
+        }
+      } catch {}
+
+      if (savedChunk <= 0) return;
+      isRestoringRef.current = true;
+      savedChunkRef.current = savedChunk;
+      savedScrollRef.current = savedScroll;
+
+      const loading = loadingChunksRef.current;
+      const needed: number[] = [];
+      for (let i = 1; i <= savedChunk; i++) {
+        if (!loading.has(i)) loading.add(i);
+        needed.push(i);
+      }
+
+      try {
+        const results = await Promise.all(
+          needed.map((chunkIdx) =>
+            readChunk.mutateAsync({ token, chunk: chunkIdx }),
+          ),
+        );
+        const additions: Record<number, string> = {};
+        for (const r of results) {
+          loading.delete(r.index);
+          additions[r.index] = r.chunk;
+        }
+        setLoadedChunks((prev) => ({ ...prev, ...additions }));
+      } catch {
+        for (const i of needed) loading.delete(i);
+        isRestoringRef.current = false;
+        return;
+      }
+    })();
+  }, [token, id, isAuthenticated, readData, readChunk]);
+
+  // Scroll to saved position once enough chunks are loaded
+  useEffect(() => {
+    if (!isRestoringRef.current || !savedChunkRef.current) return;
+    const loaded = Object.keys(loadedChunks).length;
+    if (loaded <= savedChunkRef.current) return;
+    const scrollTarget = savedScrollRef.current;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const doc = document.documentElement;
+        if (doc.scrollHeight > window.innerHeight) {
+          window.scrollTo(0, Math.round((scrollTarget / 100) * (doc.scrollHeight - window.innerHeight)));
+        }
+        isRestoringRef.current = false;
+      });
+    });
+  }, [loadedChunks]);
+
   // Single persistent observer — rebuilt only when token or loadedChunks changes meaningfully
   useEffect(() => {
     if (!token) return;
@@ -66,6 +149,7 @@ export default function Reader() {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           if (!hasMoreRef.current) continue;
+          if (isRestoringRef.current) continue;
 
           // Read current loadedChunks from a ref to avoid stale closure
           setLoadedChunks((prev) => {
@@ -124,6 +208,7 @@ export default function Reader() {
 
   // Determine if more chunks exist after each loadedChunks update
   hasMoreRef.current = Object.keys(loadedChunks).length < totalChunks;
+  loadedCountRef.current = Object.keys(loadedChunks).length;
 
   const allContent = useMemo(() => {
     const indices = Object.keys(loadedChunks).map(Number).sort((a, b) => a - b);
@@ -180,6 +265,46 @@ export default function Reader() {
       document.removeEventListener("cut", prevent, true);
     };
   }, [prevent]);
+
+  // ── Track scroll position and save reading progress ─────────
+  useEffect(() => {
+    if (!isAuthenticated || !id) return;
+    const bookId = parseInt(id);
+
+    const save = () => {
+      if (isRestoringRef.current) return;
+      const doc = document.documentElement;
+      if (doc.scrollHeight <= window.innerHeight) return;
+      const pct = Math.round((window.scrollY / (doc.scrollHeight - window.innerHeight)) * 100);
+      const topChunk = Math.max(0, loadedCountRef.current - 1);
+
+      try {
+        localStorage.setItem(`tr_progress_${bookId}`, JSON.stringify({
+          chunk: topChunk, scrollPercent: pct, updatedAt: Date.now(),
+        }));
+      } catch {}
+
+      const now = Date.now();
+      if (now - lastSaveRef.current < 5000) return;
+      lastSaveRef.current = now;
+      saveMutation.mutate({ bookId, chunk: topChunk, scrollPercent: pct });
+    };
+
+    const onScroll = () => save();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const onLeave = () => save();
+    window.addEventListener("beforeunload", onLeave);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") save();
+    });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("beforeunload", onLeave);
+      save();
+    };
+  }, [isAuthenticated, id, saveMutation]);
 
   // Clear loaded content on unmount
   useEffect(() => {

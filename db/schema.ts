@@ -2,7 +2,9 @@ import {
   sqliteTable,
   text,
   integer,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 // ── Local Users (username/password auth) ──────────────────────
 
@@ -54,3 +56,19 @@ export const purchases = sqliteTable("purchases", {
 
 export type Purchase = typeof purchases.$inferSelect;
 export type InsertPurchase = typeof purchases.$inferInsert;
+
+// ── Reading Progress (auto-resume) ────────────────────────────
+
+export const readingProgress = sqliteTable("readingProgress", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("userId").notNull(),
+  bookId: integer("bookId").notNull(),
+  chunk: integer("chunk").notNull().default(0),
+  scrollPercent: integer("scrollPercent").notNull().default(0),
+  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+}, (table) => ({
+  uniqueUserBook: uniqueIndex("uq_readingProgress_user_book").on(table.userId, table.bookId),
+}));
+
+export type ReadingProgress = typeof readingProgress.$inferSelect;
+export type InsertReadingProgress = typeof readingProgress.$inferInsert;
