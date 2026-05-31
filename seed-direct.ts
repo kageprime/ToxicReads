@@ -1,12 +1,48 @@
+import "dotenv/config";
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
-import { join } from "path";
 
-const dbUrl = "file:" + join(process.cwd(), "data", "bookhaven.db");
+const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || "file:./data/bookhaven.db";
+const authToken = process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN || "";
+
 const now = Date.now();
 
 async function seed() {
-  const client = createClient({ url: dbUrl });
+  const client = createClient({ url: dbUrl, authToken: authToken || undefined });
+
+  await client.execute(`CREATE TABLE IF NOT EXISTS localUsers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    passwordHash TEXT NOT NULL,
+    name TEXT,
+    role TEXT DEFAULT 'user' NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+  )`);
+  await client.execute(`CREATE TABLE IF NOT EXISTS books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    author TEXT NOT NULL,
+    description TEXT NOT NULL,
+    content TEXT NOT NULL DEFAULT '',
+    price TEXT NOT NULL,
+    coverImage TEXT NOT NULL,
+    category TEXT NOT NULL,
+    "condition" TEXT NOT NULL,
+    sellerId INTEGER,
+    sellerType TEXT DEFAULT 'user' NOT NULL,
+    views INTEGER DEFAULT 0 NOT NULL,
+    status TEXT DEFAULT 'pending' NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+  )`);
+  await client.execute(`CREATE TABLE IF NOT EXISTS purchases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    buyerId INTEGER NOT NULL,
+    bookId INTEGER NOT NULL,
+    purchasePrice TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+  )`);
 
   const adminExists = await client.execute({
     sql: "SELECT id FROM localUsers WHERE username = ?",
@@ -19,10 +55,13 @@ async function seed() {
       args: ["admin", hash, "Admin", "admin", now, now],
     });
     console.log("Created admin user (admin / 123456)");
+  } else {
+    console.log("Admin user already exists");
   }
 
   const bookCount = await client.execute("SELECT COUNT(*) as count FROM books");
-  if ((bookCount.rows[0] as { count: number }).count === 0) {
+  const count = Number((bookCount.rows[0] as Record<string, unknown>).count);
+  if (count === 0) {
     const seedBooks: [string, string, string, string, string, string, string, string, number, string, string][] = [
       ["The Great Gatsby", "F. Scott Fitzgerald", "A masterpiece of American fiction set in the Jazz Age.", "In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.\n\n\"Whenever you feel like criticizing anyone,\" he told me, \"just remember that all the people in this world haven't had the advantages that you've had.\"\n\nHe didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that.\n\nIn consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me and also made me the victim of not a few veteran bores.\n\nThe abnormal mind is quick to detect and attach itself to this quality when it appears in a normal person, and so it came about that in college I was unjustly accused of being a politician, because I was privy to the secret griefs of wild, unknown men.\n\nMost of the confidences were unsought—frequently I have feigned sleep, preoccupation, or a hostile levity when I realized by some unmistakable sign that an intimate revelation was quivering on the way.", "12.99", "/images/blog-1.jpg", "Fiction", "good", 1, "admin", "approved"],
       ["1984", "George Orwell", "A dystopian social science fiction novel.", "It was a bright cold day in April, and the clocks were striking thirteen. Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors of Victory Mansions, though not quickly enough to prevent a swirl of gritty dust from entering along with him.\n\nThe hallway smelt of boiled cabbage and old rag mats. At one end of it a coloured poster had been stuck on the wall. It depicted simply an enormous face, more than a metre wide: the face of a man of about forty-five, with a heavy black moustache and ruggedly handsome features.\n\nWinston made for the stairs. It was no use trying the lift. Even at the best of times it was seldom working, and at present the electricity was cut off during the hours of daylight. It was part of the economy drive in preparation for Hate Week.\n\nHis flat was seven flights up, and thirty-three-year-old Winston Smith, who had a weak spot in his left calf that always gave him a slight limp, went rather slowly, resting several times on the way.\n\nOn each landing, opposite the lift-shaft, the poster with the large face gazed from the wall. It was one of those pictures which are so constructed that the eyes follow you about when you move. BIG BROTHER IS WATCHING YOU, the caption beneath it ran.", "10.99", "/images/blog-2.jpg", "Fiction", "like-new", 1, "admin", "approved"],
@@ -41,6 +80,8 @@ async function seed() {
       });
     }
     console.log("Seeded " + seedBooks.length + " books");
+  } else {
+    console.log("Books already seeded (" + count + " found)");
   }
 
   client.close();

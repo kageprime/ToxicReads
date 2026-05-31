@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route, useLocation } from "react-router";
 import LeftColumn from "./components/LeftColumn";
 import BookList from "./components/BookList";
 import RightColumn from "./components/RightColumn";
@@ -109,9 +109,10 @@ function BookPage() {
 }
 
 function FloatingOpen() {
+  const location = useLocation();
   const { collapsed, setCollapsed } = useSidebar();
 
-  if (!collapsed) return null;
+  if (!collapsed || location.pathname === "/") return null;
 
   return (
     <button
