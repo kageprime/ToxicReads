@@ -7,6 +7,7 @@ import { createContext } from "./context.js";
 import { env } from "./lib/env.js";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import mammoth from "mammoth";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -49,6 +50,54 @@ app.post("/api/upload", async (c) => {
   } catch (err) {
     console.error("[upload] error:", err);
     return c.json({ error: "Upload failed" }, 500);
+  }
+});
+
+// ── Text Extraction (docx, pdf, epub) ─────────────────────────
+
+app.post("/api/extract-text", async (c) => {
+  try {
+    const body = await c.req.parseBody({ all: false });
+    const file = body.file as File | undefined;
+
+    if (!file || !(file instanceof File)) {
+      return c.json({ error: "No file provided" }, 400);
+    }
+
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!ext || !["docx", "pdf", "epub"].includes(ext)) {
+      return c.json({ error: "Supported formats: .docx, .pdf, .epub" }, 400);
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    let text = "";
+
+    if (ext === "docx") {
+      const result = await mammoth.extractRawText({ buffer });
+      text = result.value;
+    } else if (ext === "pdf") {
+      const { PDFParse } = await import("pdf-parse");
+      const parser = new PDFParse({ data: buffer });
+      await parser.load();
+      text = await parser.getText();
+      parser.destroy();
+    } else if (ext === "epub") {
+      const EPub = (await import("epub")).default;
+      const epub = new EPub(buffer);
+      await epub.parse();
+      const texts: string[] = [];
+      for (let i = 0; i < epub.spine.length; i++) {
+        const chapter = await epub.getChapter(i);
+        if (chapter) texts.push(chapter);
+      }
+      text = texts.join("\n\n").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    }
+
+    return c.json({ text });
+  } catch (err) {
+    console.error("[extract-text] error:", err);
+    return c.json({ error: "Text extraction failed" }, 500);
   }
 });
 

@@ -21,6 +21,7 @@ export default function SubmitBook() {
   });
 
   const [uploading, setUploading] = useState(false);
+  const [contentUploading, setContentUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const submitBook = trpc.book.submit.useMutation({
@@ -65,6 +66,26 @@ export default function SubmitBook() {
       // fallback to default
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleContentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setContentUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/extract-text", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.text) {
+        setForm({ ...form, content: data.text });
+      }
+    } catch {
+      // fallback
+    } finally {
+      setContentUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -208,7 +229,13 @@ export default function SubmitBook() {
 
           <div>
             <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Reading Content (optional)</label>
-            <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} placeholder="Enter reading content..." style={{ ...inputStyle, resize: "vertical" }} />
+            <div className="flex gap-2 mb-2">
+              <input type="file" accept=".docx,.pdf,.epub" onChange={handleContentUpload} style={{ display: "none" }} id="content-upload" />
+              <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
+                {contentUploading ? "Extracting..." : "Upload .docx / .pdf / .epub"}
+              </label>
+            </div>
+            <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} placeholder="Paste your content here, or upload a .docx file..." style={{ ...inputStyle, resize: "vertical" }} />
           </div>
 
           {submitBook.error && (
