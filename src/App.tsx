@@ -113,16 +113,14 @@ function FloatingOpen() {
   const location = useLocation();
   const { collapsed, setCollapsed, isMobile } = useSidebar();
 
-  if (!collapsed || location.pathname === "/") return null;
+  if (!collapsed || location.pathname === "/" || isMobile) return null;
 
   return (
     <button
       onClick={() => setCollapsed(false)}
-      className="fixed z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
+      className="fixed top-1/2 -translate-y-1/2 z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
       style={{
         right: "12px",
-        [isMobile ? "bottom" : "top"]: isMobile ? "calc(80px + env(safe-area-inset-bottom, 0px))" : "50%",
-        transform: isMobile ? "none" : "translateY(-50%)",
         backgroundColor: "var(--bg-warm-white)",
         border: "1px solid var(--border-light)",
       }}

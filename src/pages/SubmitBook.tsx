@@ -136,126 +136,112 @@ export default function SubmitBook() {
         </div>
         </header>
 
-      <div className="mx-auto" style={{ maxWidth: "680px", padding: "64px 24px 80px" }}>
-        <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "8px" }}>Sell Your Book</h1>
-        <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "24px", lineHeight: 1.6 }}>
-          Your book will be reviewed by an admin before being listed.
-        </p>
+      <div className="mx-auto" style={{ maxWidth: "800px", padding: "64px 24px 80px" }}>
+        <div style={{ border: "1px solid var(--border-light)", padding: "32px", backgroundColor: "var(--bg-warm-white)" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px" }}>Sell Your Book</h1>
+          <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", lineHeight: 1.6, fontFamily: "'Space Mono', monospace" }}>
+            Your book will be reviewed by an admin before being listed.
+          </p>
 
-        <div className="space-y-4">
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Title *</label>
-            <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={inputStyle} />
-          </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Title *</label>
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Author *</label>
+                <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={inputStyle} />
+              </div>
+            </div>
 
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Author *</label>
-            <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={inputStyle} />
-          </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Price *</label>
+                <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} placeholder="10.00" />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Category</label>
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
+                  {["Fiction", "Non-Fiction", "Sci-Fi", "Design", "Psychology", "History", "Philosophy", "Art", "Technology", "Poetry"].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Price *</label>
-            <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} placeholder="10.00" />
-          </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Category</label>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
-              {["Fiction", "Non-Fiction", "Sci-Fi", "Design", "Psychology", "History", "Philosophy", "Art", "Technology", "Poetry"].map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Condition</label>
-            <select value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value as "new" | "like-new" | "good" | "fair" })} style={inputStyle}>
-              <option value="new">New</option>
-              <option value="like-new">Like New</option>
-              <option value="good">Good</option>
-              <option value="fair">Fair</option>
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Cover Image</label>
-            <div className="flex gap-3 items-start">
-              <div style={{ width: "100px", height: "133px", border: "1px solid var(--border-light)", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--border-light)" }}>
-                {uploading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>Uploading...</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Condition</label>
+                <select value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value as "new" | "like-new" | "good" | "fair" })} style={inputStyle}>
+                  <option value="new">New</option>
+                  <option value="like-new">Like New</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Cover Image</label>
+                <div className="flex gap-3 items-start">
+                  <div style={{ width: "100px", height: "133px", border: "1px solid var(--border-light)", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--border-light)" }}>
+                    {uploading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>Uploading...</p>
+                      </div>
+                    ) : (
+                      <img src={form.coverImage} alt="Cover preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    )}
                   </div>
-                ) : (
-                  <img src={form.coverImage} alt="Cover preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                )}
+                  <div className="flex-1 min-w-0">
+                    <input type="file" accept="image/*" onChange={handleUpload} style={{ display: "none" }} id="submit-cover-upload" />
+                    <label htmlFor="submit-cover-upload" style={{ display: "inline-block", padding: "8px 16px", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
+                      Choose File
+                    </label>
+                    {form.coverImage !== "/images/hero-art.jpg" && (
+                      <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all", marginTop: "4px" }}>
+                        {form.coverImage}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleUpload}
-                  style={{ display: "none" }}
-                  id="submit-cover-upload"
-                />
-                <label
-                  htmlFor="submit-cover-upload"
-                  style={{
-                    display: "inline-block",
-                    padding: "8px 16px",
-                    fontSize: "10px",
-                    fontFamily: "'Space Mono', monospace",
-                    color: "var(--text-charcoal)",
-                    border: "1px solid var(--border-light)",
-                    cursor: "pointer",
-                    letterSpacing: "0.05em",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Choose File
+            </div>
+
+            <div>
+              <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Description *</label>
+              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} style={{ ...inputStyle, resize: "vertical" }} />
+            </div>
+
+            <div>
+              <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Reading Content (optional)</label>
+              <div className="flex gap-2 mb-2">
+                <input type="file" accept=".docx,.pdf,.epub" onChange={handleContentUpload} style={{ display: "none" }} id="content-upload" />
+                <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
+                  {contentUploading ? "Extracting..." : "Upload .docx / .pdf / .epub"}
                 </label>
-                {form.coverImage !== "/images/hero-art.jpg" && (
-                  <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all" }}>
-                    {form.coverImage}
-                  </p>
-                )}
               </div>
+              <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} placeholder="Paste your content here, or upload a .docx file..." style={{ ...inputStyle, resize: "vertical" }} />
             </div>
+
+            {submitBook.error && (
+              <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>
+                {submitBook.error.message}
+              </p>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              disabled={submitBook.isPending}
+              style={{
+                width: "100%", padding: "14px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
+                color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
+                cursor: submitBook.isPending ? "wait" : "pointer", opacity: submitBook.isPending ? 0.7 : 1,
+                letterSpacing: "0.05em",
+              }}
+            >
+              {submitBook.isPending ? "Submitting..." : "Submit for Review"}
+            </button>
           </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Description *</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Reading Content (optional)</label>
-            <div className="flex gap-2 mb-2">
-              <input type="file" accept=".docx,.pdf,.epub" onChange={handleContentUpload} style={{ display: "none" }} id="content-upload" />
-              <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
-                {contentUploading ? "Extracting..." : "Upload .docx / .pdf / .epub"}
-              </label>
-            </div>
-            <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} placeholder="Paste your content here, or upload a .docx file..." style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-
-          {submitBook.error && (
-            <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>
-              {submitBook.error.message}
-            </p>
-          )}
-
-          <button
-            onClick={handleSubmit}
-            disabled={submitBook.isPending}
-            style={{
-              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
-              color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
-              cursor: submitBook.isPending ? "wait" : "pointer", opacity: submitBook.isPending ? 0.7 : 1,
-              letterSpacing: "0.05em", marginTop: "16px",
-            }}
-          >
-            {submitBook.isPending ? "Submitting..." : "Submit for Review"}
-          </button>
         </div>
       </div>
     </div>

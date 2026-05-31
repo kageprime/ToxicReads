@@ -83,56 +83,61 @@ export default function Profile() {
         </div>
       </header>
 
-      <div className="mx-auto" style={{ maxWidth: "520px", padding: "64px 24px 80px", animation: "pageIn 0.4s ease-out both" }}>
-        <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "8px" }}>Account Settings</h1>
-        <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", fontFamily: "'Space Mono', monospace" }}>
-          {user?.username}
-        </p>
+      <div className="mx-auto" style={{ maxWidth: "640px", padding: "64px 24px 80px", animation: "pageIn 0.4s ease-out both" }}>
+        <div style={{ border: "1px solid var(--border-light)", padding: "32px", backgroundColor: "var(--bg-warm-white)" }}>
+          <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px" }}>Account Settings</h1>
+          <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", fontFamily: "'Space Mono', monospace" }}>
+            {user?.username}
+          </p>
 
-        <div className="space-y-4">
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Display Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} placeholder="Your name" />
-          </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Username</label>
-            <input value={username} onChange={(e) => setUsername(e.target.value)} style={inputStyle} placeholder="username" />
-          </div>
-
-          <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "24px", marginTop: "24px" }}>
-            <h2 style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "16px" }}>Change Password</h2>
-
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>New Password (leave blank to keep current)</label>
-              <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" style={inputStyle} placeholder="••••••" />
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Display Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} placeholder="Your name" />
+              </div>
+              <div>
+                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Username</label>
+                <input value={username} onChange={(e) => setUsername(e.target.value)} style={inputStyle} placeholder="username" />
+              </div>
             </div>
+
+            <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "24px" }}>
+              <h2 style={{ fontSize: "13px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "16px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                Password
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Current Password *</label>
+                  <input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" style={inputStyle} placeholder="Required to save changes" />
+                </div>
+                <div>
+                  <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>New Password</label>
+                  <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" style={inputStyle} placeholder="Leave blank to keep current" />
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>{error}</p>
+            )}
+            {success && (
+              <p style={{ fontSize: "11px", color: "#2ECC71", fontFamily: "'Space Mono', monospace" }}>{success}</p>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              disabled={updateMutation.isPending}
+              style={{
+                width: "100%", padding: "14px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
+                color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
+                cursor: updateMutation.isPending ? "wait" : "pointer", opacity: updateMutation.isPending ? 0.7 : 1,
+                letterSpacing: "0.05em",
+              }}
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+            </button>
           </div>
-
-          <div>
-            <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Current Password *</label>
-            <input value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} type="password" style={inputStyle} placeholder="Required to save changes" />
-          </div>
-
-          {error && (
-            <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>{error}</p>
-          )}
-          {success && (
-            <p style={{ fontSize: "11px", color: "#2ECC71", fontFamily: "'Space Mono', monospace" }}>{success}</p>
-          )}
-
-          <button
-            onClick={handleSubmit}
-            disabled={updateMutation.isPending}
-            style={{
-              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
-              color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
-              cursor: updateMutation.isPending ? "wait" : "pointer", opacity: updateMutation.isPending ? 0.7 : 1,
-              letterSpacing: "0.05em",
-            }}
-          >
-            {updateMutation.isPending ? "Saving..." : "Save Changes"}
-          </button>
         </div>
       </div>
 

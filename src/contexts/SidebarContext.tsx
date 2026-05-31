@@ -15,8 +15,8 @@ const SidebarContext = createContext<SidebarContextType>({
 const MOBILE_BREAKPOINT = 768;
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [collapsed, setCollapsed] = useState(true);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth >= MOBILE_BREAKPOINT ? false : true);
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
