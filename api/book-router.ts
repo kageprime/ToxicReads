@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware";
+import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware.js";
 import {
   findApprovedBooks,
   findBookById,
@@ -14,8 +14,8 @@ import {
   approveBook,
   rejectBook,
   incrementBookViews,
-} from "./queries/books";
-import { hasUserPurchasedBook } from "./queries/purchases";
+} from "./queries/books.js";
+import { hasUserPurchasedBook } from "./queries/purchases.js";
 
 export const bookRouter = createRouter({
   // ── Public: browse approved books ───────────────────────────

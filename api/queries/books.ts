@@ -1,7 +1,7 @@
 import { eq, and, desc } from "drizzle-orm";
-import { getDb } from "./connection";
-import { books } from "@db/schema";
-import type { InsertBook } from "@db/schema";
+import { getDb } from "./connection.js";
+import { books } from "../../db/schema";
+import type { InsertBook } from "../../db/schema";
 
 // ── Public: approved books only ───────────────────────────────
 

@@ -1,9 +1,9 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import type { LocalUser } from "@db/schema";
+import type { LocalUser } from "../db/schema";
 import * as cookie from "cookie";
-import { Session } from "@contracts/constants";
-import { verifyLocalSessionToken } from "./local-auth-session";
-import { findLocalUserById } from "./queries/local-users";
+import { Session } from "../contracts/constants";
+import { verifyLocalSessionToken } from "./local-auth-session.js";
+import { findLocalUserById } from "./queries/local-users.js";
 
 export type TrpcContext = {
   req: Request;

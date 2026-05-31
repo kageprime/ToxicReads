@@ -1,7 +1,7 @@
 import { eq, and, desc } from "drizzle-orm";
-import { getDb } from "./connection";
-import { purchases, books } from "@db/schema";
-import type { InsertPurchase } from "@db/schema";
+import { getDb } from "./connection.js";
+import { purchases, books } from "../../db/schema";
+import type { InsertPurchase } from "../../db/schema";
 
 export async function findPurchasesByBuyer(buyerId: number) {
   return getDb()

@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createRouter, authedQuery, adminQuery } from "./middleware";
+import { createRouter, authedQuery, adminQuery } from "./middleware.js";
 import {
   findPurchasesWithBookDetails,
   createPurchase,
   hasUserPurchasedBook,
-} from "./queries/purchases";
-import { findApprovedBookById } from "./queries/books";
+} from "./queries/purchases.js";
+import { findApprovedBookById } from "./queries/books.js";
 
 export const purchaseRouter = createRouter({
   // ── Authenticated: buy a book ───────────────────────────────
@@ -62,7 +62,7 @@ export const purchaseRouter = createRouter({
   adminList: adminQuery.query(async () => {
     // Return all purchases with details
     const { getDb } = await import("./queries/connection.js");
-    const { purchases, books: booksTable, localUsers } = await import("@db/schema");
+    const { purchases, books: booksTable, localUsers } = await import("../db/schema");
     const { eq, desc } = await import("drizzle-orm");
     const db = getDb();
 

@@ -1,7 +1,7 @@
-import { localAuthRouter } from "./local-auth-router";
-import { bookRouter } from "./book-router";
-import { purchaseRouter } from "./purchase-router";
-import { createRouter, publicQuery } from "./middleware";
+import { localAuthRouter } from "./local-auth-router.js";
+import { bookRouter } from "./book-router.js";
+import { purchaseRouter } from "./purchase-router.js";
+import { createRouter, publicQuery } from "./middleware.js";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),

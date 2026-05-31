@@ -1,20 +1,20 @@
 import * as cookie from "cookie";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { Session } from "@contracts/constants";
-import { getSessionCookieOptions } from "./lib/cookies";
-import { createRouter, publicQuery } from "./middleware";
+import { Session } from "../contracts/constants";
+import { getSessionCookieOptions } from "./lib/cookies.js";
+import { createRouter, publicQuery } from "./middleware.js";
 import {
   findLocalUserByUsername,
   findLocalUserById,
   verifyLocalPassword,
   createLocalUser,
   updateLocalUser,
-} from "./queries/local-users";
+} from "./queries/local-users.js";
 import {
   signLocalSessionToken,
   verifyLocalSessionToken,
-} from "./local-auth-session";
+} from "./local-auth-session.js";
 
 export const localAuthRouter = createRouter({
   me: publicQuery.query(async ({ ctx }) => {
