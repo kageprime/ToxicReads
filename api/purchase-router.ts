@@ -61,7 +61,7 @@ export const purchaseRouter = createRouter({
 
   adminList: adminQuery.query(async () => {
     // Return all purchases with details
-    const { getDb } = await import("./queries/connection");
+    const { getDb } = await import("./queries/connection.js");
     const { purchases, books: booksTable, localUsers } = await import("@db/schema");
     const { eq, desc } = await import("drizzle-orm");
     const db = getDb();

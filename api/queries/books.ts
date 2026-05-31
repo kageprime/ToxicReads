@@ -96,7 +96,7 @@ export async function rejectBook(id: number) {
 }
 
 export async function incrementBookViews(id: number) {
-  const getDb = (await import("./connection")).getDb;
+  const getDb = (await import("./connection.js")).getDb;
   const { sql } = await import("drizzle-orm");
   await getDb()
     .update(books)
