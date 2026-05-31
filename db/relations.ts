@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { books, purchases } from "./schema";
+import { books, purchases } from "./schema.js";
 
 export const booksRelations = relations(books, ({ many }) => ({
   purchases: many(purchases),

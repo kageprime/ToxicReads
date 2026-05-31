@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { getDb } from "./connection.js";
-import { localUsers } from "../../db/schema";
-import type { LocalUser } from "../../db/schema";
+import { localUsers } from "../../db/schema.js";
+import type { LocalUser } from "../../db/schema.js";
 
 export async function findLocalUserByUsername(
   username: string,

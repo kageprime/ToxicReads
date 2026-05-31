@@ -79,17 +79,21 @@ app.post("/api/extract-text", async (c) => {
     } else if (ext === "pdf") {
       const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: buffer });
-      await parser.load();
-      text = await parser.getText();
+      const result = await parser.getText();
+      text = result.text;
       parser.destroy();
     } else if (ext === "epub") {
       const EPub = (await import("epub")).default;
       const epub = new EPub(buffer);
       await epub.parse();
       const texts: string[] = [];
-      for (let i = 0; i < epub.spine.length; i++) {
-        const chapter = await epub.getChapter(i);
-        if (chapter) texts.push(chapter);
+      for (const item of epub.spine.contents) {
+        try {
+          const chapter = await epub.getChapter(item.id);
+          if (chapter) texts.push(chapter);
+        } catch {
+          // skip unreadable chapters
+        }
       }
       text = texts.join("\n\n").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
     }
@@ -117,7 +121,7 @@ export default app;
 
 if (env.isProduction) {
   const { serve } = await import("@hono/node-server");
-  const { serveStaticFiles } = await import("./lib/vite");
+  const { serveStaticFiles } = await import("./lib/vite.js");
   serveStaticFiles(app);
 
   const port = parseInt(process.env.PORT || "3000");

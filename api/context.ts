@@ -1,7 +1,7 @@
 import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
-import type { LocalUser } from "../db/schema";
+import type { LocalUser } from "../db/schema.js";
 import * as cookie from "cookie";
-import { Session } from "../contracts/constants";
+import { Session } from "../contracts/constants.js";
 import { verifyLocalSessionToken } from "./local-auth-session.js";
 import { findLocalUserById } from "./queries/local-users.js";
 
