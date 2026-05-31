@@ -90,7 +90,7 @@ export const bookRouter = createRouter({
 
   readChunk: authedQuery
     .input(z.object({ token: z.string(), chunk: z.number().min(0) }))
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const payload = await verifyReadToken(input.token);
       if (!payload || payload.userId !== ctx.user.id) {
         throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired read session. Please refresh the reader." });
