@@ -2,7 +2,7 @@ import "dotenv/config";
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 
-const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || "file:./data/bookhaven.db";
+const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || (() => { throw new Error("DATABASE_URL or TURSO_DATABASE_URL is required"); })();
 const authToken = process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN || "";
 
 const now = Date.now();

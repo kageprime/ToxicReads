@@ -1,10 +1,11 @@
+import "dotenv/config";
 import { createClient } from "@libsql/client";
-import { join } from "path";
 
-const dbUrl = "file:" + join(process.cwd(), "data", "bookhaven.db");
+const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || (() => { throw new Error("DATABASE_URL or TURSO_DATABASE_URL is required"); })();
+const authToken = process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN || undefined;
 
 async function resetDb() {
-  const client = createClient({ url: dbUrl });
+  const client = createClient({ url: dbUrl, authToken });
 
   await client.execute("DROP TABLE IF EXISTS localUsers");
   await client.execute("DROP TABLE IF EXISTS books");
