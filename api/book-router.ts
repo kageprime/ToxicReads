@@ -16,6 +16,19 @@ import {
   incrementBookViews,
 } from "./queries/books.js";
 import { hasUserPurchasedBook } from "./queries/purchases.js";
+import { checkRateLimit } from "./lib/rate-limiter.js";
+import { signReadToken, verifyReadToken } from "./lib/read-token.js";
+
+const CHUNK_SIZE = 5000;
+const READ_LIMIT_PER_HOUR = 10;
+
+function splitIntoChunks(text: string): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += CHUNK_SIZE) {
+    chunks.push(text.slice(i, i + CHUNK_SIZE));
+  }
+  return chunks.length > 0 ? chunks : [""];
+}
 
 export const bookRouter = createRouter({
   // ── Public: browse approved books ───────────────────────────
@@ -28,11 +41,16 @@ export const bookRouter = createRouter({
       return findApprovedBookById(input.id);
     }),
 
-  // ── Authenticated: read purchased book ──────────────────────
+  // ── Authenticated: read purchased book (first chunk + session token) ─
 
   read: authedQuery
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
+      const rlKey = `read:${ctx.user.id}:${input.id}`;
+      if (!checkRateLimit(rlKey, READ_LIMIT_PER_HOUR, 3600000)) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Read limit reached. Try again later." });
+      }
+
       const book = await findBookById(input.id);
       if (!book) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
@@ -47,7 +65,48 @@ export const bookRouter = createRouter({
           throw new TRPCError({ code: "FORBIDDEN", message: "Purchase required to read" });
         }
       }
-      return book;
+
+      const chunks = splitIntoChunks(book.content || "");
+      const token = await signReadToken({ bookId: book.id, userId: ctx.user.id });
+
+      return {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        description: book.description,
+        price: book.price,
+        coverImage: book.coverImage,
+        category: book.category,
+        condition: book.condition,
+        views: book.views,
+        createdAt: book.createdAt,
+        chunks: chunks.length,
+        chunk: chunks[0] ?? "",
+        token,
+      };
+    }),
+
+  // ── Authenticated: fetch a content fragment ─────────────────
+
+  readChunk: authedQuery
+    .input(z.object({ token: z.string(), chunk: z.number().min(0) }))
+    .query(async ({ ctx, input }) => {
+      const payload = await verifyReadToken(input.token);
+      if (!payload || payload.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired read session. Please refresh the reader." });
+      }
+
+      const book = await findBookById(payload.bookId);
+      if (!book) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
+      }
+
+      const chunks = splitIntoChunks(book.content || "");
+      if (input.chunk >= chunks.length) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Chunk index out of range" });
+      }
+
+      return { chunk: chunks[input.chunk], index: input.chunk };
     }),
 
   // ── Authenticated: check if user can access a book ───────────

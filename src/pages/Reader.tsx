@@ -1,24 +1,35 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ChevronLeft, List, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
 
+const CHUNK_PREFETCH_THRESHOLD = 3;
+
 export default function Reader() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [fontSize, setFontSize] = useState(18);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showOutline, setShowOutline] = useState(false);
   const [activeChapter, setActiveChapter] = useState(0);
+  const [loadedChunks, setLoadedChunks] = useState<Record<number, string>>({});
+  const [maxChunkLoaded, setMaxChunkLoaded] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const tokenRef = useRef<string>("");
+  const totalChunksRef = useRef(0);
 
-  const { data: book, isLoading, error } = trpc.book.read.useQuery(
+  const { data: readData, isLoading, error } = trpc.book.read.useQuery(
     { id: parseInt(id || "0") },
-    { enabled: !!id },
+    { enabled: !!id && isAuthenticated },
   );
+
+  const readChunk = trpc.book.readChunk.useMutation();
+
+  const book = readData;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -26,8 +37,91 @@ export default function Reader() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  const paragraphs = useMemo(() => book?.content?.split("\n\n") ?? [], [book?.content]);
-  const outline = useMemo(() => book?.content ? parseOutline(book.content) : [], [book?.content]);
+  // Bootstrap: load first chunk and set up token
+  useEffect(() => {
+    if (readData) {
+      setLoadedChunks({ 0: readData.chunk });
+      setMaxChunkLoaded(0);
+      tokenRef.current = readData.token;
+      totalChunksRef.current = readData.chunks;
+    }
+  }, [readData]);
+
+  // Prefetch next chunks via IntersectionObserver on sentinel
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !tokenRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const nextChunk = maxChunkLoaded + 1;
+            if (nextChunk < totalChunksRef.current && !loadedChunks[nextChunk]) {
+              readChunk.mutate(
+                { token: tokenRef.current, chunk: nextChunk },
+                {
+                  onSuccess: (data) => {
+                    setLoadedChunks((prev) => ({ ...prev, [data.index]: data.chunk }));
+                    setMaxChunkLoaded((prev) => Math.max(prev, data.index));
+                  },
+                  onError: () => {
+                    // Token likely expired; refresh the whole book
+                    tokenRef.current = "";
+                  },
+                },
+              );
+            }
+            // Prefetch one more ahead
+            const aheadChunk = nextChunk + 1;
+            if (aheadChunk < totalChunksRef.current && !loadedChunks[aheadChunk]) {
+              readChunk.mutate(
+                { token: tokenRef.current, chunk: aheadChunk },
+                {
+                  onSuccess: (data) => {
+                    setLoadedChunks((prev) => ({ ...prev, [data.index]: data.chunk }));
+                    setMaxChunkLoaded((prev) => Math.max(prev, data.index));
+                  },
+                },
+              );
+            }
+          }
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [maxChunkLoaded, loadedChunks, readChunk]);
+
+  // Re-fetch book.read when token expires
+  const { refetch: refetchBook } = trpc.book.read.useQuery(
+    { id: parseInt(id || "0") },
+    { enabled: false },
+  );
+
+  useEffect(() => {
+    if (!tokenRef.current && !isLoading && readData) {
+      refetchBook();
+    }
+  }, [tokenRef.current, isLoading, readData, refetchBook]);
+
+  const allContent = useMemo(() => {
+    const parts: string[] = [];
+    for (let i = 0; i <= maxChunkLoaded; i++) {
+      if (loadedChunks[i]) parts.push(loadedChunks[i]);
+    }
+    // Also include any higher chunks that may have been loaded out of order
+    for (const [idx, text] of Object.entries(loadedChunks)) {
+      const n = parseInt(idx);
+      if (n > maxChunkLoaded) parts.push(text);
+    }
+    return parts.join("");
+  }, [loadedChunks, maxChunkLoaded]);
+
+  const paragraphs = useMemo(() => allContent.split("\n\n"), [allContent]);
+  const outline = useMemo(() => allContent ? parseOutline(allContent) : [], [allContent]);
 
   // Track visible chapter via IntersectionObserver
   useEffect(() => {
@@ -52,12 +146,38 @@ export default function Reader() {
 
     markers.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [showOutline, outline]);
+  }, [showOutline, outline, paragraphs.length]);
 
   const scrollToChapter = (entry: OutlineEntry) => {
     const el = contentRef.current?.querySelector(`[data-para="${entry.index}"]`);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  // ── Anti-scrape: disable copy and context menu ──────────────
+
+  const prevent = useCallback((e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("copy", prevent, true);
+    document.addEventListener("contextmenu", prevent, true);
+    document.addEventListener("cut", prevent, true);
+    return () => {
+      document.removeEventListener("copy", prevent, true);
+      document.removeEventListener("contextmenu", prevent, true);
+      document.removeEventListener("cut", prevent, true);
+    };
+  }, [prevent]);
+
+  // Clear loaded content on unmount
+  useEffect(() => {
+    return () => {
+      setLoadedChunks({});
+      tokenRef.current = "";
+    };
+  }, []);
 
   if (isLoading || authLoading) {
     return (
@@ -83,9 +203,25 @@ export default function Reader() {
   const headerBg = theme === "dark" ? "#141414" : "#fff";
   const borderColor = theme === "dark" ? "#333" : "#e8e4df";
   const outlineBg = theme === "dark" ? "#141414" : "#fff";
+  const watermarkColor = theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: bgColor }}>
+    <div className="min-h-screen" style={{ backgroundColor: bgColor, position: "relative" }}>
+      {/* Watermark overlay */}
+      <div
+        style={{
+          position: "fixed", inset: 0, zIndex: 60, pointerEvents: "none", overflow: "hidden",
+          fontSize: "12px", fontFamily: "'Space Mono', monospace", color: watermarkColor,
+          whiteSpace: "pre", userSelect: "none",
+        }}
+      >
+        {Array.from({ length: 40 }).map((_, ri) => (
+          <div key={ri} style={{ textAlign: "center", lineHeight: "2.5", transform: "rotate(-20deg)", opacity: 0.5 }}>
+            {`TOXICREADS · ${user?.name || user?.username || "Reader"} · ${new Date().toISOString().slice(0, 10)} `.repeat(15)}
+          </div>
+        ))}
+      </div>
+
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50" style={{ height: "48px", backgroundColor: headerBg, borderBottom: `1px solid ${borderColor}` }}>
         <div className="flex items-center gap-2">
@@ -157,7 +293,13 @@ export default function Reader() {
               <p style={{ fontSize: "14px", color: theme === "dark" ? "#888" : "#888", fontStyle: "italic" }}>by {book.author}</p>
             </div>
 
-            <div ref={contentRef} style={{ fontSize: `${fontSize}px`, lineHeight: 1.8, color: textColor, fontFamily: "'Georgia', serif" }}>
+            <div
+              ref={contentRef}
+              style={{
+                fontSize: `${fontSize}px`, lineHeight: 1.8, color: textColor, fontFamily: "'Georgia', serif",
+                userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none", msUserSelect: "none",
+              }}
+            >
               {paragraphs.length > 0 ? (
                 paragraphs.map((paragraph, i) => (
                   <p key={i} data-para={i} style={{ marginBottom: "1.5em" }}>{paragraph}</p>
@@ -168,13 +310,18 @@ export default function Reader() {
                 </div>
               )}
             </div>
+
+            {/* Sentinel for chunk prefetching */}
+            {maxChunkLoaded < totalChunksRef.current - 1 && (
+              <div ref={sentinelRef} style={{ height: 1 }} />
+            )}
           </article>
         </main>
       </div>
 
       {/* Progress indicator */}
       <div className="fixed bottom-0 left-0 right-0 h-1" style={{ backgroundColor: borderColor }}>
-        <div style={{ width: "30%", height: "100%", backgroundColor: theme === "dark" ? "#666" : "#ccc" }} />
+        <div style={{ width: `${Math.min(100, ((maxChunkLoaded + 1) / Math.max(totalChunksRef.current, 1)) * 100)}%`, height: "100%", backgroundColor: theme === "dark" ? "#666" : "#ccc" }} />
       </div>
     </div>
   );
