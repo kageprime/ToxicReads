@@ -79,8 +79,9 @@ export default function BookDetail() {
     );
   }
 
-  const isOwner = hasPurchased || bought;
-  const canRead = isOwner && book.content;
+  const isFree = book.price === "0" || book.price === "0.00";
+  const isOwner = hasPurchased || bought || isFree;
+  const canRead = (isOwner || isFree) && !!book.content;
   const conditionLabel = conditionLabels[book.condition] || book.condition.toUpperCase();
   const conditionColor = conditionColors[book.condition] || "var(--text-grey)";
 
@@ -155,7 +156,7 @@ export default function BookDetail() {
             </p>
 
             <p style={{ fontSize: "14px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>
-              ${book.price}
+              {isFree ? "Free" : `$${book.price}`}
             </p>
             <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", marginBottom: "24px" }}>
               {book.views} view{book.views !== 1 ? "s" : ""}
@@ -247,7 +248,7 @@ export default function BookDetail() {
                   marginBottom: "16px",
                 }}
               >
-                LOG IN TO BUY
+                {isFree ? "LOG IN TO READ" : "LOG IN TO BUY"}
               </button>
             )}
 

@@ -40,18 +40,23 @@ export const bookRouter = createRouter({
       if (book.status !== "approved") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Book not available" });
       }
-      const purchased = await hasUserPurchasedBook(ctx.user.id, input.id);
-      if (!purchased) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Purchase required to read" });
+      const isFree = book.price === "0" || book.price === "0.00";
+      if (!isFree) {
+        const purchased = await hasUserPurchasedBook(ctx.user.id, input.id);
+        if (!purchased) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Purchase required to read" });
+        }
       }
       return book;
     }),
 
-  // ── Authenticated: check if user owns a book ─────────────────
+  // ── Authenticated: check if user can access a book ───────────
 
   hasPurchased: authedQuery
     .input(z.object({ id: z.number() }))
     .query(async ({ ctx, input }) => {
+      const book = await findApprovedBookById(input.id);
+      if (book && (book.price === "0" || book.price === "0.00")) return true;
       return hasUserPurchasedBook(ctx.user.id, input.id);
     }),
 
