@@ -1,25 +1,29 @@
-import Database from "better-sqlite3";
+import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 import { join } from "path";
 
-const dbPath = join(process.cwd(), "data", "bookhaven.db");
+const dbUrl = "file:" + join(process.cwd(), "data", "bookhaven.db");
 const now = Date.now();
 
 async function seed() {
-  const db = new Database(dbPath);
+  const client = createClient({ url: dbUrl });
 
-  const adminExists = db.prepare("SELECT id FROM localUsers WHERE username = ?").get("admin");
-  if (!adminExists) {
+  const adminExists = await client.execute({
+    sql: "SELECT id FROM localUsers WHERE username = ?",
+    args: ["admin"],
+  });
+  if (adminExists.rows.length === 0) {
     const hash = await bcrypt.hash("123456", 4);
-    db.prepare(
-      "INSERT INTO localUsers (username, passwordHash, name, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)"
-    ).run("admin", hash, "Admin", "admin", now, now);
+    await client.execute({
+      sql: "INSERT INTO localUsers (username, passwordHash, name, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)",
+      args: ["admin", hash, "Admin", "admin", now, now],
+    });
     console.log("Created admin user (admin / 123456)");
   }
 
-  const bookCount = db.prepare("SELECT COUNT(*) as count FROM books").get() as { count: number };
-  if (bookCount.count === 0) {
-    const seedBooks = [
+  const bookCount = await client.execute("SELECT COUNT(*) as count FROM books");
+  if ((bookCount.rows[0] as { count: number }).count === 0) {
+    const seedBooks: [string, string, string, string, string, string, string, string, number, string, string][] = [
       ["The Great Gatsby", "F. Scott Fitzgerald", "A masterpiece of American fiction set in the Jazz Age.", "In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.\n\n\"Whenever you feel like criticizing anyone,\" he told me, \"just remember that all the people in this world haven't had the advantages that you've had.\"\n\nHe didn't say any more, but we've always been unusually communicative in a reserved way, and I understood that he meant a great deal more than that.\n\nIn consequence, I'm inclined to reserve all judgments, a habit that has opened up many curious natures to me and also made me the victim of not a few veteran bores.\n\nThe abnormal mind is quick to detect and attach itself to this quality when it appears in a normal person, and so it came about that in college I was unjustly accused of being a politician, because I was privy to the secret griefs of wild, unknown men.\n\nMost of the confidences were unsought—frequently I have feigned sleep, preoccupation, or a hostile levity when I realized by some unmistakable sign that an intimate revelation was quivering on the way.", "12.99", "/images/blog-1.jpg", "Fiction", "good", 1, "admin", "approved"],
       ["1984", "George Orwell", "A dystopian social science fiction novel.", "It was a bright cold day in April, and the clocks were striking thirteen. Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors of Victory Mansions, though not quickly enough to prevent a swirl of gritty dust from entering along with him.\n\nThe hallway smelt of boiled cabbage and old rag mats. At one end of it a coloured poster had been stuck on the wall. It depicted simply an enormous face, more than a metre wide: the face of a man of about forty-five, with a heavy black moustache and ruggedly handsome features.\n\nWinston made for the stairs. It was no use trying the lift. Even at the best of times it was seldom working, and at present the electricity was cut off during the hours of daylight. It was part of the economy drive in preparation for Hate Week.\n\nHis flat was seven flights up, and thirty-three-year-old Winston Smith, who had a weak spot in his left calf that always gave him a slight limp, went rather slowly, resting several times on the way.\n\nOn each landing, opposite the lift-shaft, the poster with the large face gazed from the wall. It was one of those pictures which are so constructed that the eyes follow you about when you move. BIG BROTHER IS WATCHING YOU, the caption beneath it ran.", "10.99", "/images/blog-2.jpg", "Fiction", "like-new", 1, "admin", "approved"],
       ["Sapiens", "Yuval Noah Harari", "A groundbreaking narrative of humanity's creation.", "About 13.5 billion years ago, matter, energy, time and space came into being in what we call the Big Bang. The story of these fundamental features of our universe is called physics.\n\nAbout 300,000 years after their appearance, matter and energy started to coalesce into complex structures, called atoms, which then combined into molecules. The story of atoms, molecules and their interactions is called chemistry.\n\nAbout 3.8 billion years ago, on a planet called Earth, certain molecules combined to form particularly large and intricate structures called organisms. The story of organisms is called biology.\n\nAbout 70,000 years ago, organisms belonging to the species Homo sapiens started to form particularly intricate structures called cultures. The subsequent development of human cultures is called history.\n\nThree important revolutions shaped the course of history. The Cognitive Revolution kick-started the spread of Homo sapiens around the entire planet. The Agricultural Revolution accelerated the pace of history. The Scientific Revolution, which started only 500 years ago, may well end history as we know it and start something completely different.", "18.50", "/images/blog-3.jpg", "Non-Fiction", "new", 1, "admin", "approved"],
@@ -30,17 +34,16 @@ async function seed() {
       ["Dune", "Frank Herbert", "A landmark science fiction epic.", "A beginning is the time for taking the most delicate care that the balances are correct. This every sister of the Bene Gesserit knows.\n\nBegin your exercise of awareness with the smell of the spice. Let it become so familiar to you that you cannot imagine a time without it.\n\nThe controlled explosion that bloomed beneath the mountain rippled outward through the rock strata, shaking the sands in every direction for what would have seemed a great distance to anyone capable of feeling it.\n\nPaul Atreides sat at the window, watching the twin moons trace their paths across a sky filled with stars. He was thinking about his mother, about the order she had given him, about the terrible choice he would have to make.\n\n\"Remember,\" she had said, \"the test is not whether you can survive. The test is whether you can remain human.\"\n\nThe desert stretched endlessly in all directions, a sea of sand that had swallowed civilizations and spat out their bones. The Fremen called it Shai-Hulud, the Old Man of the Desert, and they treated it with a respect born of centuries of struggle against its harshness.", "13.49", "/images/portrait.jpg", "Sci-Fi", "new", 1, "admin", "approved"],
     ];
 
-    const insertBook = db.prepare(
-      "INSERT INTO books (title, author, description, content, price, coverImage, category, condition, sellerId, sellerType, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    );
-
     for (const book of seedBooks) {
-      insertBook.run(...book, now, now);
+      await client.execute({
+        sql: "INSERT INTO books (title, author, description, content, price, coverImage, category, condition, sellerId, sellerType, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [...book, now, now],
+      });
     }
     console.log("Seeded " + seedBooks.length + " books");
   }
 
-  db.close();
+  client.close();
   console.log("Seed complete!");
 }
 

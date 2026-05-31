@@ -4,7 +4,7 @@
 
 ### Done
 - [x] Project setup with React 19 + Vite + Hono + tRPC
-- [x] SQLite database with Drizzle ORM + better-sqlite3
+- [x] SQLite database with Drizzle ORM + libsql (Turso)
 - [x] Local auth system (register, login, logout) with JWT in httpOnly cookies
 - [x] Admin user (admin / 123456) seeded in database
 - [x] Landing page at `/` with hero, featured books, how it works, reader preview, categories, stats
@@ -51,13 +51,13 @@
 ### Backend
 - Hono server (entry: `api/boot.ts`)
 - tRPC v11 for API
-- Drizzle ORM with better-sqlite3 driver
+- Drizzle ORM with libsql driver (@libsql/client)
 
 ### Database
-- SQLite (dev) via better-sqlite3
+- SQLite (dev) & Turso (prod) via @libsql/client
 - Tables: `localUsers`, `books`, `purchases`
 - Admin credentials: admin / 123456
-- Database file: `data/bookhaven.db`
+- Database file: `data/bookhaven.db` (local)
 
 ## Dev Commands
 
@@ -72,6 +72,8 @@ npm run test       # Vitest (api/**/*.test.ts)
 npm run db:generate # Drizzle Kit generate
 npm run db:push    # Drizzle Kit push (requires DATABASE_URL)
 npm run db:migrate # Drizzle Kit migrate
+npm run db:seed    # Seed database (admin user + sample books)
+npm run db:reset   # Drop and recreate all tables
 ```
 
 ## Routes
@@ -155,7 +157,8 @@ npm run db:migrate # Drizzle Kit migrate
 ## Environment Variables
 
 Required in `.env`:
-- `DATABASE_URL` — MySQL connection string (for production)
+- `DATABASE_URL` — Turso connection string (`file:./data/bookhaven.db` for local, `libsql://...` for production)
+- `DATABASE_AUTH_TOKEN` — Turso auth token (empty for local file)
 - `APP_SECRET` — JWT signing secret
 - `PORT` — server port (default 3000)
 

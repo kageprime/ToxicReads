@@ -1,16 +1,16 @@
-import Database from "better-sqlite3";
+import { createClient } from "@libsql/client";
 import { join } from "path";
 
-const dbPath = join(process.cwd(), "data", "bookhaven.db");
+const dbUrl = "file:" + join(process.cwd(), "data", "bookhaven.db");
 
 async function resetDb() {
-  const db = new Database(dbPath);
+  const client = createClient({ url: dbUrl });
 
-  db.exec("DROP TABLE IF EXISTS localUsers");
-  db.exec("DROP TABLE IF EXISTS books");
-  db.exec("DROP TABLE IF EXISTS purchases");
+  await client.execute("DROP TABLE IF EXISTS localUsers");
+  await client.execute("DROP TABLE IF EXISTS books");
+  await client.execute("DROP TABLE IF EXISTS purchases");
 
-  db.exec(`
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS localUsers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
@@ -22,7 +22,7 @@ async function resetDb() {
     )
   `);
 
-  db.exec(`
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS books (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -41,7 +41,7 @@ async function resetDb() {
     )
   `);
 
-  db.exec(`
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS purchases (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       buyerId INTEGER NOT NULL,
@@ -51,7 +51,7 @@ async function resetDb() {
     )
   `);
 
-  db.close();
+  client.close();
   console.log("Database reset - all tables recreated");
 }
 

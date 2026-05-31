@@ -1,9 +1,9 @@
 import mammoth from "mammoth";
-import Database from "better-sqlite3";
+import { createClient } from "@libsql/client";
 import path from "path";
 import fs from "fs";
 
-const db = new Database("data/bookhaven.db");
+const client = createClient({ url: "file:./data/bookhaven.db" });
 
 const booksDir = "./books";
 
@@ -36,11 +36,6 @@ async function importBooks() {
 
   console.log(`Found ${files.length} docx files`);
 
-  const insertBook = db.prepare(`
-    INSERT INTO books (title, author, description, content, price, coverImage, category, condition, status, createdAt, updatedAt)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
   const now = Date.now();
 
   for (const file of files) {
@@ -57,7 +52,10 @@ async function importBooks() {
       const condition = "good";
       const status = "approved";
 
-      insertBook.run(title, author, description, content, price, coverImage, category, condition, status, now, now);
+      await client.execute({
+        sql: "INSERT INTO books (title, author, description, content, price, coverImage, category, condition, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args: [title, author, description, content, price, coverImage, category, condition, status, now, now],
+      });
       console.log(`Imported: ${title}`);
     } catch (err) {
       console.error(`Failed to import ${file}:`, err);
@@ -65,7 +63,7 @@ async function importBooks() {
   }
 
   console.log("Done!");
-  db.close();
+  client.close();
 }
 
 importBooks().catch(console.error);
