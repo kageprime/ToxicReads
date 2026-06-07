@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../../contracts/blog";
 import { conditionLabels, conditionColors } from "../../contracts/blog";
+import SafeImage from "@/components/SafeImage";
 
 interface BookListProps {
   books: BookDisplay[];
@@ -134,19 +135,14 @@ export default function BookList({ books }: BookListProps) {
               onMouseEnter={() => setHoveredId(book.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              <img
+              <SafeImage
                 src={book.coverImage}
                 alt={book.title}
-                width="200"
-                height="267"
-                decoding="async"
-                fetchPriority={idx < 10 ? "high" : "auto"}
-                className="w-full h-full block transition-all duration-300 object-cover"
                 style={{
                   filter: hoveredId === book.id ? "grayscale(100%) brightness(0.9)" : "none",
                   transform: hoveredId === book.id ? "scale(1.02)" : "scale(1)",
+                  transition: "filter 0.3s, transform 0.3s",
                 }}
-                loading="lazy"
               />
             </div>
             <div className="flex items-start justify-between gap-2">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft, Edit2, Check, X } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Edit2, Check, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -189,10 +189,13 @@ export default function AdminDashboard() {
           <button onClick={() => navigate("/home")} className="p-1.5 rounded hover:bg-gray-100 transition-colors">
             <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
           </button>
-          <button onClick={() => navigate("/home")} className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity">
-            TOXICREADS
-          </button>
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px" }}>/ Admin</span>
+            <button onClick={() => navigate("/")} className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity">
+              TOXICREADS
+            </button>
+            <button onClick={() => navigate("/home")} style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'Space Mono', monospace", padding: 0 }}>
+              / Browse
+            </button>
+            <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "4px" }}>/ Admin</span>
         </div>
         
       </header>
@@ -252,6 +255,14 @@ export default function AdminDashboard() {
 
         {activeTab === "pending" && (
           <div>
+            <div style={{ border: "1px solid #F39C12", padding: "10px 14px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+                <AlertTriangle size={12} style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }} />
+                <p style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+                  Before approving, verify: accurate title/author, appropriate description, disclosed AI content (if any), and valid condition. Reject submissions that violate our content policies.
+                </p>
+              </div>
+            </div>
             {pendingLoading ? (
               <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
             ) : pendingBooks && pendingBooks.length > 0 ? (

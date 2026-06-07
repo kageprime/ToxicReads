@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router";
+import { Routes, Route, useLocation, useNavigate } from "react-router";
 import LeftColumn from "./components/LeftColumn";
 import BookList from "./components/BookList";
 import RightColumn from "./components/RightColumn";
@@ -52,6 +52,7 @@ function ToggleBar() {
 }
 
 function HomePage() {
+  const navigate = useNavigate();
   const { data: dbBooks, isLoading } = trpc.book.list.useQuery();
   const books: BookDisplay[] = dbBooks ? dbBooks.map(toBookDisplay) : [];
 
@@ -61,9 +62,9 @@ function HomePage() {
         className="flex items-center justify-between px-4 sm:px-6 z-50" 
         style={{ height: "40px", position: "fixed", top: 0, left: 0, right: 0, backgroundColor: "var(--bg-warm-white)", borderBottom: "1px solid var(--border-light)" }}
       >
-        <span style={{ fontSize: "12px", fontWeight: 400, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-charcoal)" }}>
+        <button onClick={() => navigate("/")} style={{ fontSize: "12px", fontWeight: 400, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--text-charcoal)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
           TOXICREADS
-        </span>
+        </button>
         <ToggleBar />
       </header>
 

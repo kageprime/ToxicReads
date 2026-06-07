@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -142,6 +142,30 @@ export default function SubmitBook() {
           <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", lineHeight: 1.6, fontFamily: "'Space Mono', monospace" }}>
             Your book will be reviewed by an admin before being listed.
           </p>
+
+          <div style={{ border: "1px solid #F39C12", padding: "12px 16px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <AlertTriangle size={14} style={{ color: "#F39C12", marginTop: "2px", flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", fontWeight: 600, marginBottom: "4px" }}>AI CONTENT DISCLOSURE</p>
+                <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+                  When listing a book that contains AI-generated content (text, images, or translations), you <strong>must clearly disclose this</strong> in the description. Books found to contain undisclosed AI-generated content may be rejected or removed without notice.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ border: "1px solid var(--border-light)", padding: "16px", marginBottom: "24px" }}>
+            <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", fontWeight: 600, marginBottom: "8px", letterSpacing: "0.05em" }}>SUBMISSION GUIDELINES</p>
+            <ul style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", lineHeight: 2, paddingLeft: "16px", margin: 0 }}>
+              <li>Only submit books you have the right to sell</li>
+              <li>Provide accurate title, author, and description</li>
+              <li>No hate speech, illegal content, or explicit material</li>
+              <li>AI-generated content must be disclosed (see warning above)</li>
+              <li>Condition must accurately reflect the book's state</li>
+              <li>Admins reserve the right to reject or remove listings</li>
+            </ul>
+          </div>
 
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

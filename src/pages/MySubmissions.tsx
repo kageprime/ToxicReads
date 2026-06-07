@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { AlertTriangle, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -75,6 +75,16 @@ export default function MySubmissions() {
           >
             + New
           </button>
+        </div>
+
+        <div style={{ border: "1px solid #F39C12", padding: "10px 14px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <AlertTriangle size={12} style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }} />
+            <p style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+              All submissions must follow our guidelines. AI-generated content must be clearly disclosed in the description.{" "}
+              <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => navigate("/submit-book")}>View full submission guidelines.</span>
+            </p>
+          </div>
         </div>
 
         {isLoading ? (
