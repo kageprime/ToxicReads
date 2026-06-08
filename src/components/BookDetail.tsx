@@ -269,6 +269,63 @@ export default function BookDetail() {
           </div>
         </div>
 
+        {/* Share */}
+        <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "32px", paddingTop: "24px" }}>
+          <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
+            SHARE THIS BOOK
+          </h3>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              onClick={() => {
+                const url = window.location.origin + "/book/" + book.id;
+                window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url), "fb-share", "width=600,height=400");
+              }}
+              style={{
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                color: "var(--text-charcoal)", background: "transparent",
+                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+              }}
+            >
+              FACEBOOK
+            </button>
+            <button
+              onClick={() => {
+                const url = window.location.origin + "/book/" + book.id;
+                const text = "Check out this book: " + book.title + " - ";
+                window.open("https://wa.me/?text=" + encodeURIComponent(text + url), "wa-share", "width=600,height=400");
+              }}
+              style={{
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                color: "var(--text-charcoal)", background: "transparent",
+                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+              }}
+            >
+              WHATSAPP
+            </button>
+            <button
+              onClick={async () => {
+                const url = window.location.origin + "/book/" + book.id;
+                const text = "Check out this book: " + book.title;
+                if (navigator.share) {
+                  try { await navigator.share({ title: book.title, text, url }); } catch {}
+                } else {
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    alert("Link copied to clipboard!");
+                  } catch {}
+                }
+              }}
+              style={{
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                color: "var(--text-charcoal)", background: "transparent",
+                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+              }}
+            >
+              INSTAGRAM
+            </button>
+          </div>
+        </div>
+
         {/* Similar Books */}
         {similar.length > 0 && (
           <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "48px", paddingTop: "24px" }}>
