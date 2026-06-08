@@ -1,46 +1,47 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-export type Language = 'zh' | 'en';
+type Lang = "zh" | "en";
 
 interface LanguageContextType {
-  language: Language;
-  toggleLanguage: () => void;
+  lang: Lang;
+  setLang: (lang: Lang) => void;
+  toggle: () => void;
+  t: (zh: string, en: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'zh',
-  toggleLanguage: () => {},
+  lang: "zh",
+  setLang: () => {},
+  toggle: () => {},
+  t: (zh: string) => zh,
 });
 
-const STORAGE_KEY = 'neural-atelier-lang';
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("kilnfolk-lang") as Lang) || "zh";
+    }
+    return "zh";
+  });
 
-function getInitialLanguage(): Language {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY) as Language | null;
-    if (stored === 'zh' || stored === 'en') return stored;
-  } catch {
-    // localStorage not available
-  }
-  return 'zh';
-}
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l);
+    localStorage.setItem("kilnfolk-lang", l);
+    document.documentElement.lang = l === "zh" ? "zh-CN" : "en";
+  }, []);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
+  const toggle = useCallback(() => {
+    setLang(lang === "zh" ? "en" : "zh");
+  }, [lang, setLang]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, language);
-    } catch {
-      // ignore
-    }
-  }, [language]);
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  }, [lang]);
 
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === 'zh' ? 'en' : 'zh'));
-  };
+  const t = useCallback((zh: string, en: string) => (lang === "zh" ? zh : en), [lang]);
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage }}>
+    <LanguageContext.Provider value={{ lang, setLang, toggle, t }}>
       {children}
     </LanguageContext.Provider>
   );

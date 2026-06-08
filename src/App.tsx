@@ -6,6 +6,7 @@ import BookDetail from "./components/BookDetail";
 import BottomNav from "./components/BottomNav";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import { trpc } from "@/providers/trpc";
 import type { BookDisplay } from "../contracts/blog";
 import { toBookDisplay } from "../contracts/blog";
@@ -137,8 +138,9 @@ function FloatingOpen() {
 export default function App() {
   return (
     <ThemeProvider>
-      <SidebarProvider>
-        <Routes>
+      <LanguageProvider>
+        <SidebarProvider>
+          <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/book/:id" element={<BookPage />} />
@@ -154,8 +156,9 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <FloatingOpen />
-        <BottomNav />
-      </SidebarProvider>
+          <BottomNav />
+        </SidebarProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }
