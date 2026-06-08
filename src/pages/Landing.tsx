@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+﻿import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { trpc } from "@/providers/trpc";
 import SafeImage from "@/components/SafeImage";
@@ -20,7 +20,7 @@ interface CartItem {
   category?: string;
 }
 
-/* -- Rain Sound Easter Egg ------------------------------------- */
+/* ── Rain Sound Easter Egg ───────────────────────────────────── */
 
 function useRainSound() {
   const [playing, setPlaying] = useState(false);
@@ -66,7 +66,7 @@ function useRainSound() {
   return { playing, toggle };
 }
 
-/* -- Cart Drawer --------------------------------------------- */
+/* ── Cart Drawer ───────────────────────────────────────────── */
 
 interface CartItem {
   id: number;
@@ -109,17 +109,17 @@ function CartDrawer({ open, onClose, items, onRemove, onCheckout }: {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "20px 24px", borderBottom: `1px solid ${STONEWARE}20`,
         }}>
-          <span style={{ fontSize: 11, fontFamily: "'VT323', monospace", letterSpacing: "0.2em", color: KILN_CHARCOAL }}>
+          <span style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em", color: KILN_CHARCOAL }}>
             {"CART"}
           </span>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 18, color: STONEWARE }}>
-            �
+            ×
           </button>
         </div>
 
         <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>
           {items.length === 0 ? (
-            <p style={{ fontSize: 12, fontFamily: "'Caveat', cursive", color: STONEWARE, textAlign: "center", marginTop: 40 }}>
+            <p style={{ fontSize: 12, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: STONEWARE, textAlign: "center", marginTop: 40 }}>
               {"Your cart is empty"}
             </p>
           ) : (
@@ -129,12 +129,12 @@ function CartDrawer({ open, onClose, items, onRemove, onCheckout }: {
                   <SafeImage src={item.coverImage} alt={item.title} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 12, fontFamily: "'Caveat', cursive", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</p>
-                  <p style={{ fontSize: 10, fontFamily: "'VT323', monospace", color: STONEWARE }}>{item.author}</p>
-                  <p style={{ fontSize: 11, fontFamily: "'VT323', monospace", color: TERRACOTTA, marginTop: 4 }}>${item.price}</p>
+                  <p style={{ fontSize: 12, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</p>
+                  <p style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: STONEWARE }}>{item.author}</p>
+                  <p style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: TERRACOTTA, marginTop: 4 }}>${item.price}</p>
                 </div>
                 <button onClick={() => onRemove(item.id)} style={{ background: "none", border: "none", cursor: "pointer", color: STONEWARE, fontSize: 14, alignSelf: "flex-start" }}>
-                  �
+                  ×
                 </button>
               </div>
             ))
@@ -144,17 +144,17 @@ function CartDrawer({ open, onClose, items, onRemove, onCheckout }: {
         {items.length > 0 && (
           <div style={{ padding: "20px 24px", borderTop: `1px solid ${STONEWARE}20` }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-              <span style={{ fontSize: 11, fontFamily: "'VT323', monospace", color: STONEWARE }}>{"Total"}</span>
-              <span style={{ fontSize: 14, fontFamily: "'Bangers', cursive", color: KILN_CHARCOAL }}>${total.toFixed(2)}</span>
+              <span style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: STONEWARE }}>{"Total"}</span>
+              <span style={{ fontSize: 14, fontFamily: "'Libre Baskerville', serif", color: KILN_CHARCOAL }}>${total.toFixed(2)}</span>
             </div>
             <button
               onClick={onCheckout}
               style={{
-                width: "100%", padding: "14px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em",
+                width: "100%", padding: "14px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em",
                 color: RAW_LINEN, backgroundColor: KILN_CHARCOAL, border: "none", cursor: "pointer",
               }}
             >
-              {"CHECKOUT"} ?
+              {"CHECKOUT"} →
             </button>
           </div>
         )}
@@ -163,7 +163,7 @@ function CartDrawer({ open, onClose, items, onRemove, onCheckout }: {
   );
 }
 
-/* -- Shared Components --------------------------------------- */
+/* ── Shared Components ─────────────────────────────────────── */
 
 function GlazeDot({ color }: { color: string }) {
   return (
@@ -174,7 +174,7 @@ function GlazeDot({ color }: { color: string }) {
   );
 }
 
-/* -- Header ---------------------------------------------------- */
+/* ── Header ──────────────────────────────────────────────────── */
 
 function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () => void }) {
   const navigate = useNavigate();
@@ -186,28 +186,28 @@ function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () =
       backgroundColor: "transparent",
     }}>
       <span style={{
-        fontSize: 11, fontFamily: "'Bangers', cursive", fontStyle: "italic",
+        fontSize: 11, fontFamily: "'Libre Baskerville', serif", fontStyle: "italic",
         letterSpacing: "0.05em", color: RAW_LINEN, mixBlendMode: "difference",
       }}>
         TOXICREADS
       </span>
       <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
         <button onClick={() => navigate("/home")} style={{
-          fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.15em",
+          fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.15em",
           color: RAW_LINEN, background: "none", border: "none", cursor: "pointer",
           mixBlendMode: "difference",
         }}>
-          {"BROWSE"} ?
+          {"BROWSE"} →
         </button>
         <button onClick={onCartOpen} style={{
           position: "relative", background: "none", border: "none", cursor: "pointer",
           color: RAW_LINEN, mixBlendMode: "difference", fontSize: 16,
         }}>
-          ??
+          🛒
           {cartCount > 0 && (
             <span style={{
               position: "absolute", top: -4, right: -8,
-              fontSize: 9, fontFamily: "'VT323', monospace",
+              fontSize: 9, fontFamily: "'Space Mono', monospace",
               backgroundColor: TERRACOTTA, color: RAW_LINEN,
               borderRadius: "50%", width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center",
             }}>
@@ -220,7 +220,7 @@ function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () =
   );
 }
 
-/* -- Hero ----------------------------------------------------- */
+/* ── Hero ───────────────────────────────────────────────────── */
 
 function HeroSection() {
   const navigate = useNavigate();
@@ -244,7 +244,7 @@ function HeroSection() {
 
       <div style={{ position: "relative", zIndex: 5, textAlign: "center", padding: "0 8vw" }}>
         <p style={{
-          fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.35em",
+          fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.35em",
           color: WARM_SAND, marginBottom: 32, textTransform: "uppercase",
         }}>
           {"A MARKET FOR THE UNCOMMON BOOK"}
@@ -252,7 +252,7 @@ function HeroSection() {
 
         <h1 style={{
           fontSize: "clamp(48px, 10vw, 96px)", fontWeight: 300,
-          fontFamily: "'Bangers', cursive", fontStyle: "italic",
+          fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic",
           color: RAW_LINEN, letterSpacing: "0.02em", lineHeight: 1.1,
           WebkitTextStroke: "2px rgba(26,26,26,0.3)",
         }}>
@@ -260,7 +260,7 @@ function HeroSection() {
         </h1>
 
         <p style={{
-          fontSize: 14, fontFamily: "'Caveat', cursive",
+          fontSize: 14, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif",
           color: WARM_SAND, marginTop: 32, maxWidth: 520,
           margin: "32px auto 0", lineHeight: 1.8, fontWeight: 300,
         }}>
@@ -269,7 +269,7 @@ function HeroSection() {
 
         <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", marginTop: 48 }}>
           <button onClick={() => navigate("/home")} style={{
-            padding: "14px 40px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em",
+            padding: "14px 40px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em",
             color: KILN_CHARCOAL, backgroundColor: TERRACOTTA, border: "none", cursor: "pointer",
             transition: "opacity 0.2s",
           }} onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
@@ -277,7 +277,7 @@ function HeroSection() {
             {"EXPLORE COLLECTION"}
           </button>
           <button onClick={() => navigate("/home")} style={{
-            padding: "14px 40px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em",
+            padding: "14px 40px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em",
             color: TERRACOTTA, backgroundColor: "transparent", border: `1px solid ${TERRACOTTA}`, cursor: "pointer",
             transition: "all 0.2s",
           }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = TERRACOTTA; e.currentTarget.style.color = KILN_CHARCOAL; }}
@@ -288,10 +288,10 @@ function HeroSection() {
       </div>
 
       <div style={{ position: "absolute", bottom: 48, left: "10%", right: "10%", zIndex: 5, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 8, fontFamily: "'VT323', monospace", color: `${WARM_SAND}60`, letterSpacing: "0.15em" }}>
-          {"TOXICREADS � EST. 2025"}
+        <span style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: `${WARM_SAND}60`, letterSpacing: "0.15em" }}>
+          {"TOXICREADS — EST. 2025"}
         </span>
-        <span style={{ fontSize: 8, fontFamily: "'VT323', monospace", color: `${WARM_SAND}60`, letterSpacing: "0.15em" }}>
+        <span style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: `${WARM_SAND}60`, letterSpacing: "0.15em" }}>
           {"OPEN EDITION"}
         </span>
       </div>
@@ -306,7 +306,7 @@ function HeroSection() {
   );
 }
 
-/* -- Seasonal Collection ------------------------------------- */
+/* ── Seasonal Collection ───────────────────────────────────── */
 
 function SeasonalCollection({ books, onAdd }: { books: Array<{ id: number; title: string; author: string; coverImage: string; price: string; category: string }>; onAdd: (b: CartItem) => void }) {
   const navigate = useNavigate();
@@ -316,10 +316,10 @@ function SeasonalCollection({ books, onAdd }: { books: Array<{ id: number; title
     <section style={{ backgroundColor: RAW_LINEN, padding: "10vh 0", position: "relative" }}>
       <div style={{ padding: "0 4vw", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ marginBottom: 40, textAlign: "center" }}>
-          <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
+          <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
             {"SEASONAL"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
             {"This Season's Reads"}
           </h2>
           <div style={{ width: 48, height: 1, backgroundColor: TERRACOTTA, margin: "16px auto 0" }} />
@@ -350,19 +350,19 @@ function SeasonalCollection({ books, onAdd }: { books: Array<{ id: number; title
                   display: "flex", alignItems: "center",
                 }}>
                   <GlazeDot color={TERRACOTTA} />
-                  <span style={{ fontSize: 8, fontFamily: "'VT323', monospace", color: RAW_LINEN, letterSpacing: "0.1em" }}>
+                  <span style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: RAW_LINEN, letterSpacing: "0.1em" }}>
                     {book.category?.toUpperCase?.() || "BOOK"}
                   </span>
                 </div>
               </div>
-              <p style={{ fontSize: 12, fontFamily: "'Caveat', cursive", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
-              <p style={{ fontSize: 10, fontFamily: "'VT323', monospace", color: STONEWARE }}>{book.author}</p>
+              <p style={{ fontSize: 12, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
+              <p style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: STONEWARE }}>{book.author}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
-                <p style={{ fontSize: 11, fontFamily: "'VT323', monospace", color: TERRACOTTA }}>${book.price}</p>
+                <p style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: TERRACOTTA }}>${book.price}</p>
                 <button
                   onClick={(e) => { e.stopPropagation(); onAdd(book); }}
                   style={{
-                    fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.1em",
+                    fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em",
                     color: KILN_CHARCOAL, background: "none", border: `1px solid ${STONEWARE}40`,
                     cursor: "pointer", padding: "2px 8px",
                   }}
@@ -376,12 +376,12 @@ function SeasonalCollection({ books, onAdd }: { books: Array<{ id: number; title
 
         <div style={{ marginTop: 40, textAlign: "center" }}>
           <button onClick={() => navigate("/home")} style={{
-            padding: "12px 36px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em",
+            padding: "12px 36px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em",
             color: RAW_LINEN, backgroundColor: KILN_CHARCOAL, border: "none", cursor: "pointer",
             transition: "opacity 0.2s",
           }} onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>
-            VIEW ALL ?
+            VIEW ALL →
           </button>
         </div>
       </div>
@@ -389,14 +389,14 @@ function SeasonalCollection({ books, onAdd }: { books: Array<{ id: number; title
   );
 }
 
-/* -- All Products --------------------------------------------- */
+/* ── All Products ───────────────────────────────────────────── */
 
 const CATEGORIES = [
-  { key: "fiction", zh: "??", en: "Fiction", color: "#B85C3C" },
-  { key: "non-fiction", zh: "???", en: "Non-fiction", color: "#8B7355" },
-  { key: "poetry", zh: "??", en: "Poetry", color: "#C86848" },
-  { key: "philosophy", zh: "??", en: "Philosophy", color: "#D4C4A8" },
-  { key: "all", zh: "??", en: "All", color: "#2C1810" },
+  { key: "fiction", zh: "小说", en: "Fiction", color: "#B85C3C" },
+  { key: "non-fiction", zh: "非虚构", en: "Non-fiction", color: "#8B7355" },
+  { key: "poetry", zh: "诗歌", en: "Poetry", color: "#C86848" },
+  { key: "philosophy", zh: "哲学", en: "Philosophy", color: "#D4C4A8" },
+  { key: "all", zh: "全部", en: "All", color: "#2C1810" },
 ];
 
 function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: string; author: string; coverImage: string; price: string; category: string }>; onAdd: (b: CartItem) => void }) {
@@ -409,10 +409,10 @@ function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: strin
     <section style={{ backgroundColor: RAW_LINEN, padding: "10vh 4vw", position: "relative" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ marginBottom: 40, textAlign: "center" }}>
-          <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
+          <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
             {"ALL WORKS"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
             {"The Library"}
           </h2>
           <div style={{ width: 48, height: 1, backgroundColor: TERRACOTTA, margin: "16px auto 0" }} />
@@ -426,7 +426,7 @@ function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: strin
               onClick={() => setFilter(cat.key)}
               style={{
                 display: "flex", alignItems: "center", gap: 4,
-                padding: "6px 14px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.05em",
+                padding: "6px 14px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em",
                 border: filter === cat.key ? "1px solid var(--text-charcoal)" : "1px solid var(--border-light)",
                 background: filter === cat.key ? KILN_CHARCOAL : "transparent",
                 color: filter === cat.key ? RAW_LINEN : STONEWARE,
@@ -453,19 +453,19 @@ function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: strin
                 <SafeImage src={book.coverImage} alt={book.title} />
                 <div style={{ position: "absolute", top: 8, left: 8, display: "flex", alignItems: "center" }}>
                   <GlazeDot color={TERRACOTTA} />
-                  <span style={{ fontSize: 8, fontFamily: "'VT323', monospace", color: RAW_LINEN, letterSpacing: "0.1em" }}>
+                  <span style={{ fontSize: 8, fontFamily: "'Space Mono', monospace", color: RAW_LINEN, letterSpacing: "0.1em" }}>
                     {book.category?.toUpperCase?.() || "BOOK"}
                   </span>
                 </div>
               </div>
-              <p style={{ fontSize: 12, fontFamily: "'Caveat', cursive", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
-              <p style={{ fontSize: 10, fontFamily: "'VT323', monospace", color: STONEWARE }}>{book.author}</p>
+              <p style={{ fontSize: 12, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: KILN_CHARCOAL, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
+              <p style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", color: STONEWARE }}>{book.author}</p>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
-                <p style={{ fontSize: 11, fontFamily: "'VT323', monospace", color: TERRACOTTA }}>${book.price}</p>
+                <p style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: TERRACOTTA }}>${book.price}</p>
                 <button
                   onClick={(e) => { e.stopPropagation(); onAdd(book); }}
                   style={{
-                    fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.1em",
+                    fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em",
                     color: KILN_CHARCOAL, background: "none", border: `1px solid ${STONEWARE}40`,
                     cursor: "pointer", padding: "2px 8px",
                   }}
@@ -479,12 +479,12 @@ function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: strin
 
         <div style={{ marginTop: 40, textAlign: "center" }}>
           <button onClick={() => navigate("/home")} style={{
-            padding: "12px 36px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em",
+            padding: "12px 36px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em",
             color: RAW_LINEN, backgroundColor: KILN_CHARCOAL, border: "none", cursor: "pointer",
             transition: "opacity 0.2s",
           }} onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>
-            VIEW ALL ?
+            VIEW ALL →
           </button>
         </div>
       </div>
@@ -492,7 +492,7 @@ function AllProducts({ books, onAdd }: { books: Array<{ id: number; title: strin
   );
 }
 
-/* -- Maker's Story -------------------------------------------- */
+/* ── Maker's Story ──────────────────────────────────────────── */
 
 function MakersStory() {
 
@@ -504,31 +504,31 @@ function MakersStory() {
       }} />
       <div style={{ maxWidth: 720, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
+          <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
             {"ABOUT"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: RAW_LINEN, marginTop: 8, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic", color: RAW_LINEN, marginTop: 8, letterSpacing: "-0.01em" }}>
             {"The Maker's Story"}
           </h2>
           <div style={{ width: 48, height: 1, backgroundColor: TERRACOTTA, margin: "16px auto 0" }} />
         </div>
 
-        <p style={{ fontSize: 15, fontFamily: "'Caveat', cursive", color: WARM_SAND, lineHeight: 1.9, fontWeight: 300, textAlign: "center" }}>
-          Every book is a maker's monologue. The annotations in the margins, the worn dog-ears, the scent of paper and ink�these are traces left by time. We believe that uncommon books should not be forgotten; each one deserves to be read again and treasured anew.
+        <p style={{ fontSize: 15, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, lineHeight: 1.9, fontWeight: 300, textAlign: "center" }}>
+          Every book is a maker's monologue. The annotations in the margins, the worn dog-ears, the scent of paper and ink—these are traces left by time. We believe that uncommon books should not be forgotten; each one deserves to be read again and treasured anew.
         </p>
       </div>
     </section>
   );
 }
 
-/* -- The Process -------------------------------------------- */
+/* ── The Process ──────────────────────────────────────────── */
 
 const STEPS = [
-  { zh: "??", en: "Browse", descZh: "??????? uncommon ??", descEn: "Discover uncommon books in the library" },
-  { zh: "??", en: "Select", descZh: "?????????", descEn: "Find the one that moves you" },
-  { zh: "??", en: "Purchase", descZh: "???????????", descEn: "Every purchase unlocks the full read" },
-  { zh: "??", en: "Read", descZh: "????????", descEn: "Immerse yourself in the world of words" },
-  { zh: "??", en: "Share", descZh: "????????????", descEn: "Pass your book to the next reader" },
+  { zh: "浏览", en: "Browse", descZh: "在藏书阁中发现 uncommon 之书", descEn: "Discover uncommon books in the library" },
+  { zh: "选择", en: "Select", descZh: "找到触动你的那一本", descEn: "Find the one that moves you" },
+  { zh: "购买", en: "Purchase", descZh: "每一次购买解锁完整阅读", descEn: "Every purchase unlocks the full read" },
+  { zh: "阅读", en: "Read", descZh: "沉浸于文字的世界", descEn: "Immerse yourself in the world of words" },
+  { zh: "分享", en: "Share", descZh: "将你的书传递给下一位读者", descEn: "Pass your book to the next reader" },
 ];
 
 function TheProcess() {
@@ -537,10 +537,10 @@ function TheProcess() {
     <section style={{ backgroundColor: RAW_LINEN, padding: "10vh 4vw", position: "relative" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
+          <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
             {"PROCESS"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic", color: KILN_CHARCOAL, marginTop: 8, letterSpacing: "-0.01em" }}>
             {"The Five Steps"}
           </h2>
           <div style={{ width: 48, height: 1, backgroundColor: TERRACOTTA, margin: "16px auto 0" }} />
@@ -554,14 +554,14 @@ function TheProcess() {
                 border: `1px solid ${STONEWARE}40`,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 margin: "0 auto 16px",
-                fontSize: 14, fontFamily: "'Bangers', cursive", color: TERRACOTTA,
+                fontSize: 14, fontFamily: "'Libre Baskerville', serif", color: TERRACOTTA,
               }}>
                 {i + 1}
               </div>
-              <h3 style={{ fontSize: 14, fontFamily: "'Caveat', cursive", color: KILN_CHARCOAL, marginBottom: 8 }}>
+              <h3 style={{ fontSize: 14, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: KILN_CHARCOAL, marginBottom: 8 }}>
                 {step.en}
               </h3>
-              <p style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: STONEWARE, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: STONEWARE, lineHeight: 1.6 }}>
                 {step.descEn}
               </p>
             </div>
@@ -572,15 +572,15 @@ function TheProcess() {
   );
 }
 
-/* -- Gift Sets ----------------------------------------------- */
+/* ── Gift Sets ─────────────────────────────────────────────── */
 
 function GiftSets({ onAdd }: { onAdd: (b: CartItem) => void }) {
   const { data: books } = trpc.book.list.useQuery();
 
   const bundles = [
-    { nameZh: "????", nameEn: "Starter Trio", ids: [0, 1, 2], color: TERRACOTTA },
-    { nameZh: "????", nameEn: "Late Night Reads", ids: [1, 3, 4], color: STONEWARE },
-    { nameZh: "????", nameEn: "Classics Revisited", ids: [0, 2, 4], color: CLAY },
+    { nameZh: "入门三册", nameEn: "Starter Trio", ids: [0, 1, 2], color: TERRACOTTA },
+    { nameZh: "深夜阅读", nameEn: "Late Night Reads", ids: [1, 3, 4], color: STONEWARE },
+    { nameZh: "经典重读", nameEn: "Classics Revisited", ids: [0, 2, 4], color: CLAY },
   ];
 
   const available = books?.slice(0, 5) || [];
@@ -589,10 +589,10 @@ function GiftSets({ onAdd }: { onAdd: (b: CartItem) => void }) {
     <section style={{ backgroundColor: KILN_CHARCOAL, padding: "10vh 4vw", position: "relative" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
+          <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", letterSpacing: "0.3em", color: TERRACOTTA }}>
             {"GIFTS"}
           </span>
-          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: RAW_LINEN, marginTop: 8, letterSpacing: "-0.01em" }}>
+          <h2 style={{ fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 300, fontFamily: "'Libre Baskerville', 'Noto Serif SC', serif", fontStyle: "italic", color: RAW_LINEN, marginTop: 8, letterSpacing: "-0.01em" }}>
             {"Gift Sets"}
           </h2>
           <div style={{ width: 48, height: 1, backgroundColor: TERRACOTTA, margin: "16px auto 0" }} />
@@ -611,20 +611,20 @@ function GiftSets({ onAdd }: { onAdd: (b: CartItem) => void }) {
                     </div>
                   ))}
                 </div>
-                <h3 style={{ fontSize: 14, fontFamily: "'Caveat', cursive", color: RAW_LINEN, marginBottom: 4 }}>
+                <h3 style={{ fontSize: 14, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: RAW_LINEN, marginBottom: 4 }}>
                   {bundle.nameEn}
                 </h3>
-                <p style={{ fontSize: 11, fontFamily: "'VT323', monospace", color: WARM_SAND, marginBottom: 12 }}>
-                  {items.length} {"books"} � ${total.toFixed(2)}
+                <p style={{ fontSize: 11, fontFamily: "'Space Mono', monospace", color: WARM_SAND, marginBottom: 12 }}>
+                  {items.length} {"books"} · ${total.toFixed(2)}
                 </p>
                 <button
                   onClick={() => items.forEach((b) => onAdd(b))}
                   style={{
-                    width: "100%", padding: "10px", fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.15em",
+                    width: "100%", padding: "10px", fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.15em",
                     color: RAW_LINEN, backgroundColor: bundle.color, border: "none", cursor: "pointer",
                   }}
                 >
-                  {"ADD SET"} ?
+                  {"ADD SET"} →
                 </button>
               </div>
             );
@@ -635,7 +635,7 @@ function GiftSets({ onAdd }: { onAdd: (b: CartItem) => void }) {
   );
 }
 
-/* -- Footer --------------------------------------------------- */
+/* ── Footer ─────────────────────────────────────────────────── */
 
 function Footer() {
   const { playing, toggle } = useRainSound();
@@ -645,40 +645,40 @@ function Footer() {
     <footer style={{ backgroundColor: KILN_CHARCOAL, padding: "8vh 4vw 4vh", borderTop: `1px solid ${TERRACOTTA}20` }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 40 }}>
         <div>
-          <h4 style={{ fontSize: 14, fontFamily: "'Bangers', cursive", fontStyle: "italic", color: RAW_LINEN, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontFamily: "'Libre Baskerville', serif", fontStyle: "italic", color: RAW_LINEN, marginBottom: 16 }}>
             TOXICREADS
           </h4>
-          <p style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, lineHeight: 1.6 }}>
             {"A market for the uncommon book"}
           </p>
         </div>
 
         <div>
-          <h4 style={{ fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em", color: TERRACOTTA, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em", color: TERRACOTTA, marginBottom: 16 }}>
             {"NAVIGATE"}
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <button onClick={() => navigate("/home")} style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <button onClick={() => navigate("/home")} style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               {"Browse"}
             </button>
-            <button onClick={() => navigate("/submit-book")} style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <button onClick={() => navigate("/submit-book")} style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               {"Sell"}
             </button>
-            <button onClick={() => navigate("/my-purchases")} style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <button onClick={() => navigate("/my-purchases")} style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               {"My Purchases"}
             </button>
           </div>
         </div>
 
         <div>
-          <h4 style={{ fontSize: 10, fontFamily: "'VT323', monospace", letterSpacing: "0.2em", color: TERRACOTTA, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", letterSpacing: "0.2em", color: TERRACOTTA, marginBottom: 16 }}>
             {"ACCOUNT"}
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <button onClick={() => navigate("/login")} style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <button onClick={() => navigate("/login")} style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               {"Login"}
             </button>
-            <button onClick={() => navigate("/register")} style={{ fontSize: 11, fontFamily: "'Caveat', cursive", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+            <button onClick={() => navigate("/register")} style={{ fontSize: 11, fontFamily: "'Source Serif Pro', 'Noto Serif SC', serif", color: WARM_SAND, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               {"Register"}
             </button>
           </div>
@@ -686,25 +686,25 @@ function Footer() {
       </div>
 
       <div style={{ maxWidth: 1200, margin: "48px auto 0", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${TERRACOTTA}20`, paddingTop: 24 }}>
-        <span style={{ fontSize: 9, fontFamily: "'VT323', monospace", color: `${WARM_SAND}60` }}>
-          � 2025 TOXICREADS
+        <span style={{ fontSize: 9, fontFamily: "'Space Mono', monospace", color: `${WARM_SAND}60` }}>
+          © 2025 TOXICREADS
         </span>
         <button
           onClick={toggle}
           style={{
-            fontSize: 9, fontFamily: "'VT323', monospace", color: playing ? TERRACOTTA : `${WARM_SAND}60`,
+            fontSize: 9, fontFamily: "'Space Mono', monospace", color: playing ? TERRACOTTA : `${WARM_SAND}60`,
             background: "none", border: "none", cursor: "pointer", letterSpacing: "0.1em",
           }}
           title={"Rain sound"}
         >
-          {playing ? "? " + "RAIN" : "? " + "RAIN"}
+          {playing ? "⏸ " + "RAIN" : "▶ " + "RAIN"}
         </button>
       </div>
     </footer>
   );
 }
 
-/* -- Main ----------------------------------------------------- */
+/* ── Main ───────────────────────────────────────────────────── */
 
 export default function Landing() {
   const { data: books } = trpc.book.list.useQuery();

@@ -99,7 +99,7 @@ export default function Login() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'VT323', monospace",
+                fontFamily: "'Space Mono', monospace",
                 outline: "none",
               }}
             />
@@ -128,7 +128,7 @@ export default function Login() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'VT323', monospace",
+                fontFamily: "'Space Mono', monospace",
                 outline: "none",
               }}
             />
@@ -145,7 +145,7 @@ export default function Login() {
               width: "100%",
               padding: "12px",
               fontSize: "12px",
-              fontFamily: "'VT323', monospace",
+              fontFamily: "'Space Mono', monospace",
               color: "var(--bg-warm-white)",
               background: "var(--text-charcoal)",
               border: "none",
@@ -164,7 +164,7 @@ export default function Login() {
             color: "var(--text-grey)",
             marginTop: "16px",
             textAlign: "center",
-            fontFamily: "'VT323', monospace",
+            fontFamily: "'Space Mono', monospace",
           }}
         >
           Default: admin / 123456
@@ -176,7 +176,7 @@ export default function Login() {
             color: "var(--text-grey)",
             marginTop: "12px",
             textAlign: "center",
-            fontFamily: "'VT323', monospace",
+            fontFamily: "'Space Mono', monospace",
           }}
         >
           New here?{" "}

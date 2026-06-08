@@ -317,7 +317,7 @@ export default function Reader() {
   if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}>
-        <span style={{ fontSize: "12px", fontFamily: "'VT323', monospace", color: "#999" }}>LOADING...</span>
+        <span style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "#999" }}>LOADING...</span>
       </div>
     );
   }
@@ -326,7 +326,7 @@ export default function Reader() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}>
         <span style={{ fontSize: "14px", color: theme === "dark" ? "#999" : "#666" }}>Unable to load book</span>
-        <button onClick={() => navigate("/my-purchases")} style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: theme === "dark" ? "#ccc" : "#333", background: "none", border: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`, padding: "8px 16px", cursor: "pointer" }}>
+        <button onClick={() => navigate("/my-purchases")} style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#ccc" : "#333", background: "none", border: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`, padding: "8px 16px", cursor: "pointer" }}>
           Back
         </button>
       </div>
@@ -347,7 +347,7 @@ export default function Reader() {
       <div
         style={{
           position: "fixed", inset: 0, zIndex: 60, pointerEvents: "none", overflow: "hidden",
-          fontSize: "12px", fontFamily: "'VT323', monospace", color: watermarkColor,
+          fontSize: "12px", fontFamily: "'Space Mono', monospace", color: watermarkColor,
           whiteSpace: "pre", userSelect: "none",
         }}
       >
@@ -368,16 +368,16 @@ export default function Reader() {
         </div>
         <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
           {outline.length > 0 && (
-            <button onClick={() => setShowOutline(!showOutline)} style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: `1px solid ${showOutline ? textColor : borderColor}`, padding: "4px 6px sm:px-8", cursor: "pointer", display: "flex", alignItems: "center", gap: "2px sm:gap-4px" }} title="Outline">
+            <button onClick={() => setShowOutline(!showOutline)} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${showOutline ? textColor : borderColor}`, padding: "4px 6px sm:px-8", cursor: "pointer", display: "flex", alignItems: "center", gap: "2px sm:gap-4px" }} title="Outline">
               <List size={12} /> <span className="hidden sm:inline">Outline</span>
             </button>
           )}
           <span className="hidden sm:flex items-center gap-0.5 sm:gap-1">
-            <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Decrease font">A−</button>
-            <span style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "20px sm:min-w-24px", textAlign: "center" }}>{fontSize}</span>
-            <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Increase font">A+</button>
+            <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Decrease font">A−</button>
+            <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "20px sm:min-w-24px", textAlign: "center" }}>{fontSize}</span>
+            <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 5px sm:px-8", cursor: "pointer" }} title="Increase font">A+</button>
             <span style={{ fontSize: "10px", color: theme === "dark" ? "#666" : "#999" }}>|</span>
-            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 6px sm:px-10", cursor: "pointer" }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
+            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: `1px solid ${borderColor}`, padding: "4px 6px sm:px-10", cursor: "pointer" }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
               <span className="hidden sm:inline">{theme === "dark" ? "Light" : "Dark"}</span>
               <span className="sm:hidden">{theme === "dark" ? "☀" : "☾"}</span>
             </button>
@@ -404,7 +404,7 @@ export default function Reader() {
             >
               <div style={{ padding: "16px" }}>
                 <div className="flex items-center justify-between sm:justify-start mb-3">
-                  <h3 style={{ fontSize: "9px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: theme === "dark" ? "#666" : "#999" }}>
+                  <h3 style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: theme === "dark" ? "#666" : "#999" }}>
                     Contents
                   </h3>
                   <button className="sm:hidden p-1" onClick={() => setShowOutline(false)} style={{ color: theme === "dark" ? "#999" : "#666", fontSize: "16px", lineHeight: 1 }}>✕</button>
@@ -416,7 +416,7 @@ export default function Reader() {
                       onClick={() => { scrollToChapter(entry); if (window.innerWidth < 640) setShowOutline(false); }}
                       style={{
                         display: "block", width: "100%", textAlign: "left", padding: "6px 8px",
-                        fontSize: "11px", lineHeight: 1.4, fontFamily: "'Caveat', serif",
+                        fontSize: "11px", lineHeight: 1.4, fontFamily: "'Georgia', serif",
                         color: i === activeChapter ? textColor : theme === "dark" ? "#888" : "#888",
                         background: i === activeChapter ? (theme === "dark" ? "#2a2a2a" : "#f0ede8") : "none",
                         border: "none", cursor: "pointer", borderRadius: "2px",
@@ -436,14 +436,14 @@ export default function Reader() {
           <article style={{ maxWidth: "680px", margin: "0 auto", padding: "32px 32px" }}>
             {/* Book header */}
             <div style={{ marginBottom: "48px", paddingBottom: "32px", borderBottom: `1px solid ${borderColor}` }}>
-              <h1 style={{ fontSize: "28px", fontWeight: 400, color: textColor, marginBottom: "8px", lineHeight: 1.3, fontFamily: "'Caveat', serif" }}>{book.title}</h1>
+              <h1 style={{ fontSize: "28px", fontWeight: 400, color: textColor, marginBottom: "8px", lineHeight: 1.3, fontFamily: "'Georgia', serif" }}>{book.title}</h1>
               <p style={{ fontSize: "14px", color: theme === "dark" ? "#888" : "#888", fontStyle: "italic" }}>by {book.author}</p>
             </div>
 
             <div
               ref={contentRef}
               style={{
-                fontSize: `${fontSize}px`, lineHeight: 1.8, color: textColor, fontFamily: "'Caveat', serif",
+                fontSize: `${fontSize}px`, lineHeight: 1.8, color: textColor, fontFamily: "'Georgia', serif",
                 userSelect: "none", WebkitUserSelect: "none", MozUserSelect: "none", msUserSelect: "none",
               }}
             >
@@ -469,9 +469,9 @@ export default function Reader() {
       {/* Mobile bottom toolbar (font controls) */}
       <div className="sm:hidden fixed bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-2" style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}>
         <div style={{ backgroundColor: headerBg, border: `1px solid ${borderColor}`, borderRadius: "20px", padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}>
-          <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "13px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Decrease font">A−</button>
-          <span style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "22px", textAlign: "center" }}>{fontSize}</span>
-          <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "13px", fontFamily: "'VT323', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Increase font">A+</button>
+          <button onClick={() => setFontSize(Math.max(14, fontSize - 2))} style={{ fontSize: "13px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Decrease font">A−</button>
+          <span style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: theme === "dark" ? "#666" : "#999", minWidth: "22px", textAlign: "center" }}>{fontSize}</span>
+          <button onClick={() => setFontSize(Math.min(28, fontSize + 2))} style={{ fontSize: "13px", fontFamily: "'Space Mono', monospace", color: textColor, background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title="Increase font">A+</button>
           <span style={{ fontSize: "14px", color: theme === "dark" ? "#444" : "#ddd" }}>|</span>
           <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} style={{ fontSize: "13px", background: "none", border: "none", cursor: "pointer", padding: "4px", lineHeight: 1 }} title={theme === "dark" ? "Light mode" : "Dark mode"}>
             {theme === "dark" ? <span style={{ color: "#e8e6e3" }}>☀</span> : <span style={{ color: "#555" }}>☾</span>}

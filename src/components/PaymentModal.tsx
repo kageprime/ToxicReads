@@ -82,17 +82,17 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
         </div>
 
         <div className="px-5 py-3">
-          <p style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", marginBottom: "2px" }}>
+          <p style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", marginBottom: "2px" }}>
             {title}
           </p>
-          <p style={{ fontSize: "16px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)" }}>
+          <p style={{ fontSize: "16px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)" }}>
             ${price}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="px-5 pb-5 space-y-3">
           <div>
-            <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'VT323', monospace" }}>
+            <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'Space Mono', monospace" }}>
               Card Number
             </label>
             <input
@@ -102,14 +102,14 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
               style={{
                 width: "100%", fontSize: "12px", padding: "8px 10px",
                 border: "1px solid var(--border-light)", outline: "none",
-                color: "var(--text-charcoal)", fontFamily: "'VT323', monospace",
+                color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace",
                 background: "transparent",
               }}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'VT323', monospace" }}>
+            <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'Space Mono', monospace" }}>
               Cardholder Name
             </label>
             <input
@@ -119,7 +119,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
               style={{
                 width: "100%", fontSize: "12px", padding: "8px 10px",
                 border: "1px solid var(--border-light)", outline: "none",
-                color: "var(--text-charcoal)", fontFamily: "'VT323', monospace",
+                color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace",
                 background: "transparent",
               }}
             />
@@ -127,7 +127,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
 
           <div className="flex gap-3">
             <div className="flex-1">
-              <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'VT323', monospace" }}>
+              <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'Space Mono', monospace" }}>
                 Expiry
               </label>
               <input
@@ -137,13 +137,13 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
                 style={{
                   width: "100%", fontSize: "12px", padding: "8px 10px",
                   border: "1px solid var(--border-light)", outline: "none",
-                  color: "var(--text-charcoal)", fontFamily: "'VT323', monospace",
+                  color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace",
                   background: "transparent",
                 }}
               />
             </div>
             <div style={{ width: "80px" }}>
-              <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'VT323', monospace" }}>
+              <label style={{ fontSize: "10px", color: "var(--text-grey)", display: "block", marginBottom: "3px", fontFamily: "'Space Mono', monospace" }}>
                 CVC
               </label>
               <input
@@ -153,7 +153,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
                 style={{
                   width: "100%", fontSize: "12px", padding: "8px 10px",
                   border: "1px solid var(--border-light)", outline: "none",
-                  color: "var(--text-charcoal)", fontFamily: "'VT323', monospace",
+                  color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace",
                   background: "transparent",
                 }}
               />
@@ -161,7 +161,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
           </div>
 
           {error && (
-            <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'VT323', monospace" }}>
+            <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>
               {error}
             </p>
           )}
@@ -170,7 +170,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
             type="submit"
             disabled={processing}
             style={{
-              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'VT323', monospace",
+              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
               color: "var(--bg-warm-white)", background: processing ? "#999" : "var(--text-charcoal)",
               border: "none", cursor: processing ? "wait" : "pointer",
               letterSpacing: "0.05em", marginTop: "4px",
@@ -179,7 +179,7 @@ export default function PaymentModal({ price, title, onPay, onClose }: PaymentMo
             {processing ? "PROCESSING..." : `PAY $${price}`}
           </button>
 
-          <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", textAlign: "center", marginTop: "8px" }}>
+          <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", textAlign: "center", marginTop: "8px" }}>
             Mock payment — no real charges
           </p>
         </form>

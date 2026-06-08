@@ -44,13 +44,13 @@ export default function BookList({ books }: BookListProps) {
           BROWSE COLLECTION
         </h2>
         {isAdmin && (
-          <button onClick={() => navigate("/add-book")} style={{ fontSize: "10px", color: "var(--text-grey)", background: "none", border: "none", cursor: "pointer", fontFamily: "'VT323', monospace", marginBottom: "8px" }}>
+          <button onClick={() => navigate("/add-book")} style={{ fontSize: "10px", color: "var(--text-grey)", background: "none", border: "none", cursor: "pointer", fontFamily: "'Space Mono', monospace", marginBottom: "8px" }}>
             + ADD BOOK
           </button>
         )}
       </div>
 
-      <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "20px", fontFamily: "'VT323', monospace" }}>
+      <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "20px", fontFamily: "'Space Mono', monospace" }}>
         {books.length} books available
       </p>
 
@@ -61,7 +61,7 @@ export default function BookList({ books }: BookListProps) {
             onClick={() => setFilter(cat)}
             style={{
               fontSize: "9px",
-              fontFamily: "'VT323', monospace",
+              fontFamily: "'Space Mono', monospace",
               letterSpacing: "0.05em",
               padding: "3px 8px",
               border: filter === cat ? "1px solid var(--text-charcoal)" : "1px solid var(--border-light)",
@@ -84,7 +84,7 @@ export default function BookList({ books }: BookListProps) {
           style={{
             flex: 1, minWidth: "180px", fontSize: "11px", padding: "6px 10px",
             border: "1px solid var(--border-light)", outline: "none",
-            color: "var(--text-charcoal)", fontFamily: "'VT323', monospace",
+            color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace",
             background: "transparent",
           }}
         />
@@ -94,7 +94,7 @@ export default function BookList({ books }: BookListProps) {
           style={{
             fontSize: "10px", padding: "6px 8px",
             border: "1px solid var(--border-light)", outline: "none",
-            color: "var(--text-grey)", fontFamily: "'VT323', monospace",
+            color: "var(--text-grey)", fontFamily: "'Space Mono', monospace",
             background: "transparent",
           }}
         >
@@ -110,7 +110,7 @@ export default function BookList({ books }: BookListProps) {
           style={{
             fontSize: "10px", padding: "6px 8px",
             border: "1px solid var(--border-light)", outline: "none",
-            color: "var(--text-grey)", fontFamily: "'VT323', monospace",
+            color: "var(--text-grey)", fontFamily: "'Space Mono', monospace",
             background: "transparent",
           }}
         >
@@ -157,7 +157,7 @@ export default function BookList({ books }: BookListProps) {
               <span
                 style={{
                   fontSize: "9px",
-                  fontFamily: "'VT323', monospace",
+                  fontFamily: "'Space Mono', monospace",
                   color: conditionColors[book.condition] || "var(--text-grey)",
                   border: `1px solid ${conditionColors[book.condition] || "var(--border-light)"}`,
                   padding: "2px 6px",
@@ -168,11 +168,11 @@ export default function BookList({ books }: BookListProps) {
                 {conditionLabels[book.condition] || book.condition.toUpperCase()}
               </span>
             </div>
-            <p style={{ fontSize: "12px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", marginTop: "4px" }}>
+            <p style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", marginTop: "4px" }}>
               ${book.price}
             </p>
             {book.views !== undefined && (
-              <p style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: "var(--text-grey)", marginTop: "2px" }}>
+              <p style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", marginTop: "2px" }}>
                 {book.views} view{book.views !== 1 ? "s" : ""}
               </p>
             )}
@@ -182,7 +182,7 @@ export default function BookList({ books }: BookListProps) {
 
       {filteredBooks.length === 0 && (
         <div className="text-center py-16">
-          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>
+          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
             No books found
           </p>
         </div>

@@ -64,7 +64,7 @@ export default function BottomNav() {
             {item.icon}
           </span>
           <span style={{
-            fontSize: "9px", fontFamily: "'VT323', monospace", letterSpacing: "0.05em",
+            fontSize: "9px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em",
             color: active(item.path) ? "var(--text-charcoal)" : "var(--text-grey)",
           }}>
             {item.label.toUpperCase()}
@@ -81,7 +81,7 @@ export default function BottomNav() {
         }}
       >
         <span style={{ fontSize: "16px", color: "var(--text-charcoal)" }}>···</span>
-        <span style={{ fontSize: "9px", fontFamily: "'VT323', monospace", letterSpacing: "0.05em", color: "var(--text-grey)" }}>
+        <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", color: "var(--text-grey)" }}>
           MORE
         </span>
       </button>
