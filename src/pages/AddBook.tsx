@@ -96,7 +96,7 @@ export default function AddBook() {
     border: "1px solid var(--border-light)",
     outline: "none",
     color: "var(--text-charcoal)",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     background: "transparent",
   };
 
@@ -128,8 +128,8 @@ export default function AddBook() {
           <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
             <AlertTriangle size={14} style={{ color: "#F39C12", marginTop: "2px", flexShrink: 0 }} />
             <div>
-              <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", fontWeight: 600, marginBottom: "4px" }}>AI CONTENT DISCLOSURE</p>
-              <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+              <p style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", fontWeight: 600, marginBottom: "4px" }}>AI CONTENT DISCLOSURE</p>
+              <p style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
                 When listing a book that contains AI-generated content (text, images, or translations), you <strong>must clearly disclose this</strong> in the description. Books found to contain undisclosed AI-generated content may be rejected or removed without notice.
               </p>
             </div>
@@ -137,8 +137,8 @@ export default function AddBook() {
         </div>
 
         <div style={{ border: "1px solid var(--border-light)", padding: "16px", marginBottom: "24px" }}>
-          <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", fontWeight: 600, marginBottom: "8px", letterSpacing: "0.05em" }}>SUBMISSION GUIDELINES</p>
-          <ul style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", lineHeight: 2, paddingLeft: "16px", margin: 0 }}>
+          <p style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-grey)", fontWeight: 600, marginBottom: "8px", letterSpacing: "0.05em" }}>SUBMISSION GUIDELINES</p>
+          <ul style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-grey)", lineHeight: 2, paddingLeft: "16px", margin: 0 }}>
             <li>Only submit books you have the right to sell</li>
             <li>Provide accurate title, author, and description</li>
             <li>No hate speech, illegal content, or explicit material</li>
@@ -189,7 +189,7 @@ export default function AddBook() {
               <div style={{ width: "100px", height: "133px", border: "1px solid var(--border-light)", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--border-light)" }}>
                 {uploading ? (
                   <div className="flex items-center justify-center h-full">
-                    <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>Uploading...</p>
+                    <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>Uploading...</p>
                   </div>
                 ) : (
                   <img src={form.coverImage} alt="Cover preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -209,7 +209,7 @@ export default function AddBook() {
                     display: "inline-block",
                     padding: "8px 16px",
                     fontSize: "10px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     color: "var(--text-charcoal)",
                     border: "1px solid var(--border-light)",
                     cursor: "pointer",
@@ -220,7 +220,7 @@ export default function AddBook() {
                   Choose File
                 </label>
                 {form.coverImage !== "/images/hero-art.jpg" && (
-                  <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all" }}>
+                  <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", wordBreak: "break-all" }}>
                     {form.coverImage}
                   </p>
                 )}
@@ -237,7 +237,7 @@ export default function AddBook() {
             <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Reading Content</label>
             <div className="flex gap-2 mb-2">
               <input type="file" accept=".docx,.pdf,.epub" onChange={handleContentUpload} style={{ display: "none" }} id="content-upload" />
-              <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
+              <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
                 {contentUploading ? "Extracting..." : "Upload .docx / .pdf / .epub"}
               </label>
             </div>
@@ -248,7 +248,7 @@ export default function AddBook() {
             onClick={handleSubmit}
             disabled={createBook.isPending}
             style={{
-              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
+              width: "100%", padding: "12px", fontSize: "12px", fontFamily: "'VT323', monospace",
               color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
               cursor: createBook.isPending ? "wait" : "pointer", opacity: createBook.isPending ? 0.7 : 1,
               letterSpacing: "0.05em", marginTop: "16px",

@@ -48,7 +48,7 @@ export default function MyPurchases() {
         <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "32px" }}>My Purchases</h1>
 
         {isLoading ? (
-          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
         ) : purchases && purchases.length > 0 ? (
           <div className="space-y-4">
             {purchases.map((purchase) => (
@@ -69,7 +69,7 @@ export default function MyPurchases() {
                       {purchase.book?.title}
                     </p>
                     <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
-                    <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                    <p style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                       ${purchase.purchasePrice} · {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : ""}
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export default function MyPurchases() {
                     {purchase.book?.title}
                   </p>
                   <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
-                  <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                  <p style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                     ${purchase.purchasePrice} · {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : ""}
                   </p>
                 </div>
@@ -89,7 +89,7 @@ export default function MyPurchases() {
                     className="w-full sm:w-auto ml-[76px] sm:ml-0"
                     style={{
                       fontSize: "10px",
-                      fontFamily: "'Space Mono', monospace",
+                      fontFamily: "'VT323', monospace",
                       letterSpacing: "0.1em",
                       color: "var(--bg-warm-white)",
                       background: "var(--text-charcoal)",
@@ -112,7 +112,7 @@ export default function MyPurchases() {
               onClick={() => navigate("/home")}
               style={{
                 fontSize: "11px",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 color: "var(--text-charcoal)",
                 background: "none",
                 border: "1px solid var(--border-light)",

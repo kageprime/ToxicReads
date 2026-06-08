@@ -34,7 +34,7 @@ export default function SafeImage({ src, alt, className, style }: SafeImageProps
           display: "flex", alignItems: "center", justifyContent: "center",
           background: "var(--border-light)",
           fontSize: "9px", color: "var(--text-grey)",
-          fontFamily: "'Space Mono', monospace",
+          fontFamily: "'VT323', monospace",
           letterSpacing: "0.05em",
         }}>
           NO IMAGE

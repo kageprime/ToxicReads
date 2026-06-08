@@ -61,7 +61,7 @@ export default function BookDetail() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center" style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}>
-        <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+        <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function BookDetail() {
           className="flex items-center gap-1 mb-6 hover:opacity-70 transition-opacity"
         >
           <ChevronLeft size={14} style={{ color: "var(--text-grey)" }} />
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
+          <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>
             Back
           </span>
         </button>
@@ -135,14 +135,14 @@ export default function BookDetail() {
           {/* Info */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
-              <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: conditionColor, border: `1px solid ${conditionColor}`, padding: "2px 8px" }}>
+              <span style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: conditionColor, border: `1px solid ${conditionColor}`, padding: "2px 8px" }}>
                 {conditionLabel}
               </span>
-              <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>
                 {book.category.toUpperCase()}
               </span>
               {book.content && (
-                <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#666", border: "1px solid var(--border-light)", padding: "2px 8px" }}>
+                <span style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#666", border: "1px solid var(--border-light)", padding: "2px 8px" }}>
                   Includes reading content
                 </span>
               )}
@@ -155,10 +155,10 @@ export default function BookDetail() {
               by {book.author}
             </p>
 
-            <p style={{ fontSize: "14px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>
+            <p style={{ fontSize: "14px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>
               {isFree ? "Free" : `$${book.price}`}
             </p>
-            <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", marginBottom: "24px" }}>
+            <p style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-grey)", marginBottom: "24px" }}>
               {book.views} view{book.views !== 1 ? "s" : ""}
             </p>
 
@@ -171,7 +171,7 @@ export default function BookDetail() {
                     flex: 1,
                     padding: "12px",
                     fontSize: "12px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     color: "var(--bg-warm-white)",
                     background: "var(--text-charcoal)",
                     border: "none",
@@ -185,7 +185,7 @@ export default function BookDetail() {
                   style={{
                     padding: "12px 16px",
                     fontSize: "12px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     color: "#2ECC71",
                     border: "1px solid #2ECC71",
                     letterSpacing: "0.05em",
@@ -201,7 +201,7 @@ export default function BookDetail() {
                 style={{
                   padding: "12px",
                   fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "'VT323', monospace",
                   color: "#2ECC71",
                   border: "1px solid #2ECC71",
                   textAlign: "center",
@@ -221,7 +221,7 @@ export default function BookDetail() {
                   width: "100%",
                   padding: "12px",
                   fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "'VT323', monospace",
                   color: "var(--bg-warm-white)",
                   background: "var(--text-charcoal)",
                   border: "none",
@@ -239,7 +239,7 @@ export default function BookDetail() {
                   width: "100%",
                   padding: "12px",
                   fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "'VT323', monospace",
                   color: "var(--text-grey)",
                   background: "transparent",
                   border: "1px solid var(--border-light)",
@@ -253,13 +253,13 @@ export default function BookDetail() {
             )}
 
             {(buyMutation.error?.message || buyError) && (
-              <p style={{ fontSize: "11px", color: "#E74C3C", marginBottom: "12px", fontFamily: "'Space Mono', monospace" }}>
+              <p style={{ fontSize: "11px", color: "#E74C3C", marginBottom: "12px", fontFamily: "'VT323', monospace" }}>
                 {buyError || buyMutation.error?.message}
               </p>
             )}
 
             <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
-              <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "8px" }}>
+              <h3 style={{ fontSize: "10px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "8px" }}>
                 DESCRIPTION
               </h3>
               <p style={{ fontSize: "13px", lineHeight: 1.8, color: "var(--text-charcoal)" }}>
@@ -271,7 +271,7 @@ export default function BookDetail() {
 
         {/* Share */}
         <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "32px", paddingTop: "24px" }}>
-          <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
+          <h3 style={{ fontSize: "10px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
             SHARE THIS BOOK
           </h3>
           <div style={{ display: "flex", gap: 12 }}>
@@ -281,7 +281,7 @@ export default function BookDetail() {
                 window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url), "fb-share", "width=600,height=400");
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'VT323', monospace",
                 color: "var(--text-charcoal)", background: "transparent",
                 border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
               }}
@@ -295,7 +295,7 @@ export default function BookDetail() {
                 window.open("https://wa.me/?text=" + encodeURIComponent(text + url), "wa-share", "width=600,height=400");
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'VT323', monospace",
                 color: "var(--text-charcoal)", background: "transparent",
                 border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
               }}
@@ -316,7 +316,7 @@ export default function BookDetail() {
                 }
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
+                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'VT323', monospace",
                 color: "var(--text-charcoal)", background: "transparent",
                 border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
               }}
@@ -329,7 +329,7 @@ export default function BookDetail() {
         {/* Similar Books */}
         {similar.length > 0 && (
           <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "48px", paddingTop: "24px" }}>
-            <h3 style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
+            <h3 style={{ fontSize: "11px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
               SIMILAR BOOKS
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

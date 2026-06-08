@@ -62,7 +62,7 @@ export default function Profile() {
     border: "1px solid var(--border-light)",
     outline: "none",
     color: "var(--text-charcoal)",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     background: "transparent",
   };
 
@@ -86,7 +86,7 @@ export default function Profile() {
       <div className="mx-auto" style={{ maxWidth: "640px", padding: "64px 24px 80px", animation: "pageIn 0.4s ease-out both" }}>
         <div style={{ border: "1px solid var(--border-light)", padding: "32px", backgroundColor: "var(--bg-warm-white)" }}>
           <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px" }}>Account Settings</h1>
-          <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", fontFamily: "'Space Mono', monospace" }}>
+          <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", fontFamily: "'VT323', monospace" }}>
             {user?.username}
           </p>
 
@@ -103,7 +103,7 @@ export default function Profile() {
             </div>
 
             <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "24px" }}>
-              <h2 style={{ fontSize: "13px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "16px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+              <h2 style={{ fontSize: "13px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "16px", fontFamily: "'VT323', monospace", letterSpacing: "0.05em", textTransform: "uppercase" }}>
                 Password
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -119,17 +119,17 @@ export default function Profile() {
             </div>
 
             {error && (
-              <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>{error}</p>
+              <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'VT323', monospace" }}>{error}</p>
             )}
             {success && (
-              <p style={{ fontSize: "11px", color: "#2ECC71", fontFamily: "'Space Mono', monospace" }}>{success}</p>
+              <p style={{ fontSize: "11px", color: "#2ECC71", fontFamily: "'VT323', monospace" }}>{success}</p>
             )}
 
             <button
               onClick={handleSubmit}
               disabled={updateMutation.isPending}
               style={{
-                width: "100%", padding: "14px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
+                width: "100%", padding: "14px", fontSize: "12px", fontFamily: "'VT323', monospace",
                 color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
                 cursor: updateMutation.isPending ? "wait" : "pointer", opacity: updateMutation.isPending ? 0.7 : 1,
                 letterSpacing: "0.05em",

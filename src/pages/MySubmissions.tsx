@@ -64,7 +64,7 @@ export default function MySubmissions() {
             onClick={() => navigate("/submit-book")}
             style={{
               fontSize: "10px",
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'VT323', monospace",
               letterSpacing: "0.05em",
               color: "var(--bg-warm-white)",
               background: "var(--text-charcoal)",
@@ -80,7 +80,7 @@ export default function MySubmissions() {
         <div style={{ border: "1px solid #F39C12", padding: "10px 14px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
           <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
             <AlertTriangle size={12} style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }} />
-            <p style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+            <p style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
               All submissions must follow our guidelines. AI-generated content must be clearly disclosed in the description.{" "}
               <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => navigate("/submit-book")}>View full submission guidelines.</span>
             </p>
@@ -88,7 +88,7 @@ export default function MySubmissions() {
         </div>
 
         {isLoading ? (
-          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
         ) : submissions && submissions.length > 0 ? (
           <div className="space-y-4">
             {submissions.map((book) => (
@@ -109,7 +109,7 @@ export default function MySubmissions() {
                       <p style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
                       <span className="shrink-0" style={{
                         fontSize: "9px",
-                        fontFamily: "'Space Mono', monospace",
+                        fontFamily: "'VT323', monospace",
                         color: statusColors[book.status] || "var(--text-grey)",
                         border: `1px solid ${statusColors[book.status] || "var(--border-light)"}`,
                         padding: "2px 6px",
@@ -118,7 +118,7 @@ export default function MySubmissions() {
                       </span>
                     </div>
                     <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{book.author}</p>
-                    <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                    <p style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                       ${book.price} · {book.content ? "Has content" : "No content"}
                     </p>
                   </div>
@@ -128,7 +128,7 @@ export default function MySubmissions() {
                     <p style={{ fontSize: "14px", fontWeight: 400, color: "var(--text-charcoal)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{book.title}</p>
                     <span className="shrink-0" style={{
                       fontSize: "9px",
-                      fontFamily: "'Space Mono', monospace",
+                      fontFamily: "'VT323', monospace",
                       color: statusColors[book.status] || "var(--text-grey)",
                       border: `1px solid ${statusColors[book.status] || "var(--border-light)"}`,
                       padding: "2px 6px",
@@ -137,7 +137,7 @@ export default function MySubmissions() {
                     </span>
                   </div>
                   <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{book.author}</p>
-                  <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                  <p style={{ fontSize: "11px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                     ${book.price} · {book.content ? "Has content" : "No content"}
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export default function MySubmissions() {
                     className="w-full sm:w-auto ml-[66px] sm:ml-0"
                     style={{
                       fontSize: "9px",
-                      fontFamily: "'Space Mono', monospace",
+                      fontFamily: "'VT323', monospace",
                       color: "#E74C3C",
                       background: "none",
                       border: "1px solid #E74C3C",
@@ -170,7 +170,7 @@ export default function MySubmissions() {
               onClick={() => navigate("/submit-book")}
               style={{
                 fontSize: "11px",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 color: "var(--text-charcoal)",
                 background: "none",
                 border: "1px solid var(--border-light)",

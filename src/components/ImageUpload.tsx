@@ -59,7 +59,7 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     color: isDark ? "rgba(255,255,255,0.6)" : "var(--text-grey)",
     display: "block",
     marginBottom: "6px",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     letterSpacing: "0.05em",
   };
 
@@ -73,7 +73,7 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     marginBottom: "8px",
     color: isDark ? "rgba(255,255,255,0.3)" : "var(--text-grey)",
     fontSize: "11px",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
   };
 
   const btnUploadStyle: React.CSSProperties = {
@@ -85,7 +85,7 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     borderRadius: "2px",
     cursor: uploading ? "wait" : "pointer",
     opacity: uploading ? 0.6 : 1,
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     letterSpacing: "0.05em",
   };
 
@@ -97,7 +97,7 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     border: "none",
     borderRadius: "2px",
     cursor: "pointer",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     letterSpacing: "0.05em",
   };
 

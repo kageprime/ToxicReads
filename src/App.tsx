@@ -74,7 +74,7 @@ function HomePage() {
         <main className="flex-1 overflow-y-auto ml-0 md:ml-[240px]" style={{ borderRight: "1px solid var(--border-light)" }}>
           {isLoading ? (
             <div className="flex items-center justify-center" style={{ paddingTop: "40vh" }}>
-              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
             </div>
           ) : (
             <BookList books={books} />

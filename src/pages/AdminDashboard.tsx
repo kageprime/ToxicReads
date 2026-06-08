@@ -171,7 +171,7 @@ export default function AdminDashboard() {
     border: "1px solid var(--border-light)",
     outline: "none",
     color: "var(--text-charcoal)",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "'VT323', monospace",
     background: "transparent",
   };
 
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
             <button onClick={() => navigate("/")} className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity">
               TOXICREADS
             </button>
-            <button onClick={() => navigate("/home")} style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'Space Mono', monospace", padding: 0 }}>
+            <button onClick={() => navigate("/home")} style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px", background: "none", border: "none", cursor: "pointer", fontFamily: "'VT323', monospace", padding: 0 }}>
               / Browse
             </button>
             <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "4px" }}>/ Admin</span>
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                   onClick={() => setActiveTab(tab)}
                   style={{
                     fontSize: "11px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     letterSpacing: "0.05em",
                     padding: "8px 16px",
                     border: "none",
@@ -232,20 +232,20 @@ export default function AdminDashboard() {
 
           {activeTab === "pending" && selectedBooks.size > 0 && (
             <div className="flex gap-2">
-              <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", alignSelf: "center" }}>
+              <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", alignSelf: "center" }}>
                 {selectedBooks.size} selected
               </span>
               <button
                 onClick={bulkApprove}
                 disabled={approveMutation.isPending}
-                style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.05em" }}
+                style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.05em" }}
               >
                 Approve All
               </button>
               <button
                 onClick={bulkReject}
                 disabled={rejectMutation.isPending}
-                style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.05em" }}
+                style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 12px", cursor: "pointer", letterSpacing: "0.05em" }}
               >
                 Reject All
               </button>
@@ -258,13 +258,13 @@ export default function AdminDashboard() {
             <div style={{ border: "1px solid #F39C12", padding: "10px 14px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
               <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                 <AlertTriangle size={12} style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }} />
-                <p style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
+                <p style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
                   Before approving, verify: accurate title/author, appropriate description, disclosed AI content (if any), and valid condition. Reject submissions that violate our content policies.
                 </p>
               </div>
             </div>
             {pendingLoading ? (
-              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
             ) : pendingBooks && pendingBooks.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
                     onChange={() => selectAll(pendingBooks)}
                     style={{ cursor: "pointer" }}
                   />
-                  <span style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>Select All</span>
+                  <span style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>Select All</span>
                 </div>
                 {pendingBooks.map((book) => (
                   <div key={book.id} style={{ border: "1px solid var(--border-light)", padding: "16px" }}>
@@ -291,10 +291,10 @@ export default function AdminDashboard() {
                           <div>
                             <h3 style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px" }}>{book.title}</h3>
                             <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "4px" }}>{book.author}</p>
-                            <p style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>${book.price}</p>
+                            <p style={{ fontSize: "12px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>${book.price}</p>
                             <p style={{ fontSize: "10px", color: "var(--text-grey)" }}>{book.category} · {book.condition}</p>
                           </div>
-                          <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 8px" }}>
+                          <span style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 8px" }}>
                             {book.status?.toUpperCase()}
                           </span>
                         </div>
@@ -303,14 +303,14 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => approveMutation.mutate({ id: book.id })}
                             disabled={approveMutation.isPending}
-                            style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
+                            style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => rejectMutation.mutate({ id: book.id })}
                             disabled={rejectMutation.isPending}
-                            style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
+                            style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
                           >
                             Reject
                           </button>
@@ -329,10 +329,10 @@ export default function AdminDashboard() {
         {activeTab === "books" && (
           <div>
             {booksLoading ? (
-              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
             ) : allBooks && allBooks.length > 0 ? (
               <div>
-                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                   <div style={{ width: "40px" }}></div>
                   <div style={{ width: "100px" }}>COVER</div>
                   <div className="flex-1">TITLE / AUTHOR</div>
@@ -382,13 +382,13 @@ export default function AdminDashboard() {
                           <button
                             onClick={saveEdit}
                             disabled={updateMutation.isPending}
-                            style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
+                            style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#fff", background: "#2ECC71", border: "none", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
                           >
                             <Check size={12} style={{ marginRight: "4px" }} /> Save
                           </button>
                           <button
                             onClick={cancelEdit}
-                            style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
+                            style={{ fontSize: "10px", fontFamily: "'VT323', monospace", color: "#E74C3C", background: "transparent", border: "1px solid #E74C3C", padding: "6px 16px", cursor: "pointer", letterSpacing: "0.05em" }}
                           >
                             <X size={12} style={{ marginRight: "4px" }} /> Cancel
                           </button>
@@ -410,21 +410,21 @@ export default function AdminDashboard() {
                           <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{book.author}</p>
                         </div>
                         <div className="flex items-center gap-3 md:gap-4 ml-[52px] md:ml-0">
-                          <span style={{ fontSize: "12px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", width: "60px" }}>${book.price}</span>
-                          <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 6px", textAlign: "center" }}>
+                          <span style={{ fontSize: "12px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", width: "60px" }}>${book.price}</span>
+                          <span style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: statusColors[book.status], border: `1px solid ${statusColors[book.status]}`, padding: "2px 6px", textAlign: "center" }}>
                             {book.status?.toUpperCase()}
                           </span>
                           <div style={{ display: "flex", gap: "4px" }}>
                             <button
                               onClick={() => startEdit(book)}
-                              style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "none", border: "1px solid var(--border-light)", padding: "4px 6px", cursor: "pointer" }}
+                              style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "none", border: "1px solid var(--border-light)", padding: "4px 6px", cursor: "pointer" }}
                               title="Edit"
                             >
                               <Edit2 size={10} />
                             </button>
                             <button
                               onClick={() => { if (confirm("Delete this book?")) deleteMutation.mutate({ id: book.id }); }}
-                              style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "#E74C3C", background: "none", border: "1px solid #E74C3C", padding: "4px 6px", cursor: "pointer" }}
+                              style={{ fontSize: "9px", fontFamily: "'VT323', monospace", color: "#E74C3C", background: "none", border: "1px solid #E74C3C", padding: "4px 6px", cursor: "pointer" }}
                               title="Delete"
                             >
                               Del
@@ -445,10 +445,10 @@ export default function AdminDashboard() {
         {activeTab === "purchases" && (
           <div>
             {purchasesLoading ? (
-              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+              <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>LOADING...</p>
             ) : allPurchases && allPurchases.length > 0 ? (
               <div>
-                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
+                <div className="hidden md:flex items-center gap-4" style={{ padding: "8px 0", borderBottom: "2px solid var(--text-charcoal)", fontSize: "10px", fontFamily: "'VT323', monospace", color: "var(--text-grey)" }}>
                   <div style={{ width: "40px" }}>ID</div>
                   <div style={{ width: "100px" }}>BOOK</div>
                   <div className="flex-1">TITLE</div>
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
                 {allPurchases.map((purchase) => (
                   <div key={purchase.id} className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4" style={{ padding: "12px 0", borderBottom: "1px solid var(--border-light)" }}>
                     <div className="flex items-center gap-3 md:gap-4">
-                      <span className="md:hidden" style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>#{purchase.id}</span>
+                      <span className="md:hidden" style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>#{purchase.id}</span>
                       <div style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
                         <img src={purchase.book?.coverImage || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)} />
                       </div>
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
                         <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{purchase.book?.author}</p>
                       </div>
                     </div>
-                    <span className="hidden md:inline" style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", width: "40px" }}>#{purchase.id}</span>
+                    <span className="hidden md:inline" style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", width: "40px" }}>#{purchase.id}</span>
                     <div className="hidden md:block" style={{ width: "40px", height: "52px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0 }}>
                       <img src={purchase.book?.coverImage || ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)} />
                     </div>
@@ -477,9 +477,9 @@ export default function AdminDashboard() {
                       <p style={{ fontSize: "11px", color: "var(--text-grey)" }}>{purchase.book?.author}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 ml-[52px] md:ml-0 text-xs" style={{ color: "var(--text-grey)" }}>
-                      <span style={{ color: "var(--text-charcoal)", fontFamily: "'Space Mono', monospace" }}>{purchase.buyer?.username || "—"}</span>
+                      <span style={{ color: "var(--text-charcoal)", fontFamily: "'VT323', monospace" }}>{purchase.buyer?.username || "—"}</span>
                       <span>·</span>
-                      <span style={{ fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)" }}>${purchase.purchasePrice}</span>
+                      <span style={{ fontFamily: "'VT323', monospace", color: "var(--text-charcoal)" }}>${purchase.purchasePrice}</span>
                       <span>·</span>
                       <span>{purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : "—"}</span>
                     </div>

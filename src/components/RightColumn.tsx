@@ -63,7 +63,7 @@ export default function RightColumn() {
             onClick={() => { navigate("/admin"); if (isMobile) setCollapsed(true); }}
             style={{
               width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px",
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'VT323', monospace",
               color: "var(--bg-warm-white)", background: "var(--text-charcoal)",
               border: "none", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left",
             }}
@@ -74,24 +74,24 @@ export default function RightColumn() {
 
         {isAuthenticated ? (
           <>
-            <button onClick={() => { navigate("/submit-book"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+            <button onClick={() => { navigate("/submit-book"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
               SELL
             </button>
-            <button onClick={() => { navigate("/my-purchases"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+            <button onClick={() => { navigate("/my-purchases"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
               MY BOOKS
             </button>
-            <button onClick={() => { navigate("/my-submissions"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+            <button onClick={() => { navigate("/my-submissions"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
               SUBMISSIONS
             </button>
-            <button onClick={() => { navigate("/profile"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+            <button onClick={() => { navigate("/profile"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
               ACCOUNT
             </button>
-            <button onClick={logout} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+            <button onClick={logout} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-grey)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
               LOG OUT
             </button>
           </>
         ) : (
-          <button onClick={() => { navigate("/login"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
+          <button onClick={() => { navigate("/login"); if (isMobile) setCollapsed(true); }} style={{ width: "100%", padding: "12px", fontSize: "11px", minHeight: "44px", fontFamily: "'VT323', monospace", color: "var(--text-charcoal)", background: "transparent", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em", textAlign: "left" }}>
             LOG IN
           </button>
         )}
@@ -99,7 +99,7 @@ export default function RightColumn() {
 
       {isAuthenticated && recentPurchases.length > 0 && (
         <div className="mb-6">
-          <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "12px" }}>
+          <h3 style={{ fontSize: "10px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "12px" }}>
             RECENT
           </h3>
           <div className="space-y-3">
@@ -113,7 +113,7 @@ export default function RightColumn() {
                 <p style={{ fontSize: "11px", color: "var(--text-charcoal)", lineHeight: 1.4 }}>
                   {purchase.book?.title || "Unknown Book"}
                 </p>
-                <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
+                <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'VT323', monospace" }}>
                   ${purchase.purchasePrice}
                 </p>
               </div>
@@ -123,7 +123,7 @@ export default function RightColumn() {
       )}
 
       <div>
-        <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "12px" }}>
+        <h3 style={{ fontSize: "10px", fontFamily: "'VT323', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "12px" }}>
           HOW IT WORKS
         </h3>
         <div className="space-y-3">
@@ -134,7 +134,7 @@ export default function RightColumn() {
             "Admin reviews",
           ].map((step, i) => (
             <div key={i} className="flex gap-2 items-start">
-              <span style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", flexShrink: 0 }}>
+              <span style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'VT323', monospace", flexShrink: 0 }}>
                 {String(i + 1).padStart(2, "0")}
               </span>
               <p style={{ fontSize: "11px", color: "var(--text-charcoal)", lineHeight: 1.5 }}>

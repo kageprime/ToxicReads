@@ -116,7 +116,7 @@ export default function Register() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 outline: "none",
               }}
             />
@@ -145,7 +145,7 @@ export default function Register() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 outline: "none",
               }}
             />
@@ -174,7 +174,7 @@ export default function Register() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 outline: "none",
               }}
             />
@@ -203,7 +203,7 @@ export default function Register() {
                 padding: "10px 12px",
                 fontSize: "12px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "'VT323', monospace",
                 outline: "none",
               }}
             />
@@ -220,7 +220,7 @@ export default function Register() {
               width: "100%",
               padding: "12px",
               fontSize: "12px",
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: "'VT323', monospace",
               color: "var(--bg-warm-white)",
               background: "var(--text-charcoal)",
               border: "none",
@@ -239,7 +239,7 @@ export default function Register() {
             color: "var(--text-grey)",
             marginTop: "16px",
             textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
+            fontFamily: "'VT323', monospace",
           }}
         >
           Already have an account?{" "}

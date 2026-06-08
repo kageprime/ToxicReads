@@ -82,7 +82,7 @@ export default function LeftColumn() {
                   color: "rgba(255,255,255,0.8)",
                   border: "1px solid rgba(255,255,255,0.3)",
                   padding: "3px 8px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontFamily: "'VT323', monospace",
                   letterSpacing: "0.03em",
                 }}
               >
@@ -114,7 +114,7 @@ export default function LeftColumn() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     padding: 0,
                     display: "block",
                     textDecoration: "underline",
@@ -131,7 +131,7 @@ export default function LeftColumn() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: "'VT323', monospace",
                     padding: 0,
                     display: "block",
                     textDecoration: "underline",
@@ -146,7 +146,7 @@ export default function LeftColumn() {
         </div>
 
         <div style={{ flexShrink: 0 }}>
-          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace" }}>
+          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: "'VT323', monospace" }}>
             &copy; 2026 TOXICREADS
           </p>
         </div>

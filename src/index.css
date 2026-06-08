@@ -61,7 +61,7 @@
   }
 
   body {
-    font-family: 'Space Mono', monospace;
+    font-family: 'VT323', monospace;
     background-color: var(--bg-warm-white);
     color: var(--text-charcoal);
     -webkit-font-smoothing: antialiased;
