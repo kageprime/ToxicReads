@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { getDb } from "../api/queries/connection.js";
+import { getDb } from "../server/queries/connection.js";
 import { books, localUsers } from "./schema.js";
 import bcrypt from "bcryptjs";
 
