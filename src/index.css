@@ -4,60 +4,74 @@
 
 @layer base {
   :root, [data-theme="light"] {
-    --bg-warm-white: #F4F1EC;
+    --bg-warm-white: #F4EDE4;
     --text-charcoal: #1A1A1A;
     --text-grey: #6B6B6B;
-    --accent-teal: #2D6A65;
+    --accent-teal: #B85C38;
     --border-light: #E0DDD8;
 
-    --background: 40 18% 94%;
+    /* Theme-aware African palette (RGB format for Tailwind opacity) */
+    --color-cream: 244 237 228;
+    --color-charcoal: 26 26 26;
+    --color-baobab: 92 58 33;
+    --color-terracotta: 184 92 56;
+    --color-ochre: 212 160 23;
+
+    --background: 30 30% 95%;
     --foreground: 0 0% 10%;
-    --card: 40 18% 94%;
+    --card: 30 30% 95%;
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 0 0% 10%;
-    --primary-foreground: 40 18% 94%;
-    --secondary: 40 10% 88%;
+    --primary: 20 40% 24%;
+    --primary-foreground: 30 30% 95%;
+    --secondary: 30 20% 90%;
     --secondary-foreground: 0 0% 10%;
-    --muted: 40 10% 88%;
-    --muted-foreground: 0 0% 42%;
-    --accent: 174 40% 29%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 36 70% 43%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 30 10% 86%;
-    --input: 30 10% 86%;
-    --ring: 174 40% 29%;
-    --radius: 0.25rem;
+    --border: 20 20% 88%;
+    --input: 20 20% 88%;
+    --ring: 20 55% 47%;
+    --radius: 0.75rem;
   }
 
   [data-theme="dark"] {
-    --bg-warm-white: #0D0D0D;
-    --text-charcoal: #F0F0F0;
-    --text-grey: #888888;
-    --accent-teal: #5AAAA4;
-    --border-light: #2A2A2A;
+    --bg-warm-white: #1A1A1A;
+    --text-charcoal: #F4EDE4;
+    --text-grey: #999999;
+    --accent-teal: #D4A017;
+    --border-light: #333333;
 
-    --background: 0 0% 5%;
-    --foreground: 0 0% 94%;
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 94%;
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 94%;
-    --primary: 0 0% 94%;
-    --primary-foreground: 0 0% 5%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 94%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 53%;
-    --accent: 174 30% 52%;
+    /* Theme-aware African palette (RGB format for Tailwind opacity) */
+    --color-cream: 26 26 26;
+    --color-charcoal: 244 237 228;
+    --color-baobab: 212 165 116;
+    --color-terracotta: 224 120 80;
+    --color-ochre: 232 184 74;
+
+    --background: 0 0% 10%;
+    --foreground: 30 30% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 30 30% 95%;
+    --popover: 0 0% 13%;
+    --popover-foreground: 30 30% 95%;
+    --primary: 30 30% 95%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 30 30% 95%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 36 70% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 174 30% 52%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 36 70% 50%;
   }
 
   body {
@@ -68,7 +82,6 @@
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
-    /* Safe area for notched devices */
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
@@ -80,17 +93,18 @@
   }
 
   ::selection {
-    background-color: var(--text-charcoal);
-    color: var(--bg-warm-white);
+    background-color: #B85C38;
+    color: #F4EDE4;
   }
 
   [data-theme="dark"] ::selection {
-    background-color: #F0F0F0;
-    color: #0D0D0D;
+    background-color: #D4A017;
+    color: #1A1A1A;
   }
 
   ::-webkit-scrollbar {
-    width: 4px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -98,11 +112,69 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--border-light);
-    border-radius: 2px;
+    background: #B85C38;
+    border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-grey);
+    background: #D4A017;
   }
+}
+
+/* ── Sankofa Design System ─────────────────────────────── */
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.kente {
+  background: repeating-linear-gradient(
+    90deg,
+    #B85C38 0 14px,
+    #D4A017 14px 28px,
+    #5C3A21 28px 42px,
+    #1A1A1A 42px 56px,
+    #F4EDE4 56px 60px
+  );
+}
+
+[data-theme="dark"] .kente {
+  background: repeating-linear-gradient(
+    90deg,
+    #E07850 0 14px,
+    #E8B84A 14px 28px,
+    #D4A574 28px 42px,
+    #F4EDE4 42px 56px,
+    #1A1A1A 56px 60px
+  );
+}
+
+.mud {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%235C3A21' stroke-opacity='0.08' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .mud {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23D4A574' stroke-opacity='0.08' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.book-cover {
+  position: relative;
+}
+
+.book-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.45));
 }

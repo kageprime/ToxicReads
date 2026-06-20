@@ -5,6 +5,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        terracotta: 'rgb(var(--color-terracotta) / <alpha-value>)',
+        ochre: 'rgb(var(--color-ochre) / <alpha-value>)',
+        baobab: 'rgb(var(--color-baobab) / <alpha-value>)',
+        cream: 'rgb(var(--color-cream) / <alpha-value>)',
+        charcoal: 'rgb(var(--color-charcoal) / <alpha-value>)',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -48,6 +53,10 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['"Space Mono"', 'monospace'],
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
