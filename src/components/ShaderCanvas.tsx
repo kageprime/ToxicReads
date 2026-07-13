@@ -115,17 +115,17 @@ const fragmentShader = `
 
     float f = fbm(vec3(p + 3.5 * r, 1.0), time, warp);
 
-    // Light mode — matches CSS --bg-warm-white #F4F1EC and warm palette
-    vec3 l_col1 = vec3(0.957, 0.945, 0.925);  // #F4F1EC warm white
-    vec3 l_col2 = vec3(0.831, 0.863, 0.910);  // #D4DCE8 cool blue-grey
-    vec3 l_col3 = vec3(0.478, 0.549, 0.627);  // #7A8CA0 slate blue-grey
-    vec3 l_col4 = vec3(0.094, 0.094, 0.094);  // #181818 near black
+    // Light mode — warm ivory and copper tones from African palette
+    vec3 l_col1 = vec3(0.973, 0.941, 0.847);  // #F8F0D8 ivory
+    vec3 l_col2 = vec3(0.722, 0.451, 0.200);  // #B87333 copper
+    vec3 l_col3 = vec3(0.549, 0.353, 0.169);  // #8C5A2B bronze
+    vec3 l_col4 = vec3(0.035, 0.035, 0.035);  // #090909 rich black
 
-    // Dark mode — visible contrast against #0D0D0D bg with cool blue-grey tones
-    vec3 d_col1 = vec3(0.220, 0.230, 0.250);  // #383a40 light slate — bright veins
-    vec3 d_col2 = vec3(0.165, 0.175, 0.200);  // #2a2c33 mid slate
-    vec3 d_col3 = vec3(0.100, 0.110, 0.140);  // #191c24 deep slate
-    vec3 d_col4 = vec3(0.040, 0.042, 0.055);  // #0a0b0e near-black
+    // Dark mode — gold, copper, bronze on rich black
+    vec3 d_col1 = vec3(0.831, 0.686, 0.216);  // #D4AF37 primary gold
+    vec3 d_col2 = vec3(0.722, 0.451, 0.200);  // #B87333 copper
+    vec3 d_col3 = vec3(0.549, 0.353, 0.169);  // #8C5A2B bronze
+    vec3 d_col4 = vec3(0.035, 0.035, 0.035);  // #090909 rich black
 
     // Mix between light and dark palettes
     vec3 col1 = mix(l_col1, d_col1, u_dark_mode);

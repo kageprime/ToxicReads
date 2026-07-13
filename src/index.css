@@ -5,74 +5,74 @@
 @layer base {
   :root,
   [data-theme="light"] {
-    --bg-warm-white: #f4ede4;
-    --text-charcoal: #1a1a1a;
-    --text-grey: #6b6b6b;
-    --accent-teal: #b85c38;
-    --border-light: #e0ddd8;
+    --bg-warm-white: #f8f0d8;
+    --text-charcoal: #090909;
+    --text-grey: #8c5a2b;
+    --accent-teal: #d4af37;
+    --border-light: #8c5a2b;
 
     /* Theme-aware African palette (RGB format for Tailwind opacity) */
-    --color-cream: 244 237 228;
-    --color-charcoal: 26 26 26;
-    --color-baobab: 92 58 33;
-    --color-terracotta: 184 92 56;
-    --color-ochre: 212 160 23;
+    --color-cream: 248 240 216;
+    --color-charcoal: 9 9 9;
+    --color-baobab: 140 90 43;
+    --color-terracotta: 184 115 51;
+    --color-ochre: 212 175 55;
 
-    --background: 30 30% 95%;
-    --foreground: 0 0% 10%;
-    --card: 30 30% 95%;
-    --card-foreground: 0 0% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --primary: 20 40% 24%;
-    --primary-foreground: 30 30% 95%;
-    --secondary: 30 20% 90%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 30 15% 88%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 36 70% 43%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --background: 42 40% 92%;
+    --foreground: 0 0% 4%;
+    --card: 42 40% 92%;
+    --card-foreground: 0 0% 4%;
+    --popover: 42 40% 95%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 33 45% 28%;
+    --primary-foreground: 42 40% 92%;
+    --secondary: 33 30% 85%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 33 20% 82%;
+    --muted-foreground: 33 30% 35%;
+    --accent: 42 65% 52%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 4 68% 33%;
     --destructive-foreground: 0 0% 98%;
-    --border: 20 20% 88%;
-    --input: 20 20% 88%;
-    --ring: 20 55% 47%;
+    --border: 33 25% 75%;
+    --input: 33 25% 75%;
+    --ring: 33 55% 47%;
     --radius: 0.75rem;
   }
 
   [data-theme="dark"] {
-    --bg-warm-white: #1a1a1a;
-    --text-charcoal: #f4ede4;
-    --text-grey: #999999;
-    --accent-teal: #d4a017;
-    --border-light: #333333;
+    --bg-warm-white: #090909;
+    --text-charcoal: #f8f0d8;
+    --text-grey: #8c5a2b;
+    --accent-teal: #d4af37;
+    --border-light: #4a2c17;
 
     /* Theme-aware African palette (RGB format for Tailwind opacity) */
-    --color-cream: 26 26 26;
-    --color-charcoal: 244 237 228;
-    --color-baobab: 212 165 116;
-    --color-terracotta: 224 120 80;
-    --color-ochre: 232 184 74;
+    --color-cream: 9 9 9;
+    --color-charcoal: 248 240 216;
+    --color-baobab: 140 90 43;
+    --color-terracotta: 184 115 51;
+    --color-ochre: 212 175 55;
 
-    --background: 0 0% 10%;
-    --foreground: 30 30% 95%;
-    --card: 0 0% 10%;
-    --card-foreground: 30 30% 95%;
-    --popover: 0 0% 13%;
-    --popover-foreground: 30 30% 95%;
-    --primary: 30 30% 95%;
-    --primary-foreground: 0 0% 10%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 30 30% 95%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 36 70% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --background: 0 0% 4%;
+    --foreground: 42 40% 92%;
+    --card: 0 0% 4%;
+    --card-foreground: 42 40% 92%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 42 40% 92%;
+    --primary: 42 40% 92%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 42 40% 92%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 33 30% 45%;
+    --accent: 42 65% 52%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 4 68% 33%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 36 70% 50%;
+    --border: 33 20% 18%;
+    --input: 33 20% 18%;
+    --ring: 42 65% 52%;
   }
 
   body {
@@ -96,13 +96,13 @@
   }
 
   ::selection {
-    background-color: #b85c38;
-    color: #f4ede4;
+    background-color: #d4af37;
+    color: #090909;
   }
 
   [data-theme="dark"] ::selection {
-    background-color: #d4a017;
-    color: #1a1a1a;
+    background-color: #d4af37;
+    color: #090909;
   }
 
   ::-webkit-scrollbar {
@@ -115,12 +115,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #b85c38;
+    background: #8c5a2b;
     border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #d4a017;
+    background: #d4af37;
   }
 }
 
@@ -137,31 +137,31 @@
 .kente {
   background: repeating-linear-gradient(
     90deg,
-    #b85c38 0 14px,
-    #d4a017 14px 28px,
-    #5c3a21 28px 42px,
-    #1a1a1a 42px 56px,
-    #f4ede4 56px 60px
+    #b87333 0 14px,
+    #d4af37 14px 28px,
+    #4a2c17 28px 42px,
+    #090909 42px 56px,
+    #f8f0d8 56px 60px
   );
 }
 
 [data-theme="dark"] .kente {
   background: repeating-linear-gradient(
     90deg,
-    #e07850 0 14px,
-    #e8b84a 14px 28px,
-    #d4a574 28px 42px,
-    #f4ede4 42px 56px,
-    #1a1a1a 56px 60px
+    #b87333 0 14px,
+    #d4af37 14px 28px,
+    #8c5a2b 28px 42px,
+    #f8f0d8 42px 56px,
+    #090909 56px 60px
   );
 }
 
 .mud {
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%235C3A21' stroke-opacity='0.08' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%238C5A2B' stroke-opacity='0.08' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 [data-theme="dark"] .mud {
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23D4A574' stroke-opacity='0.08' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%238C5A2B' stroke-opacity='0.12' fill='none' stroke-width='1.2'%3E%3Cpath d='M0 40h80M40 0v80'/%3E%3Cpath d='M0 0l80 80M80 0L0 80'/%3E%3Crect x='28' y='28' width='24' height='24' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .reveal {
