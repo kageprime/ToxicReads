@@ -43,7 +43,7 @@ export default function MySubmissions() {
     >
       <div
         className="mx-auto"
-        style={{ maxWidth: "900px", padding: "32px 24px 80px" }}
+        style={{ maxWidth: "1120px", padding: "40px 32px 96px" }}
       >
         <div className="flex items-center justify-between mb-8">
           <h1
@@ -126,7 +126,7 @@ export default function MySubmissions() {
                 key={book.id}
                 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors hover:bg-accent"
                 style={{
-                  padding: "16px 12px",
+                  padding: "20px 16px",
                   borderBottom: "1px solid var(--border)",
                 }}
               >

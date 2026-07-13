@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { useNavigate } from "react-router";
 import { trpc } from "@/providers/trpc";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 import SafeImage from "@/components/SafeImage";
 import PaymentModal from "@/components/PaymentModal";
 import {
@@ -191,9 +192,11 @@ function BrandMark({ onClick }: { onClick?: () => void }) {
       className="flex items-center gap-2.5 group"
       aria-label="ToxicReads home"
     >
-      <span className="w-9 h-9 rounded-md border border-border bg-card grid place-items-center text-baobab group-hover:bg-accent transition-colors">
-        <PiBookOpen size={18} />
-      </span>
+      <img
+        src="/images/hero-bg.png"
+        alt="ToxicReads"
+        className="w-9 h-9 rounded-md object-cover border border-border"
+      />
       <span className="font-serif text-2xl tracking-tight text-baobab leading-none">
         Toxic<span className="text-muted-foreground">Reads</span>
       </span>
@@ -206,6 +209,8 @@ function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () =
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { isAuthenticated, isAdmin } = useAuth();
+  const dashboardPath = isAdmin ? "/admin" : "/home";
   const links = (
     <>
       <a href="/" className="hover:text-foreground transition-colors">Home</a>
@@ -246,12 +251,21 @@ function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () =
           >
             {theme === "light" ? <PiMoon size={20} /> : <PiSun size={20} />}
           </button>
-          <a
-            href="/login"
-            className="hidden sm:inline-flex px-4 py-2 rounded-md border border-border hover:bg-accent text-sm font-medium transition-colors"
-          >
-            Login
-          </a>
+          {isAuthenticated ? (
+            <button
+              onClick={() => navigate(dashboardPath)}
+              className="hidden sm:inline-flex px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-[#333333] active:scale-[0.98] transition"
+            >
+              Dashboard
+            </button>
+          ) : (
+            <a
+              href="/login"
+              className="hidden sm:inline-flex px-4 py-2 rounded-md border border-border hover:bg-accent text-sm font-medium transition-colors"
+            >
+              Login
+            </a>
+          )}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden w-10 h-10 grid place-items-center rounded-md border border-border"
@@ -271,6 +285,21 @@ function Header({ cartCount, onCartOpen }: { cartCount: number; onCartOpen: () =
             </button>
             <a href="#browse" className="py-2.5">Featured</a>
             <a href="#authors" className="py-2.5">Authors</a>
+            {isAuthenticated ? (
+              <button
+                onClick={() => {
+                  navigate(dashboardPath);
+                  setMobileOpen(false);
+                }}
+                className="py-2.5 text-left"
+              >
+                Dashboard
+              </button>
+            ) : (
+              <a href="/login" className="py-2.5">
+                Login
+              </a>
+            )}
           </div>
         </div>
       )}

@@ -4,7 +4,7 @@ import BookList from "./components/BookList";
 import LeftColumn from "./components/LeftColumn";
 import BookDetail from "./components/BookDetail";
 import BottomNav from "./components/BottomNav";
-import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { trpc } from "@/providers/trpc";
@@ -21,45 +21,7 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Reader from "./pages/Reader";
 import Landing from "./pages/Landing";
-import { PiList, PiSun, PiMoon, PiCaretRight } from "react-icons/pi";
-
-function ToggleBar() {
-  const { theme, toggleTheme } = useTheme();
-
-  return (
-    <button
-      onClick={toggleTheme}
-      className="p-1.5 rounded hover:bg-accent transition-colors"
-      title={theme === "light" ? "Dark mode" : "Light mode"}
-    >
-      {theme === "light" ? (
-        <PiMoon size={16} style={{ color: "var(--foreground)" }} />
-      ) : (
-        <PiSun size={16} style={{ color: "var(--foreground)" }} />
-      )}
-    </button>
-  );
-}
-
-function TopBar() {
-  const { isMobile, setCollapsed } = useSidebar();
-  return (
-    <header className="sticky top-0 z-40 flex items-center justify-between h-12 px-4 bg-background border-b border-border">
-      <div className="flex items-center gap-1">
-        {isMobile && (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="h-9 w-9 -ml-2 flex items-center justify-center rounded-md hover:bg-accent transition-colors"
-            aria-label="Open menu"
-          >
-            <PiList size={18} style={{ color: "var(--foreground)" }} />
-          </button>
-        )}
-      </div>
-      <ToggleBar />
-    </header>
-  );
-}
+import { PiCaretRight } from "react-icons/pi";
 
 function AppShell() {
   const location = useLocation();
@@ -77,7 +39,6 @@ function AppShell() {
     >
       <LeftColumn />
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
@@ -115,9 +76,9 @@ function BookPage() {
 
 function FloatingOpen() {
   const location = useLocation();
-  const { collapsed, setCollapsed, isMobile } = useSidebar();
+  const { collapsed, setCollapsed } = useSidebar();
 
-  if (!collapsed || location.pathname === "/" || isMobile) return null;
+  if (!collapsed || location.pathname === "/") return null;
 
   return (
     <button

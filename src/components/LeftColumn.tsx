@@ -3,10 +3,14 @@ import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useSwipe } from "@/hooks/useSwipe";
 import SafeImage from "@/components/SafeImage";
 import {
   PiCaretLeft,
+  PiCompass,
+  PiSun,
+  PiMoon,
   PiUpload,
   PiBookOpen,
   PiList,
@@ -25,6 +29,7 @@ interface NavItem {
 
 export default function LeftColumn() {
   const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { collapsed, setCollapsed, isMobile } = useSidebar();
@@ -68,6 +73,7 @@ export default function LeftColumn() {
 
   const navItems: NavItem[] = [
     { label: "Sell your book", path: "/submit-book", icon: PiUpload, primary: true },
+    { label: "Browse books", path: "/home", icon: PiCompass },
     { label: "My books", path: "/my-purchases", icon: PiBookOpen },
     { label: "Submissions", path: "/my-submissions", icon: PiList },
     { label: "Account", path: "/profile", icon: PiUser },
@@ -113,21 +119,39 @@ export default function LeftColumn() {
           aria-label={location.pathname === "/home" ? "Go to landing page" : "Browse books"}
           className="flex items-center gap-2 min-w-0 group hover:opacity-80 transition-opacity focus:outline-none"
         >
-          <span className="live-dot inline-block w-1.5 h-1.5 rounded-full bg-[rgb(var(--color-p-green-fg))]" />
+          <img
+            src="/images/hero-bg.png"
+            alt="ToxicReads"
+            className="w-7 h-7 rounded-md object-cover border border-border flex-shrink-0"
+          />
           <span className="font-serif text-[22px] leading-none tracking-tight text-foreground truncate">
             ToxicReads
           </span>
         </button>
-        <button
-          onClick={() => setCollapsed(true)}
-          className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors focus:outline-none"
-          aria-label="Collapse menu"
-        >
-          <PiCaretLeft
-            size={16}
-            className="text-muted-foreground transition-transform duration-300"
-          />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "light" ? "Dark mode" : "Light mode"}
+            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors focus:outline-none"
+          >
+            {theme === "light" ? (
+              <PiMoon size={16} className="text-muted-foreground" />
+            ) : (
+              <PiSun size={16} className="text-muted-foreground" />
+            )}
+          </button>
+          <button
+            onClick={() => setCollapsed(true)}
+            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors focus:outline-none"
+            aria-label="Collapse menu"
+          >
+            <PiCaretLeft
+              size={16}
+              className="text-muted-foreground transition-transform duration-300"
+            />
+          </button>
+        </div>
       </div>
 
       {/* ── Primary nav ── */}

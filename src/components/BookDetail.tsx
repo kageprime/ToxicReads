@@ -123,8 +123,8 @@ export default function BookDetail() {
       <div
         className="mx-auto"
         style={{
-          maxWidth: "720px",
-          padding: "32px 24px 80px",
+          maxWidth: "880px",
+          padding: "40px 32px 96px",
           animation: "pageIn 0.4s ease-out both",
         }}
       >

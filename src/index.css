@@ -238,7 +238,7 @@
   padding: 11px 13px;
   color: var(--foreground);
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   border-radius: 3px;
   outline: none;
   transition:
@@ -250,8 +250,8 @@
   opacity: 0.55;
 }
 .field-input:focus {
-  border-color: var(--foreground);
-  box-shadow: 0 0 0 1px var(--foreground);
+  border-color: hsl(var(--foreground));
+    box-shadow: 0 0 0 1px hsl(var(--foreground));
 }
 .field-input:disabled {
   opacity: 0.6;
@@ -270,7 +270,7 @@
   text-transform: uppercase;
   color: var(--foreground);
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   border-radius: 3px;
   cursor: pointer;
   transition:
@@ -279,12 +279,12 @@
 }
 .field-action:hover {
   background: var(--accent);
-  border-color: var(--foreground);
+  border-color: hsl(var(--foreground));
 }
 
 /* Refined callout / note */
 .form-note {
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   padding: 14px 16px;
   background: rgb(var(--color-p-yellow));
 }
@@ -331,18 +331,3 @@
   animation: navIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Subtle live status pulse */
-@keyframes pulseDot {
-  0% {
-    box-shadow: 0 0 0 0 rgb(var(--color-p-green-fg) / 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgb(var(--color-p-green-fg) / 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgb(var(--color-p-green-fg) / 0);
-  }
-}
-.live-dot {
-  animation: pulseDot 2.4s ease-out infinite;
-}

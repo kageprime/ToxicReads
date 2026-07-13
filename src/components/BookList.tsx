@@ -42,7 +42,7 @@ export default function BookList({ books }: BookListProps) {
   });
 
   return (
-    <div className="p-6 pb-24">
+    <div className="p-8 md:p-10 pb-28">
       {/* ── Hero Banner (animated shader + content) ── */}
       <div
         className="mb-8"
@@ -253,7 +253,7 @@ export default function BookList({ books }: BookListProps) {
         </select>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 lg:gap-x-6 lg:gap-y-9">
         {filteredBooks.map((book, idx) => (
           <BookCard
             key={book.id}

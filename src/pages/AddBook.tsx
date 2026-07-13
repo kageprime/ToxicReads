@@ -105,7 +105,7 @@ export default function AddBook() {
       style={{ backgroundColor: "var(--background)" }}
     >
       <div
-        className="mx-auto measure-narrow"
+        className="mx-auto measure"
         style={{ padding: "40px 24px 96px" }}
       >
         <div className="grid md:grid-cols-[280px_1fr] gap-12">
