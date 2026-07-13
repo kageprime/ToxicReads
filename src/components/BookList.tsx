@@ -2,15 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../../contracts/blog";
-import SafeImage from "@/components/SafeImage";
 import ShaderCanvas from "@/components/ShaderCanvas";
+import BookCard from "@/components/BookCard";
 
 interface BookListProps {
   books: BookDisplay[];
 }
 
 export default function BookList({ books }: BookListProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [priceRange, setPriceRange] = useState<string>("all");
@@ -51,7 +50,7 @@ export default function BookList({ books }: BookListProps) {
           position: "relative",
           overflow: "hidden",
           height: "240px",
-          border: "1px solid var(--border-light)",
+          border: "1px solid var(--border)",
         }}
       >
         <ShaderCanvas />
@@ -68,15 +67,16 @@ export default function BookList({ books }: BookListProps) {
         >
           <h2
             style={{
-              fontSize: "22px",
-              fontWeight: 700,
-              letterSpacing: "0.05em",
+              fontSize: "30px",
+              fontWeight: 400,
+              fontFamily: "var(--font-serif)",
+              letterSpacing: "0.02em",
               textTransform: "uppercase",
               color: "#FFFFFF",
               marginBottom: "8px",
             }}
           >
-            TOXICREADS
+            ToxicReads
           </h2>
           <p
             style={{
@@ -152,7 +152,7 @@ export default function BookList({ books }: BookListProps) {
             fontWeight: 400,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
-            color: "var(--text-grey)",
+            color: "var(--muted-foreground)",
             marginBottom: "8px",
             lineHeight: 1.4,
           }}
@@ -164,7 +164,7 @@ export default function BookList({ books }: BookListProps) {
             onClick={() => navigate("/add-book")}
             style={{
               fontSize: "16px",
-              color: "var(--text-grey)",
+              color: "var(--muted-foreground)",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -180,7 +180,7 @@ export default function BookList({ books }: BookListProps) {
       <p
         style={{
           fontSize: "17px",
-          color: "var(--text-grey)",
+          color: "var(--muted-foreground)",
           marginBottom: "20px",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
         }}
@@ -200,12 +200,12 @@ export default function BookList({ books }: BookListProps) {
               padding: "3px 8px",
               border:
                 filter === cat
-                  ? "1px solid var(--text-charcoal)"
-                  : "1px solid var(--border-light)",
+                  ? "1px solid var(--foreground)"
+                  : "1px solid var(--border)",
               background:
-                filter === cat ? "var(--text-charcoal)" : "transparent",
+                filter === cat ? "var(--foreground)" : "transparent",
               color:
-                filter === cat ? "var(--bg-warm-white)" : "var(--text-grey)",
+                filter === cat ? "var(--background)" : "var(--muted-foreground)",
               cursor: "pointer",
               textTransform: "uppercase",
             }}
@@ -225,9 +225,9 @@ export default function BookList({ books }: BookListProps) {
             minWidth: "180px",
             fontSize: "17px",
             padding: "6px 10px",
-            border: "1px solid var(--border-light)",
+            border: "1px solid var(--border)",
             outline: "none",
-            color: "var(--text-charcoal)",
+            color: "var(--foreground)",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             background: "transparent",
           }}
@@ -238,9 +238,9 @@ export default function BookList({ books }: BookListProps) {
           style={{
             fontSize: "16px",
             padding: "6px 8px",
-            border: "1px solid var(--border-light)",
+            border: "1px solid var(--border)",
             outline: "none",
-            color: "var(--text-grey)",
+            color: "var(--muted-foreground)",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             background: "transparent",
           }}
@@ -255,90 +255,16 @@ export default function BookList({ books }: BookListProps) {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {filteredBooks.map((book, idx) => (
-          <article
+          <BookCard
             key={book.id}
-            style={{
-              cursor: "pointer",
-              contentVisibility: "auto",
-              containIntrinsicSize: "200px",
-              animation: "fadeIn 0.4s ease-out both",
-              animationDelay: `${Math.min(idx * 0.03, 0.2)}s`,
-            }}
-            onClick={() => navigate(`/book/${book.id}`)}
-          >
-            <div
-              className="overflow-hidden mb-2"
-              style={{
-                border: "1px solid var(--border-light)",
-                aspectRatio: "3/4",
-              }}
-              onMouseEnter={() => setHoveredId(book.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              <SafeImage
-                src={book.coverImage}
-                alt={book.title}
-                style={{
-                  filter:
-                    hoveredId === book.id
-                      ? "grayscale(100%) brightness(0.9)"
-                      : "none",
-                  transform: hoveredId === book.id ? "scale(1.02)" : "scale(1)",
-                  transition: "filter 0.3s, transform 0.3s",
-                }}
-              />
-            </div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <h3
-                  style={{
-                    fontSize: "19px",
-                    fontWeight: 400,
-                    lineHeight: 1.4,
-                    color: "var(--text-charcoal)",
-                    marginBottom: "2px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {book.title}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    lineHeight: 1.5,
-                    marginBottom: "4px",
-                  }}
-                >
-                  {book.author}
-                </p>
-              </div>
-            </div>
-            <p
-              style={{
-                fontSize: "18px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
-                marginTop: "4px",
-              }}
-            >
-              ₦{book.price}
-            </p>
-            {book.views !== undefined && (
-              <p
-                style={{
-                  fontSize: "15px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  color: "var(--text-grey)",
-                  marginTop: "2px",
-                }}
-              >
-                {book.views} view{book.views !== 1 ? "s" : ""}
-              </p>
-            )}
-          </article>
+            id={book.id}
+            title={book.title}
+            author={book.author}
+            price={book.price}
+            coverImage={book.coverImage}
+            category={book.category}
+            index={idx}
+          />
         ))}
       </div>
 
@@ -347,7 +273,7 @@ export default function BookList({ books }: BookListProps) {
           <p
             style={{
               fontSize: "18px",
-              color: "var(--text-grey)",
+              color: "var(--muted-foreground)",
               fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             }}
           >

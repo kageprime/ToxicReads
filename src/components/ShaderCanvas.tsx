@@ -115,16 +115,16 @@ const fragmentShader = `
 
     float f = fbm(vec3(p + 3.5 * r, 1.0), time, warp);
 
-    // Light mode — warm ivory and copper tones from African palette
-    vec3 l_col1 = vec3(0.973, 0.941, 0.847);  // #F8F0D8 ivory
-    vec3 l_col2 = vec3(0.722, 0.451, 0.200);  // #B87333 copper
-    vec3 l_col3 = vec3(0.549, 0.353, 0.169);  // #8C5A2B bronze
+    // Light mode — soft smoke greys
+    vec3 l_col1 = vec3(0.910, 0.900, 0.880);  // #E8E6E0 pale smoke
+    vec3 l_col2 = vec3(0.710, 0.700, 0.670);  // #B5B3AB smoke
+    vec3 l_col3 = vec3(0.430, 0.420, 0.400);  // #6E6B66 deep smoke
     vec3 l_col4 = vec3(0.035, 0.035, 0.035);  // #090909 rich black
 
-    // Dark mode — gold, copper, bronze on rich black
-    vec3 d_col1 = vec3(0.831, 0.686, 0.216);  // #D4AF37 primary gold
-    vec3 d_col2 = vec3(0.722, 0.451, 0.200);  // #B87333 copper
-    vec3 d_col3 = vec3(0.549, 0.353, 0.169);  // #8C5A2B bronze
+    // Dark mode — smoke greys on rich black
+    vec3 d_col1 = vec3(0.820, 0.810, 0.780);  // #D1CFC7 light smoke
+    vec3 d_col2 = vec3(0.550, 0.540, 0.510);  // #8C8A82 smoke
+    vec3 d_col3 = vec3(0.320, 0.310, 0.290);  // #524E4A deep smoke
     vec3 d_col4 = vec3(0.035, 0.035, 0.035);  // #090909 rich black
 
     // Mix between light and dark palettes

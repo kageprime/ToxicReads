@@ -1,10 +1,10 @@
 import {
   CircleCheckIcon,
   InfoIcon,
-  Loader2Icon,
+  PiSpinner,
   OctagonXIcon,
   TriangleAlertIcon,
-} from "lucide-react";
+} from "react-icons/pi";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
@@ -20,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         info: <InfoIcon className="size-4" />,
         warning: <TriangleAlertIcon className="size-4" />,
         error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        loading: <PiSpinner className="size-4 animate-spin" />,
       }}
       style={
         {

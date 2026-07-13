@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { Field } from "@/components/Field";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -55,243 +55,151 @@ export default function Profile() {
     });
   };
 
-  const inputStyle = {
-    width: "100%",
-    fontSize: "18px",
-    padding: "8px 10px",
-    border: "1px solid var(--border-light)",
-    outline: "none",
-    color: "var(--text-charcoal)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-    background: "transparent",
-  };
+  const initial = (user?.name || user?.username || "?").charAt(0).toUpperCase();
 
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
+      style={{ backgroundColor: "var(--background)" }}
     >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{
-          height: "48px",
-          backgroundColor: "var(--bg-warm-white)",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/home")}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
-          </button>
-          <button
-            onClick={() => navigate("/home")}
-            className="text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
-          >
-            TOXICREADS
-          </button>
-          <span
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginLeft: "8px",
-            }}
-          >
-            / Account
-          </span>
-        </div>
-      </header>
-
       <div
-        className="mx-auto"
-        style={{
-          maxWidth: "640px",
-          padding: "64px 24px 80px",
-          animation: "pageIn 0.4s ease-out both",
-        }}
+        className="mx-auto measure-narrow"
+        style={{ padding: "40px 24px 96px" }}
       >
-        <div
-          style={{
-            border: "1px solid var(--border-light)",
-            padding: "32px",
-            backgroundColor: "var(--bg-warm-white)",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: 400,
-              color: "var(--text-charcoal)",
-              marginBottom: "4px",
-            }}
-          >
-            Account Settings
-          </h1>
-          <p
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginBottom: "32px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}
-          >
-            {user?.username}
-          </p>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Display Name
-                </label>
-                <input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  style={inputStyle}
-                  placeholder="Your name"
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Username
-                </label>
-                <input
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  style={inputStyle}
-                  placeholder="username"
-                />
-              </div>
-            </div>
-
-            <div
+        <div className="grid md:grid-cols-[280px_1fr] gap-12">
+          {/* ── Meta rail ── */}
+          <aside className="md:sticky md:top-24 self-start">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
+              Settings
+            </p>
+            <h1
+              className="font-serif text-foreground mb-6"
               style={{
-                borderTop: "1px solid var(--border-light)",
-                paddingTop: "24px",
+                fontSize: "42px",
+                lineHeight: 1.04,
+                letterSpacing: "-0.02em",
+                fontWeight: 400,
               }}
             >
-              <h2
+              Account
+            </h1>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="flex items-center justify-center rounded-full"
                 style={{
-                  fontSize: "19px",
-                  fontWeight: 400,
-                  color: "var(--text-charcoal)",
-                  marginBottom: "16px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
+                  width: "52px",
+                  height: "52px",
+                  border: "1px solid var(--border)",
+                  fontFamily: '"Newsreader", Georgia, serif',
+                  fontSize: "24px",
+                  color: "var(--foreground)",
+                  flexShrink: 0,
                 }}
               >
+                {initial}
+              </div>
+              <div className="min-w-0">
+                <p className="text-foreground truncate" style={{ fontSize: "16px" }}>
+                  {user?.name || user?.username}
+                </p>
+                <p
+                  className="font-mono uppercase text-muted-foreground truncate"
+                  style={{ fontSize: "11px", letterSpacing: "0.1em" }}
+                >
+                  {user?.role || "user"}
+                </p>
+              </div>
+            </div>
+            <p className="text-muted-foreground" style={{ fontSize: "14px", lineHeight: 1.6 }}>
+              Update your display name, username, or password. Your current
+              password is required to save any change.
+            </p>
+          </aside>
+
+          {/* ── Form ── */}
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+            className="space-y-7"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <Field label="Display Name">
+                <input
+                  className="field-input"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Your name"
+                />
+              </Field>
+              <Field label="Username">
+                <input
+                  className="field-input"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="username"
+                />
+              </Field>
+            </div>
+
+            <div className="pt-2" style={{ borderTop: "1px solid var(--border)" }}>
+              <p
+                className="font-mono uppercase text-foreground mb-5 mt-6"
+                style={{ fontSize: "12px", letterSpacing: "0.16em" }}
+              >
                 Password
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    style={{
-                      fontSize: "17px",
-                      color: "var(--text-grey)",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Current Password *
-                  </label>
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <Field label="Current Password" required>
                   <input
+                    className="field-input"
+                    type="password"
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
-                    type="password"
-                    style={inputStyle}
-                    placeholder="Required to save changes"
+                    placeholder="Required to save"
                   />
-                </div>
-                <div>
-                  <label
-                    style={{
-                      fontSize: "17px",
-                      color: "var(--text-grey)",
-                      display: "block",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    New Password
-                  </label>
+                </Field>
+                <Field label="New Password" hint="Leave blank to keep current">
                   <input
+                    className="field-input"
+                    type="password"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
-                    type="password"
-                    style={inputStyle}
-                    placeholder="Leave blank to keep current"
+                    placeholder="New password"
                   />
-                </div>
+                </Field>
               </div>
             </div>
 
             {error && (
               <p
-                style={{
-                  fontSize: "17px",
-                  color: "#E74C3C",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
+                className="text-[14px]"
+                style={{ color: "rgb(var(--color-p-red-fg))" }}
               >
                 {error}
               </p>
             )}
             {success && (
               <p
-                style={{
-                  fontSize: "17px",
-                  color: "#2ECC71",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
+                className="text-[14px]"
+                style={{ color: "rgb(var(--color-p-green-fg))" }}
               >
                 {success}
               </p>
             )}
 
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={updateMutation.isPending}
-              style={{
-                width: "100%",
-                padding: "14px",
-                fontSize: "18px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--bg-warm-white)",
-                background: "var(--text-charcoal)",
-                border: "none",
-                cursor: updateMutation.isPending ? "wait" : "pointer",
-                opacity: updateMutation.isPending ? 0.7 : 1,
-                letterSpacing: "0.05em",
-              }}
+              className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:bg-[#333333] active:scale-[0.985] transition disabled:opacity-70"
             >
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
-          </div>
+          </form>
         </div>
       </div>
-
-      <style>{`
-        @keyframes pageIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

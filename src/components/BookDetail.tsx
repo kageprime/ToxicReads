@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { PiCaretLeft } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import PaymentModal from "./PaymentModal";
+import BookCard from "./BookCard";
 
 export default function BookDetail() {
   const { id } = useParams<{ id: string }>();
@@ -60,12 +61,12 @@ export default function BookDetail() {
     return (
       <div
         className="flex items-center justify-center"
-        style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}
+        style={{ height: "100vh", backgroundColor: "var(--background)" }}
       >
         <p
           style={{
             fontSize: "18px",
-            color: "var(--text-grey)",
+            color: "var(--muted-foreground)",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
           }}
         >
@@ -79,10 +80,10 @@ export default function BookDetail() {
     return (
       <div
         className="flex items-center justify-center"
-        style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}
+        style={{ height: "100vh", backgroundColor: "var(--background)" }}
       >
         <div className="text-center">
-          <p style={{ fontSize: "20px", color: "var(--text-grey)" }}>
+          <p style={{ fontSize: "20px", color: "var(--muted-foreground)" }}>
             Book not found
           </p>
           <button
@@ -90,7 +91,7 @@ export default function BookDetail() {
             style={{
               marginTop: "16px",
               fontSize: "18px",
-              color: "var(--text-charcoal)",
+              color: "var(--foreground)",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -117,31 +118,13 @@ export default function BookDetail() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
+      style={{ backgroundColor: "var(--background)" }}
     >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{
-          height: "48px",
-          backgroundColor: "var(--bg-warm-white)",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/home")}
-            className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
-          >
-            TOXICREADS
-          </button>
-        </div>
-      </header>
-
       <div
         className="mx-auto"
         style={{
           maxWidth: "720px",
-          padding: "64px 24px 80px",
+          padding: "32px 24px 80px",
           animation: "pageIn 0.4s ease-out both",
         }}
       >
@@ -150,11 +133,11 @@ export default function BookDetail() {
           onClick={() => navigate("/home")}
           className="flex items-center gap-1 mb-6 hover:opacity-70 transition-opacity"
         >
-          <ChevronLeft size={14} style={{ color: "var(--text-grey)" }} />
+          <PiCaretLeft size={14} style={{ color: "var(--muted-foreground)" }} />
           <span
             style={{
               fontSize: "17px",
-              color: "var(--text-grey)",
+              color: "var(--muted-foreground)",
               fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             }}
           >
@@ -166,7 +149,7 @@ export default function BookDetail() {
           {/* Cover Image */}
           <div
             style={{
-              border: "1px solid var(--border-light)",
+              border: "1px solid var(--border)",
               flexShrink: 0,
               width: "100%",
               maxWidth: "320px",
@@ -185,35 +168,28 @@ export default function BookDetail() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
               <span
-                style={{
-                  fontSize: "17px",
-                  color: "var(--text-grey)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
+                className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
+                style={{ fontSize: "11px", border: "1px solid var(--border)", padding: "3px 8px" }}
               >
-                {book.category.toUpperCase()}
+                {book.category}
               </span>
               {book.content && (
                 <span
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "#666",
-                    border: "1px solid var(--border-light)",
-                    padding: "2px 8px",
-                  }}
+                  className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
+                  style={{ fontSize: "11px", border: "1px solid var(--border)", padding: "3px 8px" }}
                 >
-                  Includes reading content
+                  Includes reading
                 </span>
               )}
             </div>
 
             <h1
               style={{
-                fontSize: "28px",
+                fontSize: "30px",
                 fontWeight: 400,
-                lineHeight: 1.3,
-                color: "var(--text-charcoal)",
+                lineHeight: 1.25,
+                fontFamily: "'NewsReader', Georgia, serif",
+                color: "var(--foreground)",
                 marginBottom: "6px",
               }}
             >
@@ -222,66 +198,57 @@ export default function BookDetail() {
             <p
               style={{
                 fontSize: "20px",
-                color: "var(--text-grey)",
+                color: "var(--muted-foreground)",
                 marginBottom: "16px",
               }}
             >
               by {book.author}
             </p>
 
-            <p
-              style={{
-                fontSize: "20px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
-                marginBottom: "4px",
-              }}
-            >
-              {isFree ? "Free" : `₦${book.price}`}
-            </p>
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-grey)",
-                marginBottom: "24px",
-              }}
-            >
-              {book.views} view{book.views !== 1 ? "s" : ""}
-            </p>
+              <p
+                className="font-mono text-foreground"
+                style={{ fontSize: "20px", marginBottom: "4px" }}
+              >
+                {isFree ? "Free" : `₦${book.price}`}
+              </p>
+              <p
+                className="font-mono text-muted-foreground"
+                style={{ fontSize: "14px", marginBottom: "24px" }}
+              >
+                {book.views} view{book.views !== 1 ? "s" : ""}
+              </p>
 
             {/* Actions */}
             {canRead ? (
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/read/${book.id}`)}
+                  className="hover:opacity-90 active:scale-[0.98] transition"
                   style={{
                     flex: 1,
                     padding: "12px",
                     fontSize: "18px",
                     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--bg-warm-white)",
-                    background: "var(--text-charcoal)",
+                    color: "var(--background)",
+                    background: "var(--foreground)",
                     border: "none",
                     cursor: "pointer",
-                    letterSpacing: "0.05em",
-                  }}
+                    }}
                 >
-                  READ
+                  Read
                 </button>
                 <div
                   style={{
                     padding: "12px 16px",
                     fontSize: "18px",
                     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "#2ECC71",
-                    border: "1px solid #2ECC71",
-                    letterSpacing: "0.05em",
-                    display: "flex",
+                    color: "var(--color-p-green-fg)",
+                    border: "1px solid var(--color-p-green-fg)",
+                      display: "flex",
                     alignItems: "center",
                   }}
                 >
-                  PURCHASED
+                  Purchased
                 </div>
               </div>
             ) : bought ? (
@@ -290,14 +257,13 @@ export default function BookDetail() {
                   padding: "12px",
                   fontSize: "18px",
                   fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  color: "#2ECC71",
-                  border: "1px solid #2ECC71",
+                  color: "var(--color-p-green-fg)",
+                  border: "1px solid var(--color-p-green-fg)",
                   textAlign: "center",
-                  letterSpacing: "0.05em",
                   marginBottom: "16px",
                 }}
               >
-                PURCHASED
+                Purchased
               </div>
             ) : isAuthenticated ? (
               <button
@@ -305,38 +271,38 @@ export default function BookDetail() {
                   setBuyError("");
                   setShowPayment(true);
                 }}
+                className="hover:opacity-90 active:scale-[0.98] transition"
                 style={{
                   width: "100%",
                   padding: "12px",
                   fontSize: "18px",
                   fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  color: "var(--bg-warm-white)",
-                  background: "var(--text-charcoal)",
+                  color: "var(--background)",
+                  background: "var(--foreground)",
                   border: "none",
                   cursor: "pointer",
-                  letterSpacing: "0.05em",
                   marginBottom: "16px",
                 }}
               >
-                BUY NOW
+                Buy now
               </button>
             ) : (
               <button
                 onClick={() => navigate("/login")}
+                className="hover:bg-accent transition"
                 style={{
                   width: "100%",
                   padding: "12px",
                   fontSize: "18px",
                   fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   background: "transparent",
-                  border: "1px solid var(--border-light)",
+                  border: "1px solid var(--border)",
                   cursor: "pointer",
-                  letterSpacing: "0.05em",
                   marginBottom: "16px",
                 }}
               >
-                {isFree ? "LOG IN TO READ" : "LOG IN TO BUY"}
+                {isFree ? "Log in to read" : "Log in to buy"}
               </button>
             )}
 
@@ -344,7 +310,7 @@ export default function BookDetail() {
               <p
                 style={{
                   fontSize: "17px",
-                  color: "#E74C3C",
+                  color: "var(--color-p-red-fg)",
                   marginBottom: "12px",
                   fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 }}
@@ -355,27 +321,21 @@ export default function BookDetail() {
 
             <div
               style={{
-                borderTop: "1px solid var(--border-light)",
+                borderTop: "1px solid var(--border)",
                 paddingTop: "16px",
               }}
             >
               <h3
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--text-grey)",
-                  marginBottom: "8px",
-                }}
+                className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
+                style={{ fontSize: "12px", marginBottom: "8px" }}
               >
-                DESCRIPTION
+                Description
               </h3>
               <p
                 style={{
                   fontSize: "19px",
                   lineHeight: 1.8,
-                  color: "var(--text-charcoal)",
+                  color: "var(--foreground)",
                 }}
               >
                 {book.description}
@@ -387,23 +347,17 @@ export default function BookDetail() {
         {/* Share */}
         <div
           style={{
-            borderTop: "1px solid var(--border-light)",
+            borderTop: "1px solid var(--border)",
             marginTop: "32px",
             paddingTop: "24px",
           }}
         >
-          <h3
-            style={{
-              fontSize: "16px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--text-grey)",
-              marginBottom: "16px",
-            }}
-          >
-            SHARE THIS BOOK
-          </h3>
+            <h3
+              className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
+              style={{ fontSize: "12px", marginBottom: "16px" }}
+            >
+              Share this book
+            </h3>
           <div style={{ display: "flex", gap: 12 }}>
             <button
               onClick={() => {
@@ -415,14 +369,15 @@ export default function BookDetail() {
                   "width=600,height=400"
                 );
               }}
+              className="hover:bg-accent transition"
               style={{
                 flex: 1,
                 padding: "10px",
                 fontSize: "16px",
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
+                color: "var(--foreground)",
                 background: "transparent",
-                border: "1px solid var(--border-light)",
+                border: "1px solid var(--border)",
                 cursor: "pointer",
                 letterSpacing: "0.1em",
               }}
@@ -439,14 +394,15 @@ export default function BookDetail() {
                   "width=600,height=400"
                 );
               }}
+              className="hover:bg-accent transition"
               style={{
                 flex: 1,
                 padding: "10px",
                 fontSize: "16px",
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
+                color: "var(--foreground)",
                 background: "transparent",
-                border: "1px solid var(--border-light)",
+                border: "1px solid var(--border)",
                 cursor: "pointer",
                 letterSpacing: "0.1em",
               }}
@@ -460,22 +416,27 @@ export default function BookDetail() {
                 if (navigator.share) {
                   try {
                     await navigator.share({ title: book.title, text, url });
-                  } catch {}
+                  } catch {
+                  /* ignore */
+                }
                 } else {
                   try {
                     await navigator.clipboard.writeText(url);
                     alert("Link copied to clipboard!");
-                  } catch {}
+                  } catch {
+                  /* ignore */
+                }
                 }
               }}
+              className="hover:bg-accent transition"
               style={{
                 flex: 1,
                 padding: "10px",
                 fontSize: "16px",
                 fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
+                color: "var(--foreground)",
                 background: "transparent",
-                border: "1px solid var(--border-light)",
+                border: "1px solid var(--border)",
                 cursor: "pointer",
                 letterSpacing: "0.1em",
               }}
@@ -489,58 +450,29 @@ export default function BookDetail() {
         {similar.length > 0 && (
           <div
             style={{
-              borderTop: "1px solid var(--border-light)",
+              borderTop: "1px solid var(--border)",
               marginTop: "48px",
               paddingTop: "24px",
             }}
           >
             <h3
-              style={{
-                fontSize: "17px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: "var(--text-grey)",
-                marginBottom: "16px",
-              }}
+              className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
+              style={{ fontSize: "12px", marginBottom: "16px" }}
             >
-              SIMILAR BOOKS
+              Similar books
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {similar.map(similarBook => (
-                <div
+              {similar.map((similarBook, i) => (
+                <BookCard
                   key={similarBook.id}
-                  onClick={() => navigate(`/book/${similarBook.id}`)}
-                  className="cursor-pointer"
-                >
-                  <div
-                    style={{
-                      border: "1px solid var(--border-light)",
-                      aspectRatio: "3/4",
-                      marginBottom: "8px",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <img
-                      src={similarBook.coverImage}
-                      alt={similarBook.title}
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  </div>
-                  <p
-                    style={{
-                      fontSize: "17px",
-                      color: "var(--text-charcoal)",
-                      lineHeight: 1.3,
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {similarBook.title}
-                  </p>
-                  <p style={{ fontSize: "16px", color: "var(--text-grey)" }}>
-                    ₦{similarBook.price}
-                  </p>
-                </div>
+                  id={similarBook.id}
+                  title={similarBook.title}
+                  author={similarBook.author}
+                  price={similarBook.price}
+                  coverImage={similarBook.coverImage}
+                  category={similarBook.category}
+                  index={i}
+                />
               ))}
             </div>
           </div>

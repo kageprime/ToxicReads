@@ -64,7 +64,7 @@ export default function ImageUpload({
 
   const labelStyle: React.CSSProperties = {
     fontSize: "17px",
-    color: isDark ? "rgba(255,255,255,0.6)" : "var(--text-grey)",
+    color: isDark ? "rgba(255,255,255,0.6)" : "var(--muted-foreground)",
     display: "block",
     marginBottom: "6px",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
@@ -74,12 +74,12 @@ export default function ImageUpload({
   const emptyBoxStyle: React.CSSProperties = {
     width: "100%",
     height: "120px",
-    border: isDark ? "1px dashed #444" : "1px dashed var(--border-light)",
+    border: isDark ? "1px dashed #444" : "1px dashed var(--border)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: "8px",
-    color: isDark ? "rgba(255,255,255,0.3)" : "var(--text-grey)",
+    color: isDark ? "rgba(255,255,255,0.3)" : "var(--muted-foreground)",
     fontSize: "17px",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   };
@@ -87,7 +87,7 @@ export default function ImageUpload({
   const btnUploadStyle: React.CSSProperties = {
     fontSize: "16px",
     padding: "5px 14px",
-    background: isDark ? "#FFFFFF" : "var(--text-charcoal)",
+    background: isDark ? "#FFFFFF" : "var(--foreground)",
     color: isDark ? "#1A1A1A" : "#FFFFFF",
     border: "none",
     borderRadius: "2px",
@@ -101,7 +101,7 @@ export default function ImageUpload({
     fontSize: "16px",
     padding: "5px 14px",
     background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-    color: isDark ? "#FFFFFF" : "var(--text-charcoal)",
+    color: isDark ? "#FFFFFF" : "var(--foreground)",
     border: "none",
     borderRadius: "2px",
     cursor: "pointer",
@@ -123,7 +123,7 @@ export default function ImageUpload({
               maxHeight: "200px",
               border: isDark
                 ? "1px solid #444"
-                : "1px solid var(--border-light)",
+                : "1px solid var(--border)",
               display: "block",
             }}
           />

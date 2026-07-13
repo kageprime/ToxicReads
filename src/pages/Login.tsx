@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { PiCaretLeft } from "react-icons/pi";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -36,167 +36,81 @@ export default function Login() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
-    >
-      {/* Minimal Header */}
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center px-4"
-        style={{
-          height: "48px",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="flex items-center h-14 px-4 border-b border-border">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1 text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ChevronLeft size={16} />
+          <PiCaretLeft size={16} />
           Back
         </button>
       </header>
 
-      <div
-        className="w-full max-w-sm mx-4"
-        style={{
-          border: "1px solid var(--border-light)",
-          padding: "32px",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: 400,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            color: "var(--text-charcoal)",
-            marginBottom: "24px",
-            textAlign: "center",
-          }}
-        >
-          Log in to ToxicReads
-        </h2>
+      <div className="flex-1 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8 shadow-none">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground text-center mb-2">
+            Sign in
+          </p>
+          <h1 className="font-serif text-3xl text-foreground tracking-tight text-center">
+            Welcome back
+          </h1>
+          <p className="text-sm text-muted-foreground text-center mt-1.5">
+            Log in to keep reading.
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
+          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                autoComplete="username"
+                className="field-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+                className="field-input"
+              />
+            </div>
+
+            {error && <p className="text-sm text-p-red-fg">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loginMutation.isPending}
+              className="w-full py-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-[#333333] active:scale-[0.98] transition disabled:opacity-70"
             >
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              autoComplete="username"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
+              {loginMutation.isPending ? "Logging in..." : "Log in"}
+            </button>
+          </form>
 
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
+          <p className="text-sm text-muted-foreground text-center mt-5">
+            Default account — admin / 123456
+          </p>
+
+          <p className="text-sm text-muted-foreground text-center mt-3">
+            New here?{" "}
+            <button
+              onClick={() => navigate("/register")}
+              className="text-foreground font-medium hover:underline underline-offset-4"
             >
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="current-password"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
-
-          {error && (
-            <p style={{ fontSize: "17px", color: "#E74C3C" }}>{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loginMutation.isPending}
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "18px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              color: "var(--bg-warm-white)",
-              background: "var(--text-charcoal)",
-              border: "none",
-              cursor: loginMutation.isPending ? "wait" : "pointer",
-              opacity: loginMutation.isPending ? 0.7 : 1,
-              letterSpacing: "0.05em",
-            }}
-          >
-            {loginMutation.isPending ? "Logging in..." : "Log In"}
-          </button>
-        </form>
-
-        <p
-          style={{
-            fontSize: "17px",
-            color: "var(--text-grey)",
-            marginTop: "16px",
-            textAlign: "center",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-          }}
-        >
-          Default: admin / 123456
-        </p>
-
-        <p
-          style={{
-            fontSize: "17px",
-            color: "var(--text-grey)",
-            marginTop: "12px",
-            textAlign: "center",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-          }}
-        >
-          New here?{" "}
-          <button
-            onClick={() => navigate("/register")}
-            style={{
-              color: "var(--text-charcoal)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textDecoration: "underline",
-              textUnderlineOffset: "3px",
-            }}
-          >
-            Create account
-          </button>
-        </p>
+              Create an account
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

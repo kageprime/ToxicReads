@@ -2,7 +2,7 @@ import * as React from "react";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { PiArrowLeft, PiArrowRight } from "react-icons/pi";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ function Carousel({
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
-      axis: orientation === "horizontal" ? "x" : "y",
+      axis: orientation === "horizontal" ? "PiX" : "y",
     },
     plugins
   );
@@ -75,10 +75,10 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "ArrowLeft") {
+      if (event.key === "PiArrowLeft") {
         event.preventDefault();
         scrollPrev();
-      } else if (event.key === "ArrowRight") {
+      } else if (event.key === "PiArrowRight") {
         event.preventDefault();
         scrollNext();
       }
@@ -186,14 +186,14 @@ function CarouselPrevious({
         "absolute size-8 rounded-full",
         orientation === "horizontal"
           ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          : "-top-12 left-1/2 -translate-PiX-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft />
+      <PiArrowLeft />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -216,14 +216,14 @@ function CarouselNext({
         "absolute size-8 rounded-full",
         orientation === "horizontal"
           ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          : "-bottom-12 left-1/2 -translate-PiX-1/2 rotate-90",
         className
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight />
+      <PiArrowRight />
       <span className="sr-only">Next slide</span>
     </Button>
   );

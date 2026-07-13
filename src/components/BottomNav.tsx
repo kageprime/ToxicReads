@@ -1,12 +1,13 @@
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { PiList, PiBookOpen, PiUpload, PiUser, PiDotsThree } from "react-icons/pi";
 
 const navItems = [
-  { path: "/home", label: "Browse", icon: "☰" },
-  { path: "/my-purchases", label: "Books", icon: "○" },
-  { path: "/submit-book", label: "Sell", icon: "✎" },
-  { path: "/profile", label: "Account", icon: "◇" },
+  { path: "/home", label: "Browse", icon: <PiList size={20} /> },
+  { path: "/my-purchases", label: "Books", icon: <PiBookOpen size={20} /> },
+  { path: "/submit-book", label: "Sell", icon: <PiUpload size={20} /> },
+  { path: "/profile", label: "Account", icon: <PiUser size={20} /> },
 ];
 
 export default function BottomNav() {
@@ -49,8 +50,8 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t md:hidden"
       style={{
-        backgroundColor: "var(--bg-warm-white)",
-        borderColor: "var(--border-light)",
+        backgroundColor: "var(--background)",
+        borderColor: "var(--border)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         height: "calc(56px + env(safe-area-inset-bottom, 0px))",
       }}
@@ -82,8 +83,8 @@ export default function BottomNav() {
             style={{
               fontSize: "22px",
               color: active(item.path)
-                ? "var(--text-charcoal)"
-                : "var(--text-grey)",
+                ? "var(--foreground)"
+                : "var(--muted-foreground)",
             }}
           >
             {item.icon}
@@ -94,8 +95,8 @@ export default function BottomNav() {
               fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
               letterSpacing: "0.05em",
               color: active(item.path)
-                ? "var(--text-charcoal)"
-                : "var(--text-grey)",
+                ? "var(--foreground)"
+                : "var(--muted-foreground)",
             }}
           >
             {item.label.toUpperCase()}
@@ -115,15 +116,15 @@ export default function BottomNav() {
           cursor: "pointer",
         }}
       >
-        <span style={{ fontSize: "22px", color: "var(--text-charcoal)" }}>
-          ···
-        </span>
+          <span style={{ color: "var(--foreground)" }}>
+            <PiDotsThree size={20} />
+          </span>
         <span
           style={{
             fontSize: "15px",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             letterSpacing: "0.05em",
-            color: "var(--text-grey)",
+            color: "var(--muted-foreground)",
           }}
         >
           MORE

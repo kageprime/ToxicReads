@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { ChevronLeft, List, LogOut } from "lucide-react";
+import { PiCaretLeft, PiList, PiSignOut } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
@@ -357,7 +357,7 @@ export default function Reader() {
         <span
           style={{
             fontSize: "18px",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontFamily: "var(--font-mono)",
             color: "#999",
           }}
         >
@@ -385,7 +385,7 @@ export default function Reader() {
           onClick={() => navigate("/my-purchases")}
           style={{
             fontSize: "17px",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontFamily: "var(--font-mono)",
             color: theme === "dark" ? "#ccc" : "#333",
             background: "none",
             border: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`,
@@ -422,7 +422,7 @@ export default function Reader() {
           pointerEvents: "none",
           overflow: "hidden",
           fontSize: "18px",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+          fontFamily: "var(--font-mono)",
           color: watermarkColor,
           whiteSpace: "pre",
           userSelect: "none",
@@ -459,7 +459,7 @@ export default function Reader() {
             onClick={() => navigate("/my-purchases")}
             className="p-1.5 rounded hover:opacity-70 transition-opacity shrink-0"
           >
-            <ChevronLeft size={18} style={{ color: textColor }} />
+            <PiCaretLeft size={18} style={{ color: textColor }} />
           </button>
           <span
             className="hidden sm:inline"
@@ -481,7 +481,7 @@ export default function Reader() {
               onClick={() => setShowOutline(!showOutline)}
               style={{
                 fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontFamily: "var(--font-mono)",
                 color: textColor,
                 background: "none",
                 border: `1px solid ${showOutline ? textColor : borderColor}`,
@@ -493,7 +493,7 @@ export default function Reader() {
               }}
               title="Outline"
             >
-              <List size={12} />{" "}
+              <PiList size={12} />{" "}
               <span className="hidden sm:inline">Outline</span>
             </button>
           )}
@@ -502,7 +502,7 @@ export default function Reader() {
 onClick={() => setFontSize(Math.max(20, fontSize - 2))}
               style={{
                 fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontFamily: "var(--font-mono)",
                 color: textColor,
                 background: "none",
                 border: `1px solid ${borderColor}`,
@@ -516,7 +516,7 @@ onClick={() => setFontSize(Math.max(20, fontSize - 2))}
             <span
               style={{
                 fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontFamily: "var(--font-mono)",
                 color: theme === "dark" ? "#666" : "#999",
                 minWidth: "20px sm:min-w-24px",
                 textAlign: "center",
@@ -528,7 +528,7 @@ onClick={() => setFontSize(Math.max(20, fontSize - 2))}
 onClick={() => setFontSize(Math.min(36, fontSize + 2))}
               style={{
                 fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontFamily: "var(--font-mono)",
                 color: textColor,
                 background: "none",
                 border: `1px solid ${borderColor}`,
@@ -551,7 +551,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               style={{
                 fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                fontFamily: "var(--font-mono)",
                 color: textColor,
                 background: "none",
                 border: `1px solid ${borderColor}`,
@@ -563,14 +563,14 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
               <span className="hidden sm:inline">
                 {theme === "dark" ? "Light" : "Dark"}
               </span>
-              <span className="sm:hidden">{theme === "dark" ? "☀" : "☾"}</span>
+              <span className="sm:hidden">{theme === "dark" ? <PiSun size={16} /> : <PiMoon size={16} />}</span>
             </button>
           </span>
           <button
             onClick={logout}
             className="p-1.5 rounded hover:opacity-70 transition-opacity shrink-0"
           >
-            <LogOut size={16} style={{ color: textColor }} />
+            <PiSignOut size={16} style={{ color: textColor }} />
           </button>
         </div>
       </header>
@@ -602,7 +602,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
                   <h3
                     style={{
                       fontSize: "15px",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      fontFamily: "var(--font-mono)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
                       color: theme === "dark" ? "#666" : "#999",
@@ -613,13 +613,13 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
                   <button
                     className="sm:hidden p-1"
                     onClick={() => setShowOutline(false)}
-                    style={{
+                     style={{
                       color: theme === "dark" ? "#999" : "#666",
                       fontSize: "16px",
                       lineHeight: 1,
                     }}
                   >
-                    ✕
+                    <PiX size={16} />
                   </button>
                 </div>
                 <div className="space-y-1">
@@ -773,7 +773,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
             onClick={() => setFontSize(Math.max(14, fontSize - 2))}
             style={{
               fontSize: "19px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontFamily: "var(--font-mono)",
               color: textColor,
               background: "none",
               border: "none",
@@ -788,7 +788,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
           <span
             style={{
               fontSize: "17px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontFamily: "var(--font-mono)",
               color: theme === "dark" ? "#666" : "#999",
               minWidth: "22px",
               textAlign: "center",
@@ -800,7 +800,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
             onClick={() => setFontSize(Math.min(28, fontSize + 2))}
             style={{
               fontSize: "19px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontFamily: "var(--font-mono)",
               color: textColor,
               background: "none",
               border: "none",
@@ -833,9 +833,9 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
             title={theme === "dark" ? "Light mode" : "Dark mode"}
           >
             {theme === "dark" ? (
-              <span style={{ color: "#e8e6e3" }}>☀</span>
+              <PiSun size={18} color="#e8e6e3" />
             ) : (
-              <span style={{ color: "#555" }}>☾</span>
+              <PiMoon size={18} color="#555" />
             )}
           </button>
         </div>

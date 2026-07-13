@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, ChevronLeft } from "lucide-react";
+import { PiWarningCircle } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -31,71 +31,41 @@ export default function MySubmissions() {
   }
 
   const statusColors: Record<string, string> = {
-    pending: "#F39C12",
-    approved: "#2ECC71",
-    rejected: "#E74C3C",
+    pending: "var(--color-p-yellow-fg)",
+    approved: "var(--color-p-green-fg)",
+    rejected: "var(--color-p-red-fg)",
   };
 
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
+      style={{ backgroundColor: "var(--background)" }}
     >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{
-          height: "48px",
-          backgroundColor: "var(--bg-warm-white)",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/home")}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
-          </button>
-          <button
-            onClick={() => navigate("/home")}
-            className="text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
-          >
-            TOXICREADS
-          </button>
-          <span
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginLeft: "8px",
-            }}
-          >
-            / My Submissions
-          </span>
-        </div>
-      </header>
-
       <div
         className="mx-auto"
-        style={{ maxWidth: "900px", padding: "64px 24px 80px" }}
+        style={{ maxWidth: "900px", padding: "32px 24px 80px" }}
       >
         <div className="flex items-center justify-between mb-8">
           <h1
             style={{
-              fontSize: "28px",
+              fontSize: "34px",
               fontWeight: 400,
-              color: "var(--text-charcoal)",
+              fontFamily: "var(--font-serif)",
+              color: "var(--foreground)",
+              letterSpacing: "-0.01em",
             }}
           >
             My Submissions
           </h1>
           <button
             onClick={() => navigate("/submit-book")}
+            className="transition-transform active:scale-[0.98] hover:opacity-90"
             style={{
               fontSize: "16px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontFamily: "var(--font-mono)",
               letterSpacing: "0.05em",
-              color: "var(--bg-warm-white)",
-              background: "var(--text-charcoal)",
+              color: "var(--background)",
+              background: "var(--foreground)",
               border: "none",
               padding: "8px 16px",
               cursor: "pointer",
@@ -107,7 +77,7 @@ export default function MySubmissions() {
 
         <div
           style={{
-            border: "1px solid #F39C12",
+            border: "1px solid var(--color-p-yellow-fg)",
             padding: "10px 14px",
             marginBottom: "16px",
             backgroundColor: "rgba(243, 156, 18, 0.08)",
@@ -116,15 +86,15 @@ export default function MySubmissions() {
           <div
             style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}
           >
-            <AlertTriangle
+            <PiWarningCircle
               size={12}
-              style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }}
+              style={{ color: "var(--color-p-yellow-fg)", marginTop: "3px", flexShrink: 0 }}
             />
             <p
               style={{
                 fontSize: "15px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
+                fontFamily: "var(--font-mono)",
+                color: "var(--foreground)",
                 lineHeight: 1.6,
               }}
             >
@@ -143,8 +113,8 @@ export default function MySubmissions() {
           <p
             style={{
               fontSize: "18px",
-              color: "var(--text-grey)",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "var(--muted-foreground)",
+              fontFamily: "var(--font-mono)",
             }}
           >
             LOADING...
@@ -154,10 +124,10 @@ export default function MySubmissions() {
             {submissions.map(book => (
               <div
                 key={book.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors hover:bg-accent"
                 style={{
-                  padding: "16px 0",
-                  borderBottom: "1px solid var(--border-light)",
+                  padding: "16px 12px",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -168,7 +138,7 @@ export default function MySubmissions() {
                       width: "50px",
                       height: "66px",
                       objectFit: "cover",
-                      border: "1px solid var(--border-light)",
+                      border: "1px solid var(--border)",
                       flexShrink: 0,
                       cursor: "pointer",
                     }}
@@ -180,7 +150,7 @@ export default function MySubmissions() {
                         style={{
                           fontSize: "20px",
                           fontWeight: 400,
-                          color: "var(--text-charcoal)",
+                          color: "var(--foreground)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -192,10 +162,10 @@ export default function MySubmissions() {
                         className="shrink-0"
                         style={{
                           fontSize: "15px",
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                          fontFamily: "var(--font-mono)",
                           color:
-                            statusColors[book.status] || "var(--text-grey)",
-                          border: `1px solid ${statusColors[book.status] || "var(--border-light)"}`,
+                            statusColors[book.status] || "var(--muted-foreground)",
+                          border: `1px solid ${statusColors[book.status] || "var(--border)"}`,
                           padding: "2px 6px",
                         }}
                       >
@@ -205,7 +175,7 @@ export default function MySubmissions() {
                     <p
                       style={{
                         fontSize: "18px",
-                        color: "var(--text-grey)",
+                        color: "var(--muted-foreground)",
                         marginBottom: "2px",
                       }}
                     >
@@ -214,8 +184,8 @@ export default function MySubmissions() {
                     <p
                       style={{
                         fontSize: "17px",
-                        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                        color: "var(--text-grey)",
+                        fontFamily: "var(--font-mono)",
+                        color: "var(--muted-foreground)",
                       }}
                     >
                       ₦{book.price} ·{" "}
@@ -229,7 +199,8 @@ export default function MySubmissions() {
                       style={{
                         fontSize: "20px",
                         fontWeight: 400,
-                        color: "var(--text-charcoal)",
+                        fontFamily: "var(--font-serif)",
+                        color: "var(--foreground)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -241,9 +212,9 @@ export default function MySubmissions() {
                       className="shrink-0"
                       style={{
                         fontSize: "15px",
-                        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                        color: statusColors[book.status] || "var(--text-grey)",
-                        border: `1px solid ${statusColors[book.status] || "var(--border-light)"}`,
+                        fontFamily: "var(--font-mono)",
+                        color: statusColors[book.status] || "var(--muted-foreground)",
+                        border: `1px solid ${statusColors[book.status] || "var(--border)"}`,
                         padding: "2px 6px",
                       }}
                     >
@@ -253,7 +224,7 @@ export default function MySubmissions() {
                   <p
                     style={{
                       fontSize: "18px",
-                      color: "var(--text-grey)",
+                      color: "var(--muted-foreground)",
                       marginBottom: "2px",
                     }}
                   >
@@ -262,8 +233,8 @@ export default function MySubmissions() {
                   <p
                     style={{
                       fontSize: "17px",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                      color: "var(--text-grey)",
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--muted-foreground)",
                     }}
                   >
                     ₦{book.price} ·{" "}
@@ -277,13 +248,13 @@ export default function MySubmissions() {
                         deleteMutation.mutate({ id: book.id });
                     }}
                     disabled={deleteMutation.isPending}
-                    className="w-full sm:w-auto ml-[66px] sm:ml-0"
+                    className="w-full sm:w-auto ml-[66px] sm:ml-0 transition-transform active:scale-[0.98] hover:opacity-90"
                     style={{
                       fontSize: "15px",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                      color: "#E74C3C",
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--color-p-red-fg)",
                       background: "none",
-                      border: "1px solid #E74C3C",
+                      border: "1px solid var(--color-p-red-fg)",
                       padding: "6px 12px",
                       cursor: deleteMutation.isPending ? "wait" : "pointer",
                       opacity: deleteMutation.isPending ? 0.7 : 1,
@@ -300,7 +271,7 @@ export default function MySubmissions() {
             <p
               style={{
                 fontSize: "19px",
-                color: "var(--text-grey)",
+                color: "var(--muted-foreground)",
                 marginBottom: "16px",
               }}
             >
@@ -308,12 +279,13 @@ export default function MySubmissions() {
             </p>
             <button
               onClick={() => navigate("/submit-book")}
+              className="transition-transform active:scale-[0.98] hover:opacity-80"
               style={{
                 fontSize: "17px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
+                fontFamily: "var(--font-mono)",
+                color: "var(--foreground)",
                 background: "none",
-                border: "1px solid var(--border-light)",
+                border: "1px solid var(--border)",
                 padding: "8px 16px",
                 cursor: "pointer",
                 letterSpacing: "0.05em",

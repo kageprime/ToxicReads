@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LOGIN_PATH } from "@/const";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { PiSquaresFour, PiSignOut, PiSidebar, PiUsersThree } from "react-icons/pi";
 import {
   type CSSProperties,
   type ReactNode,
@@ -34,8 +34,8 @@ import { AuthLayoutSkeleton } from "./AuthLayoutSkeleton";
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: PiSquaresFour, label: "Page 1", path: "/" },
+  { icon: PiUsersThree, label: "Page 2", path: "/some-path" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -76,7 +76,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               window.location.href = LOGIN_PATH;
             }}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full shadow-soft hover:shadow-soft-lg transition-all"
           >
             Sign in
           </Button>
@@ -168,7 +168,7 @@ function AuthLayoutContent({
                 className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 aria-label="Toggle navigation"
               >
-                <PanelLeft className="h-4 w-4 text-muted-foreground" />
+                <PiSidebar className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
@@ -227,7 +227,7 @@ function AuthLayoutContent({
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <PiSignOut className="mr-2 h-4 w-4" />
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

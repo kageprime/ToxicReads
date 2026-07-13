@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, ChevronLeft, Settings } from "lucide-react";
+import { PiSignOut, PiCaretLeft, PiTrash } from "react-icons/pi";
 
 interface PageHeaderProps {
   title?: string;
@@ -27,18 +27,18 @@ export default function PageHeader({
       className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
       style={{
         height: "48px",
-        backgroundColor: "var(--bg-warm-white)",
-        borderBottom: "1px solid var(--border-light)",
+        backgroundColor: "var(--background)",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <div className="flex items-center gap-2">
         {showBack && (
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded hover:bg-accent transition-colors"
             aria-label="Go back"
           >
-            <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
+            <PiCaretLeft size={18} style={{ color: "var(--foreground)" }} />
           </button>
         )}
         <button
@@ -51,7 +51,7 @@ export default function PageHeader({
           <span
             style={{
               fontSize: "17px",
-              color: "var(--text-grey)",
+              color: "var(--muted-foreground)",
               marginLeft: "8px",
             }}
           >
@@ -67,7 +67,7 @@ export default function PageHeader({
             className="p-1.5 rounded hover:bg-red-50 transition-colors"
             aria-label="Delete"
           >
-            <Settings size={16} style={{ color: "#E74C3C" }} />
+            <PiTrash size={16} style={{ color: "var(--color-p-red-fg)" }} />
           </button>
         )}
         {showAdmin && isAdmin && (
@@ -81,10 +81,10 @@ export default function PageHeader({
         {showLogout && (
           <button
             onClick={logout}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-            aria-label="Logout"
+            className="p-1.5 rounded hover:bg-accent transition-colors"
+            aria-label="Sign out"
           >
-            <LogOut size={16} style={{ color: "var(--text-grey)" }} />
+            <PiSignOut size={16} style={{ color: "var(--muted-foreground)" }} />
           </button>
         )}
       </div>

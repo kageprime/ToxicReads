@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { PiCaretLeft } from "react-icons/pi";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -35,12 +35,10 @@ export default function Register() {
       setError("Username and password are required");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
@@ -54,212 +52,103 @@ export default function Register() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
-    >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center px-4"
-        style={{
-          height: "48px",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="flex items-center h-14 px-4 border-b border-border">
         <button
           onClick={() => navigate("/login")}
-          className="flex items-center gap-1 text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ChevronLeft size={16} />
+          <PiCaretLeft size={16} />
           Back
         </button>
       </header>
 
-      <div
-        className="w-full max-w-sm mx-4"
-        style={{
-          border: "1px solid var(--border-light)",
-          padding: "32px",
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: 400,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            color: "var(--text-charcoal)",
-            marginBottom: "24px",
-            textAlign: "center",
-          }}
-        >
-          Create Account
-        </h2>
+      <div className="flex-1 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8 shadow-none">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground text-center mb-2">
+            Create account
+          </p>
+          <h1 className="font-serif text-3xl text-foreground tracking-tight text-center">
+            Create your account
+          </h1>
+          <p className="text-sm text-muted-foreground text-center mt-1.5">
+            Join to buy, read, and publish.
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
+          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                autoComplete="username"
+                className="field-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Display name (optional)
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                autoComplete="name"
+                className="field-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="new-password"
+                className="field-input"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
+                Confirm password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                className="field-input"
+              />
+            </div>
+
+            {error && <p className="text-sm text-p-red-fg">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={registerMutation.isPending}
+              className="w-full py-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-[#333333] active:scale-[0.98] transition disabled:opacity-70"
             >
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              autoComplete="username"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
+              {registerMutation.isPending ? "Creating account..." : "Sign up"}
+            </button>
+          </form>
 
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
+          <p className="text-sm text-muted-foreground text-center mt-5">
+            Already have an account?{" "}
+            <button
+              onClick={() => navigate("/login")}
+              className="text-foreground font-medium hover:underline underline-offset-4"
             >
-              Display Name (optional)
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              autoComplete="name"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
-
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="new-password"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
-
-          <div>
-            <label
-              style={{
-                fontSize: "17px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "6px",
-              }}
-            >
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid var(--border-light)",
-                padding: "10px 12px",
-                fontSize: "18px",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                outline: "none",
-              }}
-            />
-          </div>
-
-          {error && (
-            <p style={{ fontSize: "17px", color: "#E74C3C" }}>{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={registerMutation.isPending}
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "18px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              color: "var(--bg-warm-white)",
-              background: "var(--text-charcoal)",
-              border: "none",
-              cursor: registerMutation.isPending ? "wait" : "pointer",
-              opacity: registerMutation.isPending ? 0.7 : 1,
-              letterSpacing: "0.05em",
-            }}
-          >
-            {registerMutation.isPending ? "Creating account..." : "Sign Up"}
-          </button>
-        </form>
-
-        <p
-          style={{
-            fontSize: "17px",
-            color: "var(--text-grey)",
-            marginTop: "16px",
-            textAlign: "center",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-          }}
-        >
-          Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            style={{
-              color: "var(--text-charcoal)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textDecoration: "underline",
-              textUnderlineOffset: "3px",
-            }}
-          >
-            Log in
-          </button>
-        </p>
+              Log in
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

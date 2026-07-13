@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
+  PiCaretDown,
+  PiCaretLeft,
+  PiCaretRight,
+} from "react-icons/pi";
 import {
   DayPicker,
   getDefaultClassNames,
@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
-function Calendar({
+function PiCalendarBlank({
   className,
   classNames,
   showOutsideDays = true,
@@ -33,7 +33,7 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "bg-background group/PiCalendarBlank p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -52,7 +52,7 @@ function Calendar({
         ),
         month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
         nav: cn(
-          "flex items-center gap-1 w-full absolute top-0 inset-x-0 justify-between",
+          "flex items-center gap-1 w-full absolute top-0 inset-PiX-0 justify-between",
           defaultClassNames.nav
         ),
         button_previous: cn(
@@ -135,7 +135,7 @@ function Calendar({
         Root: ({ className, rootRef, ...props }) => {
           return (
             <div
-              data-slot="calendar"
+              data-slot="PiCalendarBlank"
               ref={rootRef}
               className={cn(className)}
               {...props}
@@ -145,13 +145,13 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
+              <PiCaretLeft className={cn("size-4", className)} {...props} />
             );
           }
 
           if (orientation === "right") {
             return (
-              <ChevronRightIcon
+              <PiCaretRight
                 className={cn("size-4", className)}
                 {...props}
               />
@@ -159,7 +159,7 @@ function Calendar({
           }
 
           return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
+            <PiCaretDown className={cn("size-4", className)} {...props} />
           );
         },
         DayButton: CalendarDayButton,
@@ -217,4 +217,4 @@ function CalendarDayButton({
   );
 }
 
-export { Calendar, CalendarDayButton };
+export { PiCalendarBlank, CalendarDayButton };

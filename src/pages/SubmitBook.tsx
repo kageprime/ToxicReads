@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, ChevronLeft } from "lucide-react";
+import { PiWarningCircle, PiUpload, PiFileText } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { Field } from "@/components/Field";
 
 export default function SubmitBook() {
   const navigate = useNavigate();
@@ -39,7 +40,10 @@ export default function SubmitBook() {
 
   const handleSubmit = () => {
     if (!form.title || !form.author || !form.price || !form.description) return;
-    if (!form.coverImage) { setCoverError(true); return; }
+    if (!form.coverImage) {
+      setCoverError(true);
+      return;
+    }
     submitBook.mutate({
       title: form.title,
       author: form.author,
@@ -95,36 +99,24 @@ export default function SubmitBook() {
     }
   };
 
-  const inputStyle = {
-    width: "100%",
-    fontSize: "18px",
-    padding: "8px 10px",
-    border: "1px solid var(--border-light)",
-    outline: "none",
-    color: "var(--text-charcoal)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-    background: "transparent",
-  };
-
   if (submitted) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "var(--bg-warm-white)" }}
+        style={{ backgroundColor: "var(--background)" }}
       >
         <div
           className="text-center"
           style={{
             maxWidth: "400px",
             padding: "24px",
-            border: "1px solid var(--border-light)",
+            border: "1px solid var(--border)",
           }}
         >
           <p
             style={{
               fontSize: "20px",
-              color: "#2ECC71",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "rgb(var(--color-p-green-fg))",
               marginBottom: "16px",
               letterSpacing: "0.05em",
             }}
@@ -135,7 +127,7 @@ export default function SubmitBook() {
             onClick={() => navigate("/home")}
             style={{
               fontSize: "18px",
-              color: "var(--text-charcoal)",
+              color: "var(--foreground)",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -153,263 +145,137 @@ export default function SubmitBook() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
+      style={{ backgroundColor: "var(--background)" }}
     >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{
-          height: "48px",
-          backgroundColor: "var(--bg-warm-white)",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/home")}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
-          </button>
-          <button
-            onClick={() => navigate("/home")}
-            className="text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
-          >
-            TOXICREADS
-          </button>
-          <span
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginLeft: "8px",
-            }}
-          >
-            / Submit Book
-          </span>
-        </div>
-      </header>
-
       <div
-        className="mx-auto"
-        style={{ maxWidth: "800px", padding: "64px 24px 80px" }}
+        className="mx-auto measure-narrow"
+        style={{ padding: "40px 24px 96px" }}
       >
-        <div
-          style={{
-            border: "1px solid var(--border-light)",
-            padding: "32px",
-            backgroundColor: "var(--bg-warm-white)",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: 400,
-              color: "var(--text-charcoal)",
-              marginBottom: "4px",
-            }}
-          >
-            Sell Your Book
-          </h1>
-          <p
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginBottom: "32px",
-              lineHeight: 1.6,
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}
-          >
-            Your book will be reviewed by an admin before being listed.
-          </p>
-
-          <div
-            style={{
-              border: "2px solid #E74C3C",
-              padding: "14px 18px",
-              marginBottom: "16px",
-              backgroundColor: "rgba(231, 76, 60, 0.06)",
-            }}
-          >
-            <div
-              style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}
+        <div className="grid md:grid-cols-[280px_1fr] gap-12">
+          {/* ── Meta rail ── */}
+          <aside className="md:sticky md:top-24 self-start">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
+              Submit a book
+            </p>
+            <h1
+              className="font-serif text-foreground mb-4"
+              style={{
+                fontSize: "42px",
+                lineHeight: 1.04,
+                letterSpacing: "-0.02em",
+                fontWeight: 400,
+              }}
             >
-              <AlertTriangle
-                size={16}
-                style={{ color: "#E74C3C", marginTop: "2px", flexShrink: 0 }}
-              />
-              <div>
-                <p
+              Sell Your Book
+            </h1>
+            <p
+              className="text-muted-foreground mb-6"
+              style={{ fontSize: "16px", lineHeight: 1.6 }}
+            >
+              Your book will be reviewed by an admin before being listed in the
+              catalog.
+            </p>
+
+            <div className="form-note form-note--alert mb-6">
+              <div className="flex gap-2.5 items-start">
+                <PiWarningCircle
+                  size={16}
                   style={{
-                    fontSize: "17px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "#E74C3C",
-                    fontWeight: 700,
-                    marginBottom: "4px",
+                    color: "rgb(var(--color-p-red-fg))",
+                    marginTop: "2px",
+                    flexShrink: 0,
                   }}
-                >
-                  NO AI GENERATED CONTENT
-                </p>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--text-charcoal)",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  ToxicReads does <strong>not</strong> accept any AI-generated
-                  content. Every submission is reviewed. Violations will be
-                  rejected or removed without notice.
-                </p>
+                />
+                <div>
+                  <p
+                    className="font-mono uppercase"
+                    style={{
+                      fontSize: "11px",
+                      letterSpacing: "0.14em",
+                      color: "rgb(var(--color-p-red-fg))",
+                    }}
+                  >
+                    No AI content
+                  </p>
+                  <p
+                    className="text-foreground"
+                    style={{ fontSize: "14px", lineHeight: 1.55, marginTop: "4px" }}
+                  >
+                    ToxicReads does not accept AI-generated work. Every
+                    submission is reviewed.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div
-            style={{
-              border: "1px solid var(--border-light)",
-              padding: "16px",
-              marginBottom: "24px",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-charcoal)",
-                fontWeight: 700,
-                marginBottom: "10px",
-                letterSpacing: "0.05em",
-              }}
-            >
-              SUBMISSION GUIDELINES
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-1">
+              Accepted formats
             </p>
-            <p
-              style={{
-                fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-grey)",
-                lineHeight: 1.6,
-                marginBottom: "12px",
-              }}
-            >
-              Make sure your submission matches one of these formats:
-            </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "6px 16px",
-                fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-grey)",
-                lineHeight: 2,
-                padding: "8px 12px",
-                backgroundColor: "rgba(0,0,0,0.02)",
-                marginBottom: "12px",
-              }}
-            >
-              <span style={{ fontWeight: 600 }}>Flash Fiction</span>
-              <span>&lt; 1,000 words</span>
-              <span style={{ fontWeight: 600 }}>Short Story</span>
-              <span>1,000 – 7,500 words</span>
-              <span style={{ fontWeight: 600 }}>Novelette</span>
-              <span>7,500 – 17,500 words</span>
-              <span style={{ fontWeight: 600 }}>Novella</span>
-              <span>17,500 – 40,000 words</span>
-              <span style={{ fontWeight: 600 }}>Novel</span>
-              <span>40,000+ words</span>
+            <div>
+              <div className="spec-row">
+                <span>Flash Fiction</span>
+                <span>&lt; 1,000</span>
+              </div>
+              <div className="spec-row">
+                <span>Short Story</span>
+                <span>1,000 – 7,500</span>
+              </div>
+              <div className="spec-row">
+                <span>Novelette</span>
+                <span>7,500 – 17,500</span>
+              </div>
+              <div className="spec-row">
+                <span>Novella</span>
+                <span>17,500 – 40,000</span>
+              </div>
+              <div className="spec-row">
+                <span>Novel</span>
+                <span>40,000+</span>
+              </div>
             </div>
-            <ul
-              style={{
-                fontSize: "16px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--text-grey)",
-                lineHeight: 2,
-                paddingLeft: "16px",
-                margin: 0,
-              }}
-            >
-              <li>Only submit original work you have the right to sell</li>
-              <li>Provide accurate title, author, and description</li>
-              <li>No hate speech, illegal content, or explicit material</li>
-              <li>No AI-generated content — zero tolerance</li>
-              <li>All books are digital — no physical copies will be handled</li>
-              <li>Admins reserve the right to reject or remove listings</li>
-            </ul>
-          </div>
+          </aside>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Title *
-                </label>
+          {/* ── Form ── */}
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+            className="space-y-7"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <Field label="Title" required>
                 <input
+                  className="field-input"
                   value={form.title}
                   onChange={e => setForm({ ...form, title: e.target.value })}
-                  style={inputStyle}
+                  placeholder="The Last Frequency"
                 />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Author *
-                </label>
+              </Field>
+              <Field label="Author" required>
                 <input
+                  className="field-input"
                   value={form.author}
                   onChange={e => setForm({ ...form, author: e.target.value })}
-                  style={inputStyle}
+                  placeholder="A. Okafor"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Price *
-                </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <Field label="Price" required hint="Nigerian Naira">
                 <input
+                  className="field-input"
                   value={form.price}
                   onChange={e => setForm({ ...form, price: e.target.value })}
-                  style={inputStyle}
                   placeholder="₦2,500"
                 />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "17px",
-                    color: "var(--text-grey)",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Genre
-                </label>
+              </Field>
+              <Field label="Genre">
                 <select
+                  className="field-input"
                   value={form.category}
                   onChange={e => setForm({ ...form, category: e.target.value })}
-                  style={inputStyle}
                 >
                   {["Sci-Fi", "Horror", "Thriller"].map(c => (
                     <option key={c} value={c}>
@@ -417,70 +283,46 @@ export default function SubmitBook() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </Field>
             </div>
 
-            <div>
-              <label
-                style={{
-                  fontSize: "17px",
-                  color: "var(--text-grey)",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Cover Image *
-              </label>
-              <div className="flex gap-3 items-start">
+            <Field label="Cover Image" required>
+              <div className="flex gap-4 items-start">
                 <div
                   style={{
-                    width: "100px",
-                    height: "133px",
-                    border: "1px solid var(--border-light)",
+                    width: "96px",
+                    height: "128px",
+                    border: "1px solid var(--border)",
                     flexShrink: 0,
                     overflow: "hidden",
-                    backgroundColor: "var(--border-light)",
+                    backgroundColor: "var(--muted)",
                   }}
                 >
                   {uploading ? (
                     <div className="flex items-center justify-center h-full">
-                      <p
-                        style={{
-                          fontSize: "15px",
-                          color: "var(--text-grey)",
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                        }}
+                      <span
+                        className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground"
                       >
-                        Uploading...
-                      </p>
+                        Uploading
+                      </span>
                     </div>
                   ) : form.coverImage ? (
                     <img
                       src={form.coverImage}
                       alt="Cover preview"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--text-grey)",
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                          textAlign: "center",
-                          padding: "4px",
-                        }}
+                    <div className="flex items-center justify-center h-full px-2">
+                      <span
+                        className="font-mono text-[11px] text-center text-muted-foreground"
                       >
                         No file
-                      </p>
+                      </span>
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 pt-1">
                   <input
                     type="file"
                     accept="image/*"
@@ -488,134 +330,75 @@ export default function SubmitBook() {
                     style={{ display: "none" }}
                     id="submit-cover-upload"
                   />
-                  <label
-                    htmlFor="submit-cover-upload"
-                    style={{
-                      display: "inline-block",
-                      padding: "8px 16px",
-                      fontSize: "16px",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                      color: "var(--text-charcoal)",
-                      border: "1px solid var(--border-light)",
-                      cursor: "pointer",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    Choose File
+                  <label htmlFor="submit-cover-upload" className="field-action">
+                    <PiUpload size={14} />
+                    {uploading ? "Uploading..." : "Choose file"}
                   </label>
                   {coverError && !form.coverImage && (
                     <p
-                      style={{
-                        fontSize: "15px",
-                        color: "#E74C3C",
-                        marginTop: "4px",
-                      }}
+                      className="mt-2 text-[13px]"
+                      style={{ color: "rgb(var(--color-p-red-fg))" }}
                     >
                       Please upload a cover image
                     </p>
                   )}
                 </div>
               </div>
-            </div>
+            </Field>
 
-            <div>
-              <label
-                style={{
-                  fontSize: "17px",
-                  color: "var(--text-grey)",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Description *
-              </label>
+            <Field label="Description" required>
               <textarea
-                value={form.description}
-                onChange={e =>
-                  setForm({ ...form, description: e.target.value })
-                }
+                className="field-input"
                 rows={4}
-                style={{ ...inputStyle, resize: "vertical" }}
+                value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })}
+                placeholder="A short, compelling summary of your book."
               />
-            </div>
+            </Field>
 
-            <div>
-              <label
-                style={{
-                  fontSize: "17px",
-                  color: "var(--text-grey)",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Reading Content (optional)
+            <Field
+              label="Reading Content"
+              hint="Optional — paste text or upload a document."
+            >
+              <input
+                type="file"
+                accept=".docx,.pdf,.epub"
+                onChange={handleContentUpload}
+                style={{ display: "none" }}
+                id="content-upload"
+              />
+              <label htmlFor="content-upload" className="field-action">
+                <PiFileText size={14} />
+                {contentUploading
+                  ? "Extracting..."
+                  : "Upload .docx / .pdf / .epub"}
               </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="file"
-                  accept=".docx,.pdf,.epub"
-                  onChange={handleContentUpload}
-                  style={{ display: "none" }}
-                  id="content-upload"
-                />
-                <label
-                  htmlFor="content-upload"
-                  style={{
-                    display: "inline-block",
-                    padding: "6px 12px",
-                    fontSize: "15px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--text-charcoal)",
-                    border: "1px solid var(--border-light)",
-                    cursor: "pointer",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {contentUploading
-                    ? "Extracting..."
-                    : "Upload .docx / .pdf / .epub"}
-                </label>
-              </div>
               <textarea
+                className="field-input mt-3"
+                rows={8}
                 value={form.content}
                 onChange={e => setForm({ ...form, content: e.target.value })}
-                rows={8}
-                placeholder="Paste your content here, or upload a .docx file..."
-                style={{ ...inputStyle, resize: "vertical" }}
+                placeholder="Paste your content here, or upload a document above."
               />
-            </div>
+            </Field>
 
             {submitBook.error && (
               <p
-                style={{
-                  fontSize: "17px",
-                  color: "#E74C3C",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                }}
+                className="text-[14px]"
+                style={{ color: "rgb(var(--color-p-red-fg))" }}
               >
                 {submitBook.error.message}
               </p>
             )}
 
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={submitBook.isPending}
-              style={{
-                width: "100%",
-                padding: "14px",
-                fontSize: "18px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                color: "var(--bg-warm-white)",
-                background: "var(--text-charcoal)",
-                border: "none",
-                cursor: submitBook.isPending ? "wait" : "pointer",
-                opacity: submitBook.isPending ? 0.7 : 1,
-                letterSpacing: "0.05em",
-              }}
+              className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:bg-[#333333] active:scale-[0.985] transition disabled:opacity-70"
             >
               {submitBook.isPending ? "Submitting..." : "Submit for Review"}
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>

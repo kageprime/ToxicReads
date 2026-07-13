@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, ChevronLeft, Edit2, Check, X } from "lucide-react";
+import { PiWarningCircle, PiPencilSimple, PiCheck, PiX } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -83,9 +83,9 @@ export default function AdminDashboard() {
   }
 
   const statusColors: Record<string, string> = {
-    pending: "#F39C12",
-    approved: "#2ECC71",
-    rejected: "#E74C3C",
+    pending: "var(--color-p-yellow-fg)",
+    approved: "var(--color-p-green-fg)",
+    rejected: "var(--color-p-red-fg)",
   };
 
   const categories = ["Sci-Fi", "Horror", "Thriller"];
@@ -157,87 +157,41 @@ export default function AdminDashboard() {
     width: "100%",
     fontSize: "18px",
     padding: "8px 10px",
-    border: "1px solid var(--border-light)",
+    border: "1px solid var(--border)",
     outline: "none",
-    color: "var(--text-charcoal)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    color: "var(--foreground)",
+    fontFamily: "var(--font-mono)",
     background: "transparent",
   };
 
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--bg-warm-white)" }}
+      style={{ backgroundColor: "var(--background)" }}
     >
-      <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{
-          height: "48px",
-          backgroundColor: "var(--bg-warm-white)",
-          borderBottom: "1px solid var(--border-light)",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/home")}
-            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
-          >
-            TOXICREADS
-          </button>
-          <button
-            onClick={() => navigate("/home")}
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginLeft: "8px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              padding: 0,
-            }}
-          >
-            / Browse
-          </button>
-          <span
-            style={{
-              fontSize: "17px",
-              color: "var(--text-grey)",
-              marginLeft: "4px",
-            }}
-          >
-            / Admin
-          </span>
-        </div>
-      </header>
-
       <div
         className="mx-auto"
-        style={{ maxWidth: "960px", padding: "64px 24px 80px" }}
+        style={{ maxWidth: "960px", padding: "32px 24px 80px" }}
       >
-        <h1
-          style={{
-            fontSize: "28px",
-            fontWeight: 400,
-            color: "var(--text-charcoal)",
-            marginBottom: "24px",
-          }}
-        >
-          Admin Dashboard
-        </h1>
+          <h1
+            style={{
+              fontSize: "34px",
+              fontWeight: 400,
+              fontFamily: "var(--font-serif)",
+              color: "var(--foreground)",
+              marginBottom: "24px",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Admin Dashboard
+          </h1>
 
         <div className="flex items-center justify-between mb-6">
           <div
             style={{
               display: "flex",
               gap: "1px",
-              borderBottom: "1px solid var(--border-light)",
+              borderBottom: "1px solid var(--border)",
             }}
           >
             {(["pending", "books", "purchases"] as Tab[]).map(tab => {
@@ -258,19 +212,19 @@ export default function AdminDashboard() {
                   onClick={() => setActiveTab(tab)}
                   style={{
                     fontSize: "17px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    fontFamily: "var(--font-mono)",
                     letterSpacing: "0.05em",
                     padding: "8px 16px",
                     border: "none",
                     borderBottom:
                       activeTab === tab
-                        ? "2px solid var(--text-charcoal)"
+                        ? "2px solid var(--foreground)"
                         : "2px solid transparent",
                     background: "transparent",
                     color:
                       activeTab === tab
-                        ? "var(--text-charcoal)"
-                        : "var(--text-grey)",
+                        ? "var(--foreground)"
+                        : "var(--muted-foreground)",
                     cursor: "pointer",
                   }}
                 >
@@ -285,8 +239,8 @@ export default function AdminDashboard() {
               <span
                 style={{
                   fontSize: "17px",
-                  color: "var(--text-grey)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--muted-foreground)",
+                  fontFamily: "var(--font-mono)",
                   alignSelf: "center",
                 }}
               >
@@ -297,9 +251,9 @@ export default function AdminDashboard() {
                 disabled={approveMutation.isPending}
                 style={{
                   fontSize: "16px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontFamily: "var(--font-mono)",
                   color: "#fff",
-                  background: "#2ECC71",
+                  background: "var(--color-p-green-fg)",
                   border: "none",
                   padding: "6px 12px",
                   cursor: "pointer",
@@ -313,10 +267,10 @@ export default function AdminDashboard() {
                 disabled={rejectMutation.isPending}
                 style={{
                   fontSize: "16px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  color: "#E74C3C",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--color-p-red-fg)",
                   background: "transparent",
-                  border: "1px solid #E74C3C",
+                  border: "1px solid var(--color-p-red-fg)",
                   padding: "6px 12px",
                   cursor: "pointer",
                   letterSpacing: "0.05em",
@@ -332,7 +286,7 @@ export default function AdminDashboard() {
           <div>
             <div
               style={{
-                border: "1px solid #F39C12",
+                border: "1px solid var(--color-p-yellow-fg)",
                 padding: "10px 14px",
                 marginBottom: "16px",
                 backgroundColor: "rgba(243, 156, 18, 0.08)",
@@ -345,15 +299,15 @@ export default function AdminDashboard() {
                   alignItems: "flex-start",
                 }}
               >
-                <AlertTriangle
+                <PiWarningCircle
                   size={12}
-                  style={{ color: "#F39C12", marginTop: "3px", flexShrink: 0 }}
+                  style={{ color: "var(--color-p-yellow-fg)", marginTop: "3px", flexShrink: 0 }}
                 />
                 <p
                   style={{
                     fontSize: "15px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--text-charcoal)",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--foreground)",
                     lineHeight: 1.6,
                   }}
                 >
@@ -367,8 +321,8 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--text-grey)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--muted-foreground)",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 LOADING...
@@ -388,8 +342,8 @@ export default function AdminDashboard() {
                   <span
                     style={{
                       fontSize: "16px",
-                      color: "var(--text-grey)",
-                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      color: "var(--muted-foreground)",
+                      fontFamily: "var(--font-mono)",
                     }}
                   >
                     Select All
@@ -399,7 +353,7 @@ export default function AdminDashboard() {
                   <div
                     key={book.id}
                     style={{
-                      border: "1px solid var(--border-light)",
+                      border: "1px solid var(--border)",
                       padding: "16px",
                     }}
                   >
@@ -419,7 +373,7 @@ export default function AdminDashboard() {
                           objectFit: "cover",
                           flexShrink: 0,
                           cursor: "pointer",
-                          border: "1px solid var(--border-light)",
+                          border: "1px solid var(--border)",
                         }}
                         onClick={() => navigate(`/book/${book.id}`)}
                       />
@@ -430,7 +384,8 @@ export default function AdminDashboard() {
                               style={{
                                 fontSize: "21px",
                                 fontWeight: 400,
-                                color: "var(--text-charcoal)",
+                                fontFamily: "var(--font-serif)",
+                                color: "var(--foreground)",
                                 marginBottom: "4px",
                               }}
                             >
@@ -439,7 +394,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "18px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 marginBottom: "4px",
                               }}
                             >
@@ -448,8 +403,8 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "18px",
-                                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                                color: "var(--text-charcoal)",
+                                fontFamily: "var(--font-mono)",
+                                color: "var(--foreground)",
                                 marginBottom: "4px",
                               }}
                             >
@@ -458,7 +413,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                               }}
                             >
                               {book.category}
@@ -467,7 +422,7 @@ export default function AdminDashboard() {
                           <span
                             style={{
                               fontSize: "15px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                              fontFamily: "var(--font-mono)",
                               color: statusColors[book.status],
                               border: `1px solid ${statusColors[book.status]}`,
                               padding: "2px 8px",
@@ -479,7 +434,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "18px",
-                            color: "var(--text-charcoal)",
+                            color: "var(--foreground)",
                             lineHeight: 1.6,
                             marginBottom: "12px",
                             maxWidth: "600px",
@@ -495,9 +450,9 @@ export default function AdminDashboard() {
                             disabled={approveMutation.isPending}
                             style={{
                               fontSize: "16px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                              fontFamily: "var(--font-mono)",
                               color: "#fff",
-                              background: "#2ECC71",
+                              background: "var(--color-p-green-fg)",
                               border: "none",
                               padding: "6px 16px",
                               cursor: "pointer",
@@ -513,10 +468,10 @@ export default function AdminDashboard() {
                             disabled={rejectMutation.isPending}
                             style={{
                               fontSize: "16px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                              color: "#E74C3C",
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--color-p-red-fg)",
                               background: "transparent",
-                              border: "1px solid #E74C3C",
+                              border: "1px solid var(--color-p-red-fg)",
                               padding: "6px 16px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
@@ -534,7 +489,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   textAlign: "center",
                   padding: "40px 0",
                 }}
@@ -551,8 +506,8 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--text-grey)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--muted-foreground)",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 LOADING...
@@ -563,10 +518,10 @@ export default function AdminDashboard() {
                   className="hidden md:flex items-center gap-4"
                   style={{
                     padding: "8px 0",
-                    borderBottom: "2px solid var(--text-charcoal)",
+                    borderBottom: "2px solid var(--foreground)",
                     fontSize: "16px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--text-grey)",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   <div style={{ width: "40px" }}></div>
@@ -582,7 +537,7 @@ export default function AdminDashboard() {
                       <div
                         style={{
                           padding: "16px",
-                          borderBottom: "1px solid var(--border-light)",
+                          borderBottom: "1px solid var(--border)",
                           backgroundColor: "rgba(0,0,0,0.02)",
                         }}
                       >
@@ -591,7 +546,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -613,7 +568,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -635,7 +590,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -657,7 +612,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -685,7 +640,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -708,7 +663,7 @@ export default function AdminDashboard() {
                           <label
                             style={{
                               fontSize: "16px",
-                              color: "var(--text-grey)",
+                              color: "var(--muted-foreground)",
                               display: "block",
                               marginBottom: "4px",
                             }}
@@ -733,42 +688,42 @@ export default function AdminDashboard() {
                             disabled={updateMutation.isPending}
                             style={{
                               fontSize: "16px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                              fontFamily: "var(--font-mono)",
                               color: "#fff",
-                              background: "#2ECC71",
+                              background: "var(--color-p-green-fg)",
                               border: "none",
                               padding: "6px 16px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
                           >
-                            <Check size={12} style={{ marginRight: "4px" }} />{" "}
+                            <PiCheck size={12} style={{ marginRight: "4px" }} />{" "}
                             Save
                           </button>
                           <button
                             onClick={cancelEdit}
                             style={{
                               fontSize: "16px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                              color: "#E74C3C",
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--color-p-red-fg)",
                               background: "transparent",
-                              border: "1px solid #E74C3C",
+                              border: "1px solid var(--color-p-red-fg)",
                               padding: "6px 16px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
                           >
-                            <X size={12} style={{ marginRight: "4px" }} />{" "}
+                            <PiX size={12} style={{ marginRight: "4px" }} />{" "}
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div
-                        className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4"
+                        className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-colors hover:bg-accent"
                         style={{
-                          padding: "12px 0",
-                          borderBottom: "1px solid var(--border-light)",
+                          padding: "12px",
+                          borderBottom: "1px solid var(--border)",
                         }}
                       >
                         <div className="flex items-center gap-3 md:gap-4">
@@ -777,7 +732,7 @@ export default function AdminDashboard() {
                               width: "40px",
                               height: "52px",
                               objectFit: "cover",
-                              border: "1px solid var(--border-light)",
+                              border: "1px solid var(--border)",
                               flexShrink: 0,
                             }}
                           >
@@ -797,7 +752,8 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "19px",
-                                color: "var(--text-charcoal)",
+                                fontFamily: "var(--font-serif)",
+                                color: "var(--foreground)",
                                 cursor: "pointer",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -810,7 +766,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "17px",
-                                color: "var(--text-grey)",
+                                color: "var(--muted-foreground)",
                               }}
                             >
                               {book.author}
@@ -821,7 +777,7 @@ export default function AdminDashboard() {
                           <p
                             style={{
                               fontSize: "19px",
-                              color: "var(--text-charcoal)",
+                              color: "var(--foreground)",
                               cursor: "pointer",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
@@ -834,7 +790,7 @@ export default function AdminDashboard() {
                           <p
                             style={{
                               fontSize: "17px",
-                              color: "var(--text-grey)",
+                              color: "var(--muted-foreground)",
                             }}
                           >
                             {book.author}
@@ -844,8 +800,8 @@ export default function AdminDashboard() {
                           <span
                             style={{
                               fontSize: "18px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                              color: "var(--text-charcoal)",
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--foreground)",
                               width: "60px",
                             }}
                           >
@@ -854,7 +810,7 @@ export default function AdminDashboard() {
                           <span
                             style={{
                               fontSize: "15px",
-                              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                              fontFamily: "var(--font-mono)",
                               color: statusColors[book.status],
                               border: `1px solid ${statusColors[book.status]}`,
                               padding: "2px 6px",
@@ -868,16 +824,16 @@ export default function AdminDashboard() {
                               onClick={() => startEdit(book)}
                               style={{
                                 fontSize: "15px",
-                                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                                color: "var(--text-charcoal)",
+                                fontFamily: "var(--font-mono)",
+                                color: "var(--foreground)",
                                 background: "none",
-                                border: "1px solid var(--border-light)",
+                                border: "1px solid var(--border)",
                                 padding: "4px 6px",
                                 cursor: "pointer",
                               }}
                               title="Edit"
                             >
-                              <Edit2 size={10} />
+                              <PiPencilSimple size={10} />
                             </button>
                             <button
                               onClick={() => {
@@ -886,10 +842,10 @@ export default function AdminDashboard() {
                               }}
                               style={{
                                 fontSize: "15px",
-                                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                                color: "#E74C3C",
+                                fontFamily: "var(--font-mono)",
+                                color: "var(--color-p-red-fg)",
                                 background: "none",
-                                border: "1px solid #E74C3C",
+                                border: "1px solid var(--color-p-red-fg)",
                                 padding: "4px 6px",
                                 cursor: "pointer",
                               }}
@@ -908,7 +864,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   textAlign: "center",
                   padding: "40px 0",
                 }}
@@ -925,8 +881,8 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--text-grey)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--muted-foreground)",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 LOADING...
@@ -937,10 +893,10 @@ export default function AdminDashboard() {
                   className="hidden md:flex items-center gap-4"
                   style={{
                     padding: "8px 0",
-                    borderBottom: "2px solid var(--text-charcoal)",
+                    borderBottom: "2px solid var(--foreground)",
                     fontSize: "16px",
-                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                    color: "var(--text-grey)",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--muted-foreground)",
                   }}
                 >
                   <div style={{ width: "40px" }}>ID</div>
@@ -956,7 +912,7 @@ export default function AdminDashboard() {
                     className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4"
                     style={{
                       padding: "12px 0",
-                      borderBottom: "1px solid var(--border-light)",
+                      borderBottom: "1px solid var(--border)",
                     }}
                   >
                     <div className="flex items-center gap-3 md:gap-4">
@@ -964,8 +920,8 @@ export default function AdminDashboard() {
                         className="md:hidden"
                         style={{
                           fontSize: "16px",
-                          color: "var(--text-grey)",
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                          color: "var(--muted-foreground)",
+                          fontFamily: "var(--font-mono)",
                         }}
                       >
                         #{purchase.id}
@@ -975,7 +931,7 @@ export default function AdminDashboard() {
                           width: "40px",
                           height: "52px",
                           objectFit: "cover",
-                          border: "1px solid var(--border-light)",
+                          border: "1px solid var(--border)",
                           flexShrink: 0,
                         }}
                       >
@@ -995,7 +951,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "19px",
-                            color: "var(--text-charcoal)",
+                            color: "var(--foreground)",
                             cursor: "pointer",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -1008,7 +964,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "17px",
-                            color: "var(--text-grey)",
+                            color: "var(--muted-foreground)",
                           }}
                         >
                           {purchase.book?.author}
@@ -1019,8 +975,8 @@ export default function AdminDashboard() {
                       className="hidden md:inline"
                       style={{
                         fontSize: "17px",
-                        color: "var(--text-grey)",
-                        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        color: "var(--muted-foreground)",
+                        fontFamily: "var(--font-mono)",
                         width: "40px",
                       }}
                     >
@@ -1032,7 +988,7 @@ export default function AdminDashboard() {
                         width: "40px",
                         height: "52px",
                         objectFit: "cover",
-                        border: "1px solid var(--border-light)",
+                        border: "1px solid var(--border)",
                         flexShrink: 0,
                       }}
                     >
@@ -1052,7 +1008,7 @@ export default function AdminDashboard() {
                       <p
                         style={{
                           fontSize: "19px",
-                          color: "var(--text-charcoal)",
+                          color: "var(--foreground)",
                           cursor: "pointer",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -1063,19 +1019,19 @@ export default function AdminDashboard() {
                         {purchase.book?.title}
                       </p>
                       <p
-                        style={{ fontSize: "17px", color: "var(--text-grey)" }}
+                        style={{ fontSize: "17px", color: "var(--muted-foreground)" }}
                       >
                         {purchase.book?.author}
                       </p>
                     </div>
                     <div
                       className="flex flex-wrap items-center gap-2 ml-[52px] md:ml-0 text-xs"
-                      style={{ color: "var(--text-grey)" }}
+                      style={{ color: "var(--muted-foreground)" }}
                     >
                       <span
                         style={{
-                          color: "var(--text-charcoal)",
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                          color: "var(--foreground)",
+                          fontFamily: "var(--font-mono)",
                         }}
                       >
                         {purchase.buyer?.username || "—"}
@@ -1083,8 +1039,8 @@ export default function AdminDashboard() {
                       <span>·</span>
                       <span
                         style={{
-                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                          color: "var(--text-charcoal)",
+                          fontFamily: "var(--font-mono)",
+                          color: "var(--foreground)",
                         }}
                       >
                         ₦{purchase.purchasePrice}
@@ -1103,7 +1059,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   textAlign: "center",
                   padding: "40px 0",
                 }}

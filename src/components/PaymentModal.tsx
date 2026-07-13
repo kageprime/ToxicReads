@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { PiX } from "react-icons/pi";
 
 interface PaymentModalProps {
   price: string;
@@ -91,15 +91,15 @@ export default function PaymentModal({
       <div
         className="w-full max-w-sm mx-4"
         style={{
-          backgroundColor: "var(--bg-warm-white)",
-          border: "1px solid var(--border-light)",
+          backgroundColor: "var(--background)",
+          border: "1px solid var(--border)",
           animation: "modalIn 0.25s ease-out both",
         }}
         onClick={e => e.stopPropagation()}
       >
         <div
           className="flex items-center justify-between px-5 pt-4 pb-2"
-          style={{ borderBottom: "1px solid var(--border-light)" }}
+          style={{ borderBottom: "1px solid var(--border)" }}
         >
           <h2
             style={{
@@ -107,7 +107,7 @@ export default function PaymentModal({
               fontWeight: 400,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
-              color: "var(--text-charcoal)",
+              color: "var(--foreground)",
             }}
           >
             Complete Payment
@@ -116,7 +116,7 @@ export default function PaymentModal({
             onClick={onClose}
             className="p-1 hover:opacity-70 transition-opacity"
           >
-            <X size={16} style={{ color: "var(--text-grey)" }} />
+            <PiX size={16} style={{ color: "var(--muted-foreground)" }} />
           </button>
         </div>
 
@@ -124,8 +124,8 @@ export default function PaymentModal({
           <p
             style={{
               fontSize: "17px",
-              color: "var(--text-grey)",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "var(--muted-foreground)",
+              fontFamily: "var(--font-mono)",
               marginBottom: "2px",
             }}
           >
@@ -134,24 +134,18 @@ export default function PaymentModal({
           <p
             style={{
               fontSize: "22px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              color: "var(--text-charcoal)",
+              fontFamily: "var(--font-mono)",
+              color: "var(--foreground)",
             }}
           >
-            ${price}
+            ₦{price}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="px-5 pb-5 space-y-3">
           <div>
             <label
-              style={{
-                fontSize: "16px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "3px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              }}
+              className="field-label"
             >
               Card Number
             </label>
@@ -159,28 +153,13 @@ export default function PaymentModal({
               value={cardNumber}
               onChange={e => setCardNumber(formatCardNumber(e.target.value))}
               placeholder="4242 4242 4242 4242"
-              style={{
-                width: "100%",
-                fontSize: "18px",
-                padding: "8px 10px",
-                border: "1px solid var(--border-light)",
-                outline: "none",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                background: "transparent",
-              }}
+              className="field-input"
             />
           </div>
 
           <div>
             <label
-              style={{
-                fontSize: "16px",
-                color: "var(--text-grey)",
-                display: "block",
-                marginBottom: "3px",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              }}
+              className="field-label"
             >
               Cardholder Name
             </label>
@@ -188,16 +167,7 @@ export default function PaymentModal({
               value={cardName}
               onChange={e => setCardName(e.target.value)}
               placeholder="John Doe"
-              style={{
-                width: "100%",
-                fontSize: "18px",
-                padding: "8px 10px",
-                border: "1px solid var(--border-light)",
-                outline: "none",
-                color: "var(--text-charcoal)",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                background: "transparent",
-              }}
+              className="field-input"
             />
           </div>
 
@@ -206,10 +176,10 @@ export default function PaymentModal({
               <label
                 style={{
                   fontSize: "16px",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   display: "block",
                   marginBottom: "3px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 Expiry
@@ -222,10 +192,10 @@ export default function PaymentModal({
                   width: "100%",
                   fontSize: "18px",
                   padding: "8px 10px",
-                  border: "1px solid var(--border-light)",
+                  border: "1px solid var(--border)",
                   outline: "none",
-                  color: "var(--text-charcoal)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--foreground)",
+                  fontFamily: "var(--font-mono)",
                   background: "transparent",
                 }}
               />
@@ -234,10 +204,10 @@ export default function PaymentModal({
               <label
                 style={{
                   fontSize: "16px",
-                  color: "var(--text-grey)",
+                  color: "var(--muted-foreground)",
                   display: "block",
                   marginBottom: "3px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  fontFamily: "var(--font-mono)",
                 }}
               >
                 CVC
@@ -252,10 +222,10 @@ export default function PaymentModal({
                   width: "100%",
                   fontSize: "18px",
                   padding: "8px 10px",
-                  border: "1px solid var(--border-light)",
+                  border: "1px solid var(--border)",
                   outline: "none",
-                  color: "var(--text-charcoal)",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  color: "var(--foreground)",
+                  fontFamily: "var(--font-mono)",
                   background: "transparent",
                 }}
               />
@@ -266,8 +236,8 @@ export default function PaymentModal({
             <p
               style={{
                 fontSize: "17px",
-                color: "#E74C3C",
-                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--color-p-red-fg)",
+                fontFamily: "var(--font-mono)",
               }}
             >
               {error}
@@ -281,9 +251,9 @@ export default function PaymentModal({
               width: "100%",
               padding: "12px",
               fontSize: "18px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              color: "var(--bg-warm-white)",
-              background: processing ? "#999" : "var(--text-charcoal)",
+              fontFamily: "var(--font-mono)",
+              color: "var(--background)",
+              background: processing ? "#999" : "var(--foreground)",
               border: "none",
               cursor: processing ? "wait" : "pointer",
               letterSpacing: "0.05em",
@@ -296,8 +266,8 @@ export default function PaymentModal({
           <p
             style={{
               fontSize: "15px",
-              color: "var(--text-grey)",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "var(--muted-foreground)",
+              fontFamily: "var(--font-mono)",
               textAlign: "center",
               marginTop: "8px",
             }}
