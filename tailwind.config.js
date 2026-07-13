@@ -55,6 +55,7 @@ module.exports = {
         },
       },
       fontFamily: {
+        display: ['"Lilita One"', "cursive"],
         serif: ['"Playfair Display"', "serif"],
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
       },

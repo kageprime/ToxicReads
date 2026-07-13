@@ -130,6 +130,10 @@
   font-family: "Playfair Display", serif;
 }
 
+.font-display {
+  font-family: "Lilita One", cursive;
+}
+
 .kente {
   background: repeating-linear-gradient(
     90deg,

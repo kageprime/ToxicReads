@@ -118,7 +118,7 @@ function formatNaira(price: string | number) {
           </div>{" "}
           <div>
             {" "}
-            <h3 className="font-serif text-2xl font-extrabold text-baobab">
+            <h3 className="font-display text-2xl font-extrabold text-baobab">
               Upload Your Book
             </h3>{" "}
             <p className="text-sm text-charcoal/60 -mt-0.5">
@@ -326,7 +326,7 @@ function formatNaira(price: string | number) {
               />{" "}
             </svg>{" "}
           </span>{" "}
-          <span className="font-serif text-[28px] font-extrabold tracking-tight text-baobab">
+          <span className="font-display text-[28px] font-extrabold tracking-tight text-baobab">
             Toxic<span className="text-terracotta">Reads</span>
           </span>{" "}
         </a>{" "}
@@ -443,7 +443,7 @@ function formatNaira(price: string | number) {
           {" "}
           <div className="max-w-3xl">
             {" "}
-            <h1 className="mt-6 font-serif text-[50px] leading-[1.05] sm:text-6xl md:text-[86px] font-black tracking-tight text-baobab">
+            <h1 className="mt-6 font-display text-[50px] leading-[1.05] sm:text-6xl md:text-[86px] font-black tracking-tight text-baobab">
               {" "}
               African Sci-Fi,
               <br />{" "}
@@ -564,7 +564,7 @@ function formatNaira(price: string | number) {
           {" "}
           <div>
             {" "}
-            <h2 className="font-serif text-3xl md:text-4xl font-extrabold text-baobab inline-flex items-center gap-3">
+            <h2 className="font-display text-3xl md:text-4xl font-extrabold text-baobab inline-flex items-center gap-3">
               Featured This Week
               {!loading && fetching && (
                 <span className="inline-block w-4 h-4 border-2 border-baobab/30 border-t-baobab rounded-full animate-spin" />
@@ -626,7 +626,7 @@ function formatNaira(price: string | number) {
                     {" "}
                     {book.category || "Book"}{" "}
                   </span>{" "}
-                  <h3 className="mt-2 font-serif text-[32px] leading-tight font-bold text-white drop-shadow">
+                  <h3 className="mt-2 font-display text-[32px] leading-tight font-bold text-white drop-shadow">
                     {book.title}
                   </h3>{" "}
                 </div>{" "}
@@ -696,7 +696,7 @@ function formatNaira(price: string | number) {
                   <path d="M24 7c-5.5 0-10 4.5-10 10 0 4.2 2.6 7.8 6.3 9.2l-2.8 7.8 6.5-4 6.5 4-2.8-7.8c3.7-1.4 6.3-5 6.3-9.2 0-5.5-4.5-10-10-10Z" />
                 </svg>{" "}
               </span>{" "}
-              <span className="font-serif text-xl font-extrabold text-baobab">
+              <span className="font-display text-xl font-extrabold text-baobab">
                 ToxicReads
               </span>{" "}
             </div>{" "}
