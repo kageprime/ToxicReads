@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
-import { useTheme } from '../contexts/ThemeContext';
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+import { useTheme } from "../contexts/ThemeContext";
 
 const vertexShader = `
   varying vec2 vUv;
@@ -155,7 +155,7 @@ export default function ShaderCanvas() {
   // React to theme changes
   useEffect(() => {
     if (uniformsRef.current) {
-      uniformsRef.current.u_dark_mode.value = theme === 'dark' ? 1.0 : 0.0;
+      uniformsRef.current.u_dark_mode.value = theme === "dark" ? 1.0 : 0.0;
     }
   }, [theme]);
 
@@ -166,7 +166,10 @@ export default function ShaderCanvas() {
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      alpha: false,
+    });
 
     const w = container.clientWidth;
     const h = container.clientHeight;
@@ -176,13 +179,18 @@ export default function ShaderCanvas() {
 
     const uniforms: Record<string, THREE.IUniform> = {
       u_time: { value: 0 },
-      u_res: { value: new THREE.Vector2(w * Math.min(window.devicePixelRatio, 2), h * Math.min(window.devicePixelRatio, 2)) },
+      u_res: {
+        value: new THREE.Vector2(
+          w * Math.min(window.devicePixelRatio, 2),
+          h * Math.min(window.devicePixelRatio, 2)
+        ),
+      },
       u_scale: { value: 2.5 },
       u_speed: { value: 0.05 },
       u_warp: { value: 0.45 },
       u_grid_width: { value: 0.4 },
       u_color_w: { value: 0.8 },
-      u_dark_mode: { value: theme === 'dark' ? 1.0 : 0.0 },
+      u_dark_mode: { value: theme === "dark" ? 1.0 : 0.0 },
     };
     uniformsRef.current = uniforms;
 
@@ -197,7 +205,9 @@ export default function ShaderCanvas() {
     scene.add(mesh);
 
     let isHidden = false;
-    const onVisibility = () => { isHidden = document.hidden; };
+    const onVisibility = () => {
+      isHidden = document.hidden;
+    };
     document.addEventListener("visibilitychange", onVisibility);
 
     const animate = () => {
@@ -218,11 +228,11 @@ export default function ShaderCanvas() {
       uniforms.u_res.value.set(nw, nh);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(frameRef.current);
       renderer.dispose();
       geometry.dispose();
@@ -237,11 +247,11 @@ export default function ShaderCanvas() {
     <div
       ref={containerRef}
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         zIndex: 0,
       }}
     />

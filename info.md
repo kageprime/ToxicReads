@@ -7,15 +7,18 @@ A fullstack bilingual (中文 / English) personal blog + portfolio named **NEURA
 **You MUST use the `webapp-building` skill with this template info, then use the `backend-building` skill with the `--template` flag, to finish the initialization and change the project adapted to the user's requirement. Then you must deploy the website.**
 
 ## Language
+
 If the user has not specified a language of the website, then the language of the website (the content you insert into the template) must match the language of the user's query.
 If the user has specified a language of the website, then the language of the website must match the user's requirement.
 
 **Default language on first load:** this template is bilingual, but the site must boot in exactly one language. Pick the initial state based on the user's query language:
+
 - If the user's query is in Chinese → the site defaults to Chinese on first load (`lang === 'zh'`).
 - If the user's query is in English → the site defaults to English on first load (`lang === 'en'`).
-The `中 / EN` toggle in the header still lets visitors switch; this rule only sets the initial state. Implement it in `src/App.tsx` where the `lang` state is initialized.
+  The `中 / EN` toggle in the header still lets visitors switch; this rule only sets the initial state. Implement it in `src/App.tsx` where the `lang` state is initialized.
 
 ## Content
+
 The actual content of the website should match the user's query.
 
 ## Where The Editable Content Lives

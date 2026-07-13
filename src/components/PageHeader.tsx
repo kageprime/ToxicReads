@@ -11,9 +11,9 @@ interface PageHeaderProps {
   showDelete?: boolean;
 }
 
-export default function PageHeader({ 
-  title, 
-  showBack = true, 
+export default function PageHeader({
+  title,
+  showBack = true,
   showLogout = false,
   showAdmin = false,
   onDelete,
@@ -23,32 +23,38 @@ export default function PageHeader({
   const { isAdmin, logout } = useAuth();
 
   return (
-    <header 
+    <header
       className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-      style={{ 
-        height: "48px", 
-        backgroundColor: "var(--bg-warm-white)", 
-        borderBottom: "1px solid var(--border-light)" 
+      style={{
+        height: "48px",
+        backgroundColor: "var(--bg-warm-white)",
+        borderBottom: "1px solid var(--border-light)",
       }}
     >
       <div className="flex items-center gap-2">
         {showBack && (
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="p-1.5 rounded hover:bg-gray-100 transition-colors"
             aria-label="Go back"
           >
             <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
           </button>
         )}
-        <button 
+        <button
           onClick={() => navigate("/home")}
-          className="font-sans text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          className="font-sans text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
         >
           TOXICREADS
         </button>
         {title && (
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px" }}>
+          <span
+            style={{
+              fontSize: "17px",
+              color: "var(--text-grey)",
+              marginLeft: "8px",
+            }}
+          >
             / {title}
           </span>
         )}
@@ -56,7 +62,7 @@ export default function PageHeader({
 
       <div className="flex items-center gap-1">
         {showDelete && onDelete && (
-          <button 
+          <button
             onClick={onDelete}
             className="p-1.5 rounded hover:bg-red-50 transition-colors"
             aria-label="Delete"
@@ -65,7 +71,7 @@ export default function PageHeader({
           </button>
         )}
         {showAdmin && isAdmin && (
-          <button 
+          <button
             onClick={() => navigate("/admin")}
             className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider rounded border border-border-light hover:border-charcoal transition-colors"
           >
@@ -73,7 +79,7 @@ export default function PageHeader({
           </button>
         )}
         {showLogout && (
-          <button 
+          <button
             onClick={logout}
             className="p-1.5 rounded hover:bg-gray-100 transition-colors"
             aria-label="Logout"

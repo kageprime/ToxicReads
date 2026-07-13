@@ -7,7 +7,12 @@ interface ImageUploadProps {
   variant?: "dark" | "light";
 }
 
-export default function ImageUpload({ value, onChange, label, variant = "dark" }: ImageUploadProps) {
+export default function ImageUpload({
+  value,
+  onChange,
+  label,
+  variant = "dark",
+}: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -40,7 +45,10 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
         alert("Upload failed: " + (data.error || "Unknown error"));
       }
     } catch (err) {
-      alert("Upload failed: " + (err instanceof Error ? err.message : "Network error"));
+      alert(
+        "Upload failed: " +
+          (err instanceof Error ? err.message : "Network error")
+      );
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -55,11 +63,11 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
   const displayUrl = preview || value;
 
   const labelStyle: React.CSSProperties = {
-    fontSize: "11px",
+    fontSize: "17px",
     color: isDark ? "rgba(255,255,255,0.6)" : "var(--text-grey)",
     display: "block",
     marginBottom: "6px",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     letterSpacing: "0.05em",
   };
 
@@ -72,12 +80,12 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     justifyContent: "center",
     marginBottom: "8px",
     color: isDark ? "rgba(255,255,255,0.3)" : "var(--text-grey)",
-    fontSize: "11px",
-    fontFamily: "'Space Mono', monospace",
+    fontSize: "17px",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
   };
 
   const btnUploadStyle: React.CSSProperties = {
-    fontSize: "10px",
+    fontSize: "16px",
     padding: "5px 14px",
     background: isDark ? "#FFFFFF" : "var(--text-charcoal)",
     color: isDark ? "#1A1A1A" : "#FFFFFF",
@@ -85,19 +93,19 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
     borderRadius: "2px",
     cursor: uploading ? "wait" : "pointer",
     opacity: uploading ? 0.6 : 1,
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     letterSpacing: "0.05em",
   };
 
   const btnRemoveStyle: React.CSSProperties = {
-    fontSize: "10px",
+    fontSize: "16px",
     padding: "5px 14px",
     background: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
     color: isDark ? "#FFFFFF" : "var(--text-charcoal)",
     border: "none",
     borderRadius: "2px",
     cursor: "pointer",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     letterSpacing: "0.05em",
   };
 
@@ -113,7 +121,9 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
             style={{
               maxWidth: "100%",
               maxHeight: "200px",
-              border: isDark ? "1px solid #444" : "1px solid var(--border-light)",
+              border: isDark
+                ? "1px solid #444"
+                : "1px solid var(--border-light)",
               display: "block",
             }}
           />
@@ -123,7 +133,11 @@ export default function ImageUpload({ value, onChange, label, variant = "dark" }
       )}
 
       <div className="flex gap-2">
-        <button onClick={() => inputRef.current?.click()} disabled={uploading} style={btnUploadStyle}>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          style={btnUploadStyle}
+        >
           {uploading ? "UPLOADING..." : "UPLOAD"}
         </button>
         {value && (

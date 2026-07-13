@@ -1,156 +1,382 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import ShaderCanvas from "./ShaderCanvas";
 import { useAuth } from "@/hooks/useAuth";
-
-const categories = [
-  "Fiction", "Non-Fiction", "Sci-Fi", "Design", "Psychology", "History", "Philosophy", "Art", "Technology", "Poetry"
-];
+import { trpc } from "@/providers/trpc";
+import { useSidebar } from "@/contexts/SidebarContext";
+import { useSwipe } from "@/hooks/useSwipe";
 
 export default function LeftColumn() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const { collapsed, setCollapsed, isMobile } = useSidebar();
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  return (
-    <aside
-      className="hidden md:block"
+  const { data: purchases } = trpc.purchase.myPurchases.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const recentPurchases = purchases?.slice(0, 3) || [];
+
+  // Mobile: swipe on panel to close
+  useSwipe({
+    element: panelRef,
+    onSwipeRight: () => {
+      if (isMobile) setCollapsed(true);
+    },
+    threshold: 30,
+  });
+
+  // Mobile: swipe from left edge to open
+  useSwipe({
+    onSwipeLeft: () => {
+      if (isMobile && collapsed) setCollapsed(false);
+    },
+    edgeOnly: "left",
+    threshold: 30,
+  });
+
+  // Prevent body scroll when mobile overlay is open
+  useEffect(() => {
+    if (isMobile && !collapsed) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, collapsed]);
+
+  const content = (
+    <div
+      className="h-full overflow-y-auto"
       style={{
-        width: "240px",
-        borderRight: "1px solid var(--border-light)",
-        height: "100vh",
-        position: "fixed",
-        top: "40px",
-        left: 0,
-        overflow: "hidden",
-        willChange: "transform",
+        padding: isMobile
+          ? "32px 24px calc(4rem + env(safe-area-inset-bottom, 16px))"
+          : "24px",
       }}
     >
-      <ShaderCanvas />
-
-      <div
-        className="flex flex-col"
-        style={{
-          mixBlendMode: "difference",
-          height: "100vh",
-          padding: "24px",
-          boxSizing: "border-box",
-        }}
+      <button
+        onClick={() => setCollapsed(true)}
+        className="w-full flex items-center justify-between mb-6 hover:opacity-70 transition-opacity"
+        style={{ minHeight: "44px" }}
       >
-        <div style={{ flexShrink: 0 }}>
-          <h2
-            style={{
-              fontSize: "12px",
-              fontWeight: 400,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              color: "#FFFFFF",
-              marginBottom: "16px",
-              lineHeight: 1.4,
-            }}
-          >
-            TOXICREADS
-          </h2>
-          <p
-            style={{
-              fontSize: "11px",
-              lineHeight: 1.8,
-              color: "#FFFFFF",
-            }}
-          >
-            A community-driven marketplace for pre-loved books. Admins curate the collection, and users can submit their own books for sale after vetting.
-          </p>
-        </div>
+        <h2
+          style={{
+            fontSize: "18px",
+            fontWeight: 400,
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            color: "var(--text-grey)",
+            lineHeight: 1.4,
+          }}
+        >
+          QUICK ACTIONS
+        </h2>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          style={{ color: "var(--text-grey)" }}
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
 
-        <div style={{ flex: 1, overflow: "hidden", marginTop: "24px" }}>
+      <div className="space-y-3 mb-6">
+        {isAdmin && (
+          <button
+            onClick={() => {
+              navigate("/admin");
+              if (isMobile) setCollapsed(true);
+            }}
+            style={{
+              width: "100%",
+              padding: "12px",
+              fontSize: "17px",
+              minHeight: "44px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "var(--bg-warm-white)",
+              background: "var(--text-charcoal)",
+              border: "none",
+              cursor: "pointer",
+              letterSpacing: "0.05em",
+              textAlign: "left",
+            }}
+          >
+            ADMIN
+          </button>
+        )}
+
+        {isAuthenticated ? (
+          <>
+            <button
+              onClick={() => {
+                navigate("/submit-book");
+                if (isMobile) setCollapsed(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px",
+                fontSize: "17px",
+                minHeight: "44px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.05em",
+                textAlign: "left",
+              }}
+            >
+              SELL
+            </button>
+            <button
+              onClick={() => {
+                navigate("/my-purchases");
+                if (isMobile) setCollapsed(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px",
+                fontSize: "17px",
+                minHeight: "44px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.05em",
+                textAlign: "left",
+              }}
+            >
+              MY BOOKS
+            </button>
+            <button
+              onClick={() => {
+                navigate("/my-submissions");
+                if (isMobile) setCollapsed(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px",
+                fontSize: "17px",
+                minHeight: "44px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.05em",
+                textAlign: "left",
+              }}
+            >
+              SUBMISSIONS
+            </button>
+            <button
+              onClick={() => {
+                navigate("/profile");
+                if (isMobile) setCollapsed(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "12px",
+                fontSize: "17px",
+                minHeight: "44px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.05em",
+                textAlign: "left",
+              }}
+            >
+              ACCOUNT
+            </button>
+            <button
+              onClick={logout}
+              style={{
+                width: "100%",
+                padding: "12px",
+                fontSize: "17px",
+                minHeight: "44px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-grey)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.05em",
+                textAlign: "left",
+              }}
+            >
+              LOG OUT
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              navigate("/login");
+              if (isMobile) setCollapsed(true);
+            }}
+            style={{
+              width: "100%",
+              padding: "12px",
+              fontSize: "17px",
+              minHeight: "44px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              color: "var(--text-charcoal)",
+              background: "transparent",
+              border: "1px solid var(--border-light)",
+              cursor: "pointer",
+              letterSpacing: "0.05em",
+              textAlign: "left",
+            }}
+          >
+            LOG IN
+          </button>
+        )}
+      </div>
+
+      {isAuthenticated && recentPurchases.length > 0 && (
+        <div className="mb-6">
           <h3
             style={{
-              fontSize: "10px",
-              fontWeight: 400,
+              fontSize: "16px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "rgba(255,255,255,0.6)",
+              color: "var(--text-grey)",
               marginBottom: "12px",
             }}
           >
-            CATEGORIES
+            RECENT
           </h3>
-          <div className="flex flex-wrap gap-1">
-            {categories.map((cat) => (
-              <span
-                key={cat}
-                style={{
-                  fontSize: "10px",
-                  color: "rgba(255,255,255,0.8)",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  padding: "3px 8px",
-                  fontFamily: "'Space Mono', monospace",
-                  letterSpacing: "0.03em",
+          <div className="space-y-3">
+            {recentPurchases.map(purchase => (
+              <div
+                key={purchase.id}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => {
+                  navigate(`/book/${purchase.book?.id}`);
+                  if (isMobile) setCollapsed(true);
                 }}
+                style={{ minHeight: "44px" }}
               >
-                {cat.toUpperCase()}
-              </span>
+                <p
+                  style={{
+                    fontSize: "17px",
+                    color: "var(--text-charcoal)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {purchase.book?.title || "Unknown Book"}
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    color: "var(--text-grey)",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  }}
+                >
+                  ₦{purchase.purchasePrice}
+                </p>
+              </div>
             ))}
           </div>
+        </div>
+      )}
 
-          {isAuthenticated && (
-            <div className="mt-8">
-              <h3
+      <div>
+        <h3
+          style={{
+            fontSize: "16px",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--text-grey)",
+            marginBottom: "12px",
+          }}
+        >
+          HOW IT WORKS
+        </h3>
+        <div className="space-y-3">
+          {[
+            "Browse curated books",
+            "Buy books you love",
+            "Submit your own",
+            "Admin reviews",
+          ].map((step, i) => (
+            <div key={i} className="flex gap-2 items-start">
+              <span
                 style={{
-                  fontSize: "10px",
-                  fontWeight: 400,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.6)",
-                  marginBottom: "12px",
+                  fontSize: "16px",
+                  color: "var(--text-grey)",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  flexShrink: 0,
                 }}
               >
-                MY ACCOUNT
-              </h3>
-              <div className="space-y-2">
-                <button
-                  onClick={() => navigate("/my-purchases")}
-                  style={{
-                    fontSize: "11px",
-                    color: "#FFFFFF",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace",
-                    padding: 0,
-                    display: "block",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "2px",
-                  }}
-                >
-                  MY PURCHASES
-                </button>
-                <button
-                  onClick={() => navigate("/submit-book")}
-                  style={{
-                    fontSize: "11px",
-                    color: "#FFFFFF",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace",
-                    padding: 0,
-                    display: "block",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "2px",
-                  }}
-                >
-                  SELL A BOOK
-                </button>
-              </div>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p
+                style={{
+                  fontSize: "17px",
+                  color: "var(--text-charcoal)",
+                  lineHeight: 1.5,
+                }}
+              >
+                {step}
+              </p>
             </div>
-          )}
-        </div>
-
-        <div style={{ flexShrink: 0 }}>
-          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", fontFamily: "'Space Mono', monospace" }}>
-            &copy; 2026 TOXICREADS
-          </p>
+          ))}
         </div>
       </div>
+    </div>
+  );
+
+  // Mobile: overlay with backdrop
+  if (isMobile) {
+    return (
+      <>
+        {/* Backdrop */}
+        {!collapsed && (
+          <div
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+            onClick={() => setCollapsed(true)}
+          />
+        )}
+        {/* Panel */}
+        <aside
+          ref={panelRef}
+          className="fixed top-0 left-0 z-50 h-full transition-transform duration-300 ease-out"
+          style={{
+            width: "min(85vw, 320px)",
+            backgroundColor: "var(--bg-warm-white)",
+            borderRight: "1px solid var(--border-light)",
+            transform: collapsed ? "translateX(-100%)" : "translateX(0)",
+          }}
+        >
+          {content}
+        </aside>
+      </>
+    );
+  }
+
+  // Desktop: inline push sidebar
+  return (
+    <aside
+      className="h-screen flex-shrink-0 transition-all duration-300 ease-out overflow-hidden"
+      style={{
+        width: collapsed ? "0px" : "280px",
+        backgroundColor: "var(--bg-warm-white)",
+        borderRight: collapsed ? "none" : "1px solid var(--border-light)",
+      }}
+    >
+      {content}
     </aside>
   );
 }

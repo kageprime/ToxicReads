@@ -3,12 +3,19 @@ let cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
 function startCleanup(windowMs: number): void {
   if (cleanupInterval) return;
-  cleanupInterval = setInterval(() => {
-    clearExpired(windowMs);
-  }, Math.max(60000, windowMs));
+  cleanupInterval = setInterval(
+    () => {
+      clearExpired(windowMs);
+    },
+    Math.max(60000, windowMs)
+  );
 }
 
-export function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
+export function checkRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number
+): boolean {
   startCleanup(windowMs);
   const now = Date.now();
   const timestamps = store.get(key) || [];

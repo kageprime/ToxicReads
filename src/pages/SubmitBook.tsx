@@ -15,10 +15,11 @@ export default function SubmitBook() {
     description: "",
     content: "",
     price: "",
-    coverImage: "/images/hero-art.jpg",
-    category: "Fiction",
-    condition: "good" as "new" | "like-new" | "good" | "fair",
+    coverImage: "",
+    category: "Sci-Fi",
   });
+
+  const [coverError, setCoverError] = useState(false);
 
   const [uploading, setUploading] = useState(false);
   const [contentUploading, setContentUploading] = useState(false);
@@ -38,6 +39,7 @@ export default function SubmitBook() {
 
   const handleSubmit = () => {
     if (!form.title || !form.author || !form.price || !form.description) return;
+    if (!form.coverImage) { setCoverError(true); return; }
     submitBook.mutate({
       title: form.title,
       author: form.author,
@@ -46,7 +48,6 @@ export default function SubmitBook() {
       price: form.price,
       coverImage: form.coverImage,
       category: form.category,
-      condition: form.condition,
     });
   };
 
@@ -69,14 +70,19 @@ export default function SubmitBook() {
     }
   };
 
-  const handleContentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContentUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setContentUploading(true);
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/extract-text", { method: "POST", body: fd });
+      const res = await fetch("/api/extract-text", {
+        method: "POST",
+        body: fd,
+      });
       const data = await res.json();
       if (data.text) {
         setForm({ ...form, content: data.text });
@@ -91,23 +97,52 @@ export default function SubmitBook() {
 
   const inputStyle = {
     width: "100%",
-    fontSize: "12px",
+    fontSize: "18px",
     padding: "8px 10px",
     border: "1px solid var(--border-light)",
     outline: "none",
     color: "var(--text-charcoal)",
-    fontFamily: "'Space Mono', monospace",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     background: "transparent",
   };
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-warm-white)" }}>
-        <div className="text-center" style={{ maxWidth: "400px", padding: "24px", border: "1px solid var(--border-light)" }}>
-          <p style={{ fontSize: "14px", color: "#2ECC71", fontFamily: "'Space Mono', monospace", marginBottom: "16px", letterSpacing: "0.05em" }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "var(--bg-warm-white)" }}
+      >
+        <div
+          className="text-center"
+          style={{
+            maxWidth: "400px",
+            padding: "24px",
+            border: "1px solid var(--border-light)",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "20px",
+              color: "#2ECC71",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              marginBottom: "16px",
+              letterSpacing: "0.05em",
+            }}
+          >
             Submitted! Your book will be listed after admin review.
           </p>
-          <button onClick={() => navigate("/home")} style={{ fontSize: "12px", color: "var(--text-charcoal)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+          <button
+            onClick={() => navigate("/home")}
+            style={{
+              fontSize: "18px",
+              color: "var(--text-charcoal)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "underline",
+              textUnderlineOffset: "3px",
+            }}
+          >
             Back
           </button>
         </div>
@@ -116,53 +151,189 @@ export default function SubmitBook() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm-white)" }}>
-      <header 
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-warm-white)" }}
+    >
+      <header
         className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{ 
-          height: "48px", 
-          backgroundColor: "var(--bg-warm-white)", 
-          borderBottom: "1px solid var(--border-light)" 
+        style={{
+          height: "48px",
+          backgroundColor: "var(--bg-warm-white)",
+          borderBottom: "1px solid var(--border-light)",
         }}
       >
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate("/home")} className="p-1.5 rounded hover:bg-gray-100 transition-colors">
+          <button
+            onClick={() => navigate("/home")}
+            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+          >
             <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
           </button>
-          <button onClick={() => navigate("/home")} className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity">
+          <button
+            onClick={() => navigate("/home")}
+            className="text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          >
             TOXICREADS
           </button>
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px" }}>/ Submit Book</span>
+          <span
+            style={{
+              fontSize: "17px",
+              color: "var(--text-grey)",
+              marginLeft: "8px",
+            }}
+          >
+            / Submit Book
+          </span>
         </div>
-        </header>
+      </header>
 
-      <div className="mx-auto" style={{ maxWidth: "800px", padding: "64px 24px 80px" }}>
-        <div style={{ border: "1px solid var(--border-light)", padding: "32px", backgroundColor: "var(--bg-warm-white)" }}>
-          <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px" }}>Sell Your Book</h1>
-          <p style={{ fontSize: "11px", color: "var(--text-grey)", marginBottom: "32px", lineHeight: 1.6, fontFamily: "'Space Mono', monospace" }}>
+      <div
+        className="mx-auto"
+        style={{ maxWidth: "800px", padding: "64px 24px 80px" }}
+      >
+        <div
+          style={{
+            border: "1px solid var(--border-light)",
+            padding: "32px",
+            backgroundColor: "var(--bg-warm-white)",
+          }}
+        >
+          <h1
+            style={{
+              fontSize: "28px",
+              fontWeight: 400,
+              color: "var(--text-charcoal)",
+              marginBottom: "4px",
+            }}
+          >
+            Sell Your Book
+          </h1>
+          <p
+            style={{
+              fontSize: "17px",
+              color: "var(--text-grey)",
+              marginBottom: "32px",
+              lineHeight: 1.6,
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            }}
+          >
             Your book will be reviewed by an admin before being listed.
           </p>
 
-          <div style={{ border: "1px solid #F39C12", padding: "12px 16px", marginBottom: "16px", backgroundColor: "rgba(243, 156, 18, 0.08)" }}>
-            <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-              <AlertTriangle size={14} style={{ color: "#F39C12", marginTop: "2px", flexShrink: 0 }} />
+          <div
+            style={{
+              border: "2px solid #E74C3C",
+              padding: "14px 18px",
+              marginBottom: "16px",
+              backgroundColor: "rgba(231, 76, 60, 0.06)",
+            }}
+          >
+            <div
+              style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}
+            >
+              <AlertTriangle
+                size={16}
+                style={{ color: "#E74C3C", marginTop: "2px", flexShrink: 0 }}
+              />
               <div>
-                <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", fontWeight: 600, marginBottom: "4px" }}>AI CONTENT DISCLOSURE</p>
-                <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", lineHeight: 1.6 }}>
-                  When listing a book that contains AI-generated content (text, images, or translations), you <strong>must clearly disclose this</strong> in the description. Books found to contain undisclosed AI-generated content may be rejected or removed without notice.
+                <p
+                  style={{
+                    fontSize: "17px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    color: "#E74C3C",
+                    fontWeight: 700,
+                    marginBottom: "4px",
+                  }}
+                >
+                  NO AI GENERATED CONTENT
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    color: "var(--text-charcoal)",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  ToxicReads does <strong>not</strong> accept any AI-generated
+                  content. Every submission is reviewed. Violations will be
+                  rejected or removed without notice.
                 </p>
               </div>
             </div>
           </div>
 
-          <div style={{ border: "1px solid var(--border-light)", padding: "16px", marginBottom: "24px" }}>
-            <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", fontWeight: 600, marginBottom: "8px", letterSpacing: "0.05em" }}>SUBMISSION GUIDELINES</p>
-            <ul style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", lineHeight: 2, paddingLeft: "16px", margin: 0 }}>
-              <li>Only submit books you have the right to sell</li>
+          <div
+            style={{
+              border: "1px solid var(--border-light)",
+              padding: "16px",
+              marginBottom: "24px",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                fontWeight: 700,
+                marginBottom: "10px",
+                letterSpacing: "0.05em",
+              }}
+            >
+              SUBMISSION GUIDELINES
+            </p>
+            <p
+              style={{
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-grey)",
+                lineHeight: 1.6,
+                marginBottom: "12px",
+              }}
+            >
+              Make sure your submission matches one of these formats:
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "6px 16px",
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-grey)",
+                lineHeight: 2,
+                padding: "8px 12px",
+                backgroundColor: "rgba(0,0,0,0.02)",
+                marginBottom: "12px",
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>Flash Fiction</span>
+              <span>&lt; 1,000 words</span>
+              <span style={{ fontWeight: 600 }}>Short Story</span>
+              <span>1,000 – 7,500 words</span>
+              <span style={{ fontWeight: 600 }}>Novelette</span>
+              <span>7,500 – 17,500 words</span>
+              <span style={{ fontWeight: 600 }}>Novella</span>
+              <span>17,500 – 40,000 words</span>
+              <span style={{ fontWeight: 600 }}>Novel</span>
+              <span>40,000+ words</span>
+            </div>
+            <ul
+              style={{
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-grey)",
+                lineHeight: 2,
+                paddingLeft: "16px",
+                margin: 0,
+              }}
+            >
+              <li>Only submit original work you have the right to sell</li>
               <li>Provide accurate title, author, and description</li>
               <li>No hate speech, illegal content, or explicit material</li>
-              <li>AI-generated content must be disclosed (see warning above)</li>
-              <li>Condition must accurately reflect the book's state</li>
+              <li>No AI-generated content — zero tolerance</li>
+              <li>All books are digital — no physical copies will be handled</li>
               <li>Admins reserve the right to reject or remove listings</li>
             </ul>
           </div>
@@ -170,85 +341,258 @@ export default function SubmitBook() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Title *</label>
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={inputStyle} />
+                <label
+                  style={{
+                    fontSize: "17px",
+                    color: "var(--text-grey)",
+                    display: "block",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Title *
+                </label>
+                <input
+                  value={form.title}
+                  onChange={e => setForm({ ...form, title: e.target.value })}
+                  style={inputStyle}
+                />
               </div>
               <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Author *</label>
-                <input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} style={inputStyle} />
+                <label
+                  style={{
+                    fontSize: "17px",
+                    color: "var(--text-grey)",
+                    display: "block",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Author *
+                </label>
+                <input
+                  value={form.author}
+                  onChange={e => setForm({ ...form, author: e.target.value })}
+                  style={inputStyle}
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Price *</label>
-                <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} placeholder="10.00" />
+                <label
+                  style={{
+                    fontSize: "17px",
+                    color: "var(--text-grey)",
+                    display: "block",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Price *
+                </label>
+                <input
+                  value={form.price}
+                  onChange={e => setForm({ ...form, price: e.target.value })}
+                  style={inputStyle}
+                  placeholder="₦2,500"
+                />
               </div>
               <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Category</label>
-                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
-                  {["Fiction", "Non-Fiction", "Sci-Fi", "Design", "Psychology", "History", "Philosophy", "Art", "Technology", "Poetry"].map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                <label
+                  style={{
+                    fontSize: "17px",
+                    color: "var(--text-grey)",
+                    display: "block",
+                    marginBottom: "4px",
+                  }}
+                >
+                  Genre
+                </label>
+                <select
+                  value={form.category}
+                  onChange={e => setForm({ ...form, category: e.target.value })}
+                  style={inputStyle}
+                >
+                  {["Sci-Fi", "Horror", "Thriller"].map(c => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Condition</label>
-                <select value={form.condition} onChange={(e) => setForm({ ...form, condition: e.target.value as "new" | "like-new" | "good" | "fair" })} style={inputStyle}>
-                  <option value="new">New</option>
-                  <option value="like-new">Like New</option>
-                  <option value="good">Good</option>
-                  <option value="fair">Fair</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Cover Image</label>
-                <div className="flex gap-3 items-start">
-                  <div style={{ width: "100px", height: "133px", border: "1px solid var(--border-light)", flexShrink: 0, overflow: "hidden", backgroundColor: "var(--border-light)" }}>
-                    {uploading ? (
-                      <div className="flex items-center justify-center h-full">
-                        <p style={{ fontSize: "9px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>Uploading...</p>
-                      </div>
-                    ) : (
-                      <img src={form.coverImage} alt="Cover preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <input type="file" accept="image/*" onChange={handleUpload} style={{ display: "none" }} id="submit-cover-upload" />
-                    <label htmlFor="submit-cover-upload" style={{ display: "inline-block", padding: "8px 16px", fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
-                      Choose File
-                    </label>
-                    {form.coverImage !== "/images/hero-art.jpg" && (
-                      <p style={{ fontSize: "10px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace", wordBreak: "break-all", marginTop: "4px" }}>
-                        {form.coverImage}
+            <div>
+              <label
+                style={{
+                  fontSize: "17px",
+                  color: "var(--text-grey)",
+                  display: "block",
+                  marginBottom: "4px",
+                }}
+              >
+                Cover Image *
+              </label>
+              <div className="flex gap-3 items-start">
+                <div
+                  style={{
+                    width: "100px",
+                    height: "133px",
+                    border: "1px solid var(--border-light)",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                    backgroundColor: "var(--border-light)",
+                  }}
+                >
+                  {uploading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <p
+                        style={{
+                          fontSize: "15px",
+                          color: "var(--text-grey)",
+                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        }}
+                      >
+                        Uploading...
                       </p>
-                    )}
-                  </div>
+                    </div>
+                  ) : form.coverImage ? (
+                    <img
+                      src={form.coverImage}
+                      alt="Cover preview"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p
+                        style={{
+                          fontSize: "13px",
+                          color: "var(--text-grey)",
+                          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                          textAlign: "center",
+                          padding: "4px",
+                        }}
+                      >
+                        No file
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUpload}
+                    style={{ display: "none" }}
+                    id="submit-cover-upload"
+                  />
+                  <label
+                    htmlFor="submit-cover-upload"
+                    style={{
+                      display: "inline-block",
+                      padding: "8px 16px",
+                      fontSize: "16px",
+                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      color: "var(--text-charcoal)",
+                      border: "1px solid var(--border-light)",
+                      cursor: "pointer",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    Choose File
+                  </label>
+                  {coverError && !form.coverImage && (
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        color: "#E74C3C",
+                        marginTop: "4px",
+                      }}
+                    >
+                      Please upload a cover image
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
             <div>
-              <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Description *</label>
-              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} style={{ ...inputStyle, resize: "vertical" }} />
+              <label
+                style={{
+                  fontSize: "17px",
+                  color: "var(--text-grey)",
+                  display: "block",
+                  marginBottom: "4px",
+                }}
+              >
+                Description *
+              </label>
+              <textarea
+                value={form.description}
+                onChange={e =>
+                  setForm({ ...form, description: e.target.value })
+                }
+                rows={4}
+                style={{ ...inputStyle, resize: "vertical" }}
+              />
             </div>
 
             <div>
-              <label style={{ fontSize: "11px", color: "var(--text-grey)", display: "block", marginBottom: "4px" }}>Reading Content (optional)</label>
+              <label
+                style={{
+                  fontSize: "17px",
+                  color: "var(--text-grey)",
+                  display: "block",
+                  marginBottom: "4px",
+                }}
+              >
+                Reading Content (optional)
+              </label>
               <div className="flex gap-2 mb-2">
-                <input type="file" accept=".docx,.pdf,.epub" onChange={handleContentUpload} style={{ display: "none" }} id="content-upload" />
-                <label htmlFor="content-upload" style={{ display: "inline-block", padding: "6px 12px", fontSize: "9px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.05em" }}>
-                  {contentUploading ? "Extracting..." : "Upload .docx / .pdf / .epub"}
+                <input
+                  type="file"
+                  accept=".docx,.pdf,.epub"
+                  onChange={handleContentUpload}
+                  style={{ display: "none" }}
+                  id="content-upload"
+                />
+                <label
+                  htmlFor="content-upload"
+                  style={{
+                    display: "inline-block",
+                    padding: "6px 12px",
+                    fontSize: "15px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    color: "var(--text-charcoal)",
+                    border: "1px solid var(--border-light)",
+                    cursor: "pointer",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {contentUploading
+                    ? "Extracting..."
+                    : "Upload .docx / .pdf / .epub"}
                 </label>
               </div>
-              <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} placeholder="Paste your content here, or upload a .docx file..." style={{ ...inputStyle, resize: "vertical" }} />
+              <textarea
+                value={form.content}
+                onChange={e => setForm({ ...form, content: e.target.value })}
+                rows={8}
+                placeholder="Paste your content here, or upload a .docx file..."
+                style={{ ...inputStyle, resize: "vertical" }}
+              />
             </div>
 
             {submitBook.error && (
-              <p style={{ fontSize: "11px", color: "#E74C3C", fontFamily: "'Space Mono', monospace" }}>
+              <p
+                style={{
+                  fontSize: "17px",
+                  color: "#E74C3C",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                }}
+              >
                 {submitBook.error.message}
               </p>
             )}
@@ -257,9 +601,15 @@ export default function SubmitBook() {
               onClick={handleSubmit}
               disabled={submitBook.isPending}
               style={{
-                width: "100%", padding: "14px", fontSize: "12px", fontFamily: "'Space Mono', monospace",
-                color: "var(--bg-warm-white)", background: "var(--text-charcoal)", border: "none",
-                cursor: submitBook.isPending ? "wait" : "pointer", opacity: submitBook.isPending ? 0.7 : 1,
+                width: "100%",
+                padding: "14px",
+                fontSize: "18px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--bg-warm-white)",
+                background: "var(--text-charcoal)",
+                border: "none",
+                cursor: submitBook.isPending ? "wait" : "pointer",
+                opacity: submitBook.isPending ? 0.7 : 1,
                 letterSpacing: "0.05em",
               }}
             >

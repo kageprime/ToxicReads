@@ -1,7 +1,11 @@
 import "dotenv/config";
 import { createClient } from "@libsql/client";
 
-const dbUrl = process.env.TURSO_DATABASE_URL ?? (() => { throw new Error("TURSO_DATABASE_URL is not set"); })();
+const dbUrl =
+  process.env.TURSO_DATABASE_URL ??
+  (() => {
+    throw new Error("TURSO_DATABASE_URL is not set");
+  })();
 const authToken = process.env.TURSO_AUTH_TOKEN ?? undefined;
 
 async function resetDb() {
@@ -18,6 +22,7 @@ async function resetDb() {
       passwordHash TEXT NOT NULL,
       name TEXT,
       role TEXT DEFAULT 'user' NOT NULL,
+      tokenVersion INTEGER DEFAULT 0 NOT NULL,
       createdAt INTEGER NOT NULL,
       updatedAt INTEGER NOT NULL
     )
@@ -33,7 +38,7 @@ async function resetDb() {
       price TEXT NOT NULL,
       coverImage TEXT NOT NULL,
       category TEXT NOT NULL,
-      "condition" TEXT NOT NULL,
+      views INTEGER DEFAULT 0 NOT NULL,
       sellerId INTEGER,
       sellerType TEXT DEFAULT 'user' NOT NULL,
       status TEXT DEFAULT 'pending' NOT NULL,
@@ -49,6 +54,17 @@ async function resetDb() {
       bookId INTEGER NOT NULL,
       purchasePrice TEXT NOT NULL,
       createdAt INTEGER NOT NULL
+    )
+  `);
+
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS readingProgress (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
+      bookId INTEGER NOT NULL,
+      chunk INTEGER DEFAULT 0 NOT NULL,
+      scrollPercent INTEGER DEFAULT 0 NOT NULL,
+      updatedAt INTEGER NOT NULL
     )
   `);
 

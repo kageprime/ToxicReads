@@ -43,13 +43,21 @@ export const localAuthRouter = createRouter({
       z.object({
         username: z.string().min(1),
         password: z.string().min(1),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const ip = ctx.req.headers.get("x-forwarded-for") || ctx.req.headers.get("cf-connecting-ip") || "unknown";
+      const ip =
+        ctx.req.headers.get("x-forwarded-for") ||
+        ctx.req.headers.get("cf-connecting-ip") ||
+        "unknown";
       const rlKey = `login:${ip}`;
-      if (!checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts. Try again later." });
+      if (
+        !checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)
+      ) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many login attempts. Try again later.",
+        });
       }
 
       const user = await findLocalUserByUsername(input.username);
@@ -83,7 +91,7 @@ export const localAuthRouter = createRouter({
           sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
           secure: opts.secure,
           maxAge: Session.maxAgeMs / 1000,
-        }),
+        })
       );
 
       return {
@@ -100,13 +108,21 @@ export const localAuthRouter = createRouter({
         username: z.string().min(3).max(100),
         password: z.string().min(6).max(100),
         name: z.string().max(255).optional(),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
-      const ip = ctx.req.headers.get("x-forwarded-for") || ctx.req.headers.get("cf-connecting-ip") || "unknown";
+      const ip =
+        ctx.req.headers.get("x-forwarded-for") ||
+        ctx.req.headers.get("cf-connecting-ip") ||
+        "unknown";
       const rlKey = `register:${ip}`;
-      if (!checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many registration attempts. Try again later." });
+      if (
+        !checkRateLimit(rlKey, env.rateLimitMaxAttempts, env.rateLimitWindowMs)
+      ) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many registration attempts. Try again later.",
+        });
       }
 
       const existing = await findLocalUserByUsername(input.username);
@@ -138,7 +154,7 @@ export const localAuthRouter = createRouter({
         newName: z.string().max(100).optional(),
         newUsername: z.string().min(3).max(100).optional(),
         newPassword: z.string().min(6).max(100).optional(),
-      }),
+      })
     )
     .mutation(async ({ input, ctx }) => {
       // Get current user from session
@@ -150,7 +166,10 @@ export const localAuthRouter = createRouter({
 
       const claim = await verifyLocalSessionToken(token);
       if (!claim) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid session",
+        });
       }
 
       const user = await findLocalUserById(claim.userId);
@@ -201,7 +220,7 @@ export const localAuthRouter = createRouter({
           sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
           secure: opts.secure,
           maxAge: Session.maxAgeMs / 1000,
-        }),
+        })
       );
 
       return {
@@ -222,7 +241,7 @@ export const localAuthRouter = createRouter({
         sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
         secure: opts.secure,
         maxAge: 0,
-      }),
+      })
     );
     return { success: true };
   }),

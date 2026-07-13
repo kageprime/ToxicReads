@@ -47,58 +47,64 @@ A fullstack digital book marketplace with a built-in reading interface, admin CM
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev (port 3000) with Hono backend |
-| `npm run build` | Build frontend + compile backend |
-| `npm run start` | Run production server (`dist/boot.js`) |
-| `npm run check` | TypeScript typecheck |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier write |
-| `npm run test` | Vitest (api/**/*.test.ts) |
-| `npm run db:generate` | Drizzle Kit generate |
-| `npm run db:push` | Drizzle Kit push |
-| `npm run db:migrate` | Drizzle Kit migrate |
-| `npm run db:seed` | Seed admin user + sample books |
-| `npm run db:reset` | Drop and recreate all tables |
+| Command               | Description                                  |
+| --------------------- | -------------------------------------------- |
+| `npm run dev`         | Start Vite dev (port 3000) with Hono backend |
+| `npm run build`       | Build frontend + compile backend             |
+| `npm run start`       | Run production server (`dist/boot.js`)       |
+| `npm run check`       | TypeScript typecheck                         |
+| `npm run lint`        | ESLint                                       |
+| `npm run format`      | Prettier write                               |
+| `npm run test`        | Vitest (api/\*_/_.test.ts)                   |
+| `npm run db:generate` | Drizzle Kit generate                         |
+| `npm run db:push`     | Drizzle Kit push                             |
+| `npm run db:migrate`  | Drizzle Kit migrate                          |
+| `npm run db:seed`     | Seed admin user + sample books               |
+| `npm run db:reset`    | Drop and recreate all tables                 |
 
 ## Routes
 
-| Path | Component | Description |
-|------|-----------|-------------|
-| `/` | Landing | Marketing page with hero, featured books, how it works |
-| `/home` | HomePage | Browse books catalog |
-| `/book/:id` | BookDetail | Book details + buy |
-| `/read/:id` | Reader | Read purchased/free book |
-| `/login` | Login | Sign in |
-| `/register` | Register | Create account |
-| `/submit-book` | SubmitBook | Submit new book |
-| `/my-submissions` | MySubmissions | Manage submissions |
-| `/my-purchases` | MyPurchases | View purchased books |
-| `/admin` | AdminDashboard | Admin panel |
-| `/add-book` | AddBook | Admin add book |
-| `/profile` | Profile | Account settings |
+| Path              | Component      | Description                                            |
+| ----------------- | -------------- | ------------------------------------------------------ |
+| `/`               | Landing        | Marketing page with hero, featured books, how it works |
+| `/home`           | HomePage       | Browse books catalog                                   |
+| `/book/:id`       | BookDetail     | Book details + buy                                     |
+| `/read/:id`       | Reader         | Read purchased/free book                               |
+| `/login`          | Login          | Sign in                                                |
+| `/register`       | Register       | Create account                                         |
+| `/submit-book`    | SubmitBook     | Submit new book                                        |
+| `/my-submissions` | MySubmissions  | Manage submissions                                     |
+| `/my-purchases`   | MyPurchases    | View purchased books                                   |
+| `/admin`          | AdminDashboard | Admin panel                                            |
+| `/add-book`       | AddBook        | Admin add book                                         |
+| `/profile`        | Profile        | Account settings                                       |
 
 ## Database Schema
 
 ### localUsers
+
 - id, username, passwordHash, name, role (`user`|`admin`), createdAt
 
 ### books
+
 - id, title, author, description, content, price, coverImage, category, condition, sellerId, sellerType, status (`pending`|`approved`|`rejected`), views, createdAt, updatedAt
 
 ### purchases
+
 - id, bookId, buyerId, purchasePrice, createdAt
 
 ## API Endpoints (tRPC)
 
 ### Auth
+
 - `auth.me`, `auth.login`, `auth.register`, `auth.logout`, `auth.updateCredentials`
 
 ### Books
+
 - `book.list`, `book.byId`, `book.pendingList`, `book.adminList`, `book.create`, `book.update`, `book.delete`, `book.approve`, `book.reject`, `book.submit`, `book.updateMySubmission`, `book.deleteMySubmission`, `book.hasPurchased`, `book.read`, `book.readChunk`, `book.incrementView`
 
 ### Purchases
+
 - `purchase.buy`, `purchase.myPurchases`, `purchase.adminList`
 
 ## Deployment
@@ -111,6 +117,7 @@ The project is configured for Vercel:
 - `vercel.json` — SPA rewrites, output directory config
 
 Set the following environment variables in Vercel dashboard:
+
 - `TURSO_DATABASE_URL` — Turso connection string
 - `TURSO_AUTH_TOKEN` — Turso auth token
 - `APP_SECRET` — JWT signing secret

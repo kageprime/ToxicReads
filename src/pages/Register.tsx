@@ -17,7 +17,7 @@ export default function Register() {
     onSuccess: () => {
       window.location.href = "/home";
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.message);
     },
   });
@@ -30,22 +30,22 @@ export default function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     if (!username.trim() || !password.trim()) {
       setError("Username and password are required");
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-    
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
-    
+
     registerMutation.mutate({
       username: username.trim(),
       password: password.trim(),
@@ -58,13 +58,16 @@ export default function Register() {
       className="min-h-screen flex flex-col items-center justify-center"
       style={{ backgroundColor: "var(--bg-warm-white)" }}
     >
-      <header 
+      <header
         className="fixed top-0 left-0 right-0 flex items-center px-4"
-        style={{ height: "48px", borderBottom: "1px solid var(--border-light)" }}
+        style={{
+          height: "48px",
+          borderBottom: "1px solid var(--border-light)",
+        }}
       >
-        <button 
+        <button
           onClick={() => navigate("/login")}
-          className="flex items-center gap-1 text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1 text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
         >
           <ChevronLeft size={16} />
           Back
@@ -80,7 +83,7 @@ export default function Register() {
       >
         <h2
           style={{
-            fontSize: "14px",
+            fontSize: "20px",
             fontWeight: 400,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
@@ -96,7 +99,7 @@ export default function Register() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -107,16 +110,16 @@ export default function Register() {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value)}
               autoComplete="username"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
@@ -125,7 +128,7 @@ export default function Register() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -136,16 +139,16 @@ export default function Register() {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               autoComplete="name"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
@@ -154,7 +157,7 @@ export default function Register() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -165,16 +168,16 @@ export default function Register() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               autoComplete="new-password"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
@@ -183,7 +186,7 @@ export default function Register() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -194,23 +197,23 @@ export default function Register() {
             <input
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
           </div>
 
           {error && (
-            <p style={{ fontSize: "11px", color: "#E74C3C" }}>{error}</p>
+            <p style={{ fontSize: "17px", color: "#E74C3C" }}>{error}</p>
           )}
 
           <button
@@ -219,8 +222,8 @@ export default function Register() {
             style={{
               width: "100%",
               padding: "12px",
-              fontSize: "12px",
-              fontFamily: "'Space Mono', monospace",
+              fontSize: "18px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
               color: "var(--bg-warm-white)",
               background: "var(--text-charcoal)",
               border: "none",
@@ -235,11 +238,11 @@ export default function Register() {
 
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "17px",
             color: "var(--text-grey)",
             marginTop: "16px",
             textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
           }}
         >
           Already have an account?{" "}

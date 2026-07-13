@@ -15,7 +15,7 @@ export default function Login() {
     onSuccess: () => {
       window.location.href = "/home";
     },
-    onError: (err) => {
+    onError: err => {
       setError(err.message);
     },
   });
@@ -41,13 +41,16 @@ export default function Login() {
       style={{ backgroundColor: "var(--bg-warm-white)" }}
     >
       {/* Minimal Header */}
-      <header 
+      <header
         className="fixed top-0 left-0 right-0 flex items-center px-4"
-        style={{ height: "48px", borderBottom: "1px solid var(--border-light)" }}
+        style={{
+          height: "48px",
+          borderBottom: "1px solid var(--border-light)",
+        }}
       >
-        <button 
+        <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1 text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1 text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
         >
           <ChevronLeft size={16} />
           Back
@@ -63,7 +66,7 @@ export default function Login() {
       >
         <h2
           style={{
-            fontSize: "14px",
+            fontSize: "20px",
             fontWeight: 400,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
@@ -79,7 +82,7 @@ export default function Login() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -90,16 +93,16 @@ export default function Login() {
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value)}
               autoComplete="username"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
@@ -108,7 +111,7 @@ export default function Login() {
           <div>
             <label
               style={{
-                fontSize: "11px",
+                fontSize: "17px",
                 color: "var(--text-grey)",
                 display: "block",
                 marginBottom: "6px",
@@ -119,23 +122,23 @@ export default function Login() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               autoComplete="current-password"
               style={{
                 width: "100%",
                 background: "transparent",
                 border: "1px solid var(--border-light)",
                 padding: "10px 12px",
-                fontSize: "12px",
+                fontSize: "18px",
                 color: "var(--text-charcoal)",
-                fontFamily: "'Space Mono', monospace",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 outline: "none",
               }}
             />
           </div>
 
           {error && (
-            <p style={{ fontSize: "11px", color: "#E74C3C" }}>{error}</p>
+            <p style={{ fontSize: "17px", color: "#E74C3C" }}>{error}</p>
           )}
 
           <button
@@ -144,8 +147,8 @@ export default function Login() {
             style={{
               width: "100%",
               padding: "12px",
-              fontSize: "12px",
-              fontFamily: "'Space Mono', monospace",
+              fontSize: "18px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
               color: "var(--bg-warm-white)",
               background: "var(--text-charcoal)",
               border: "none",
@@ -160,11 +163,11 @@ export default function Login() {
 
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "17px",
             color: "var(--text-grey)",
             marginTop: "16px",
             textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
           }}
         >
           Default: admin / 123456
@@ -172,11 +175,11 @@ export default function Login() {
 
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "17px",
             color: "var(--text-grey)",
             marginTop: "12px",
             textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
           }}
         >
           New here?{" "}

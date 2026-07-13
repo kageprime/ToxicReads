@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 type Lang = "zh" | "en";
 
@@ -38,7 +44,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
   }, [lang]);
 
-  const t = useCallback((zh: string, en: string) => (lang === "zh" ? zh : en), [lang]);
+  const t = useCallback(
+    (zh: string, en: string) => (lang === "zh" ? zh : en),
+    [lang]
+  );
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, toggle, t }}>

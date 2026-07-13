@@ -12,7 +12,7 @@ export type LocalSessionPayload = {
 const getSecret = () => new TextEncoder().encode(env.appSecret);
 
 export async function signLocalSessionToken(
-  payload: LocalSessionPayload,
+  payload: LocalSessionPayload
 ): Promise<string> {
   return new jose.SignJWT({ ...payload })
     .setProtectedHeader({ alg: JWT_ALG })
@@ -22,7 +22,7 @@ export async function signLocalSessionToken(
 }
 
 export async function verifyLocalSessionToken(
-  token: string,
+  token: string
 ): Promise<LocalSessionPayload | null> {
   if (!token) return null;
   try {

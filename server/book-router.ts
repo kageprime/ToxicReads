@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware.js";
+import {
+  createRouter,
+  publicQuery,
+  authedQuery,
+  adminQuery,
+} from "./middleware.js";
 import {
   findApprovedBooks,
   findBookById,
@@ -53,7 +58,10 @@ export const bookRouter = createRouter({
     .query(async ({ ctx, input }) => {
       const rlKey = `read:${ctx.user.id}:${input.id}`;
       if (!checkRateLimit(rlKey, READ_LIMIT_PER_HOUR, 3600000)) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Read limit reached. Try again later." });
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Read limit reached. Try again later.",
+        });
       }
 
       const book = await findBookById(input.id);
@@ -61,18 +69,27 @@ export const bookRouter = createRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
       }
       if (book.status !== "approved") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Book not available" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Book not available",
+        });
       }
       const isFree = book.price === "0" || book.price === "0.00";
       if (!isFree) {
         const purchased = await hasUserPurchasedBook(ctx.user.id, input.id);
         if (!purchased) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Purchase required to read" });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Purchase required to read",
+          });
         }
       }
 
       const chunks = splitIntoChunks(book.content || "");
-      const token = await signReadToken({ bookId: book.id, userId: ctx.user.id });
+      const token = await signReadToken({
+        bookId: book.id,
+        userId: ctx.user.id,
+      });
 
       return {
         id: book.id,
@@ -82,7 +99,6 @@ export const bookRouter = createRouter({
         price: book.price,
         coverImage: book.coverImage,
         category: book.category,
-        condition: book.condition,
         views: book.views,
         createdAt: book.createdAt,
         chunks: chunks.length,
@@ -98,12 +114,19 @@ export const bookRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const rlKey = `read:${ctx.user.id}:chunk`;
       if (!checkRateLimit(rlKey, READ_LIMIT_PER_HOUR, 3600000)) {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Read limit reached. Try again later." });
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Read limit reached. Try again later.",
+        });
       }
 
       const payload = await verifyReadToken(input.token);
       if (!payload || payload.userId !== ctx.user.id) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired read session. Please refresh the reader." });
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message:
+            "Invalid or expired read session. Please refresh the reader.",
+        });
       }
 
       const book = await findBookById(payload.bookId);
@@ -113,7 +136,10 @@ export const bookRouter = createRouter({
 
       const chunks = splitIntoChunks(book.content || "");
       if (input.chunk >= chunks.length) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Chunk index out of range" });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Chunk index out of range",
+        });
       }
 
       return { chunk: chunks[input.chunk], index: input.chunk };
@@ -122,13 +148,20 @@ export const bookRouter = createRouter({
   // ── Authenticated: save/restore reading progress ──────────
 
   saveProgress: authedQuery
-    .input(z.object({
-      bookId: z.number(),
-      chunk: z.number().min(0),
-      scrollPercent: z.number().min(0).max(100),
-    }))
+    .input(
+      z.object({
+        bookId: z.number(),
+        chunk: z.number().min(0),
+        scrollPercent: z.number().min(0).max(100),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      await upsertProgress(ctx.user.id, input.bookId, input.chunk, input.scrollPercent);
+      await upsertProgress(
+        ctx.user.id,
+        input.bookId,
+        input.chunk,
+        input.scrollPercent
+      );
       return { success: true };
     }),
 
@@ -169,8 +202,7 @@ export const bookRouter = createRouter({
         price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
         coverImage: z.string().max(500),
         category: z.string().min(1).max(100),
-        condition: z.enum(["new", "like-new", "good", "fair"]),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const book = await createBook({
@@ -200,11 +232,13 @@ export const bookRouter = createRouter({
         author: z.string().max(255).optional(),
         description: z.string().optional(),
         content: z.string().optional(),
-        price: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        price: z
+          .string()
+          .regex(/^\d+(\.\d{1,2})?$/)
+          .optional(),
         coverImage: z.string().max(500).optional(),
         category: z.string().max(100).optional(),
-        condition: z.enum(["new", "like-new", "good", "fair"]).optional(),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...raw } = input;
@@ -212,7 +246,9 @@ export const bookRouter = createRouter({
         ...raw,
         ...(raw.title !== undefined && { title: stripHtml(raw.title) }),
         ...(raw.author !== undefined && { author: stripHtml(raw.author) }),
-        ...(raw.description !== undefined && { description: stripHtml(raw.description) }),
+        ...(raw.description !== undefined && {
+          description: stripHtml(raw.description),
+        }),
         ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
       };
       const book = await findBookById(id);
@@ -220,10 +256,16 @@ export const bookRouter = createRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
       }
       if (book.sellerId !== ctx.user.id || book.sellerType !== "user") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You can only edit your own submissions" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only edit your own submissions",
+        });
       }
       if (book.status !== "pending") {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Can only edit pending submissions" });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only edit pending submissions",
+        });
       }
       return updateBook(id, data);
     }),
@@ -238,10 +280,16 @@ export const bookRouter = createRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
       }
       if (book.sellerId !== ctx.user.id || book.sellerType !== "user") {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You can only delete your own submissions" });
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only delete your own submissions",
+        });
       }
       if (book.status !== "pending") {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Can only delete pending submissions" });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Can only delete pending submissions",
+        });
       }
       await deleteBook(input.id);
       return { success: true };
@@ -267,8 +315,7 @@ export const bookRouter = createRouter({
         price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
         coverImage: z.string().max(500),
         category: z.string().min(1).max(100),
-        condition: z.enum(["new", "like-new", "good", "fair"]),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const book = await createBook({
@@ -292,11 +339,13 @@ export const bookRouter = createRouter({
         author: z.string().max(255).optional(),
         description: z.string().optional(),
         content: z.string().optional(),
-        price: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+        price: z
+          .string()
+          .regex(/^\d+(\.\d{1,2})?$/)
+          .optional(),
         coverImage: z.string().max(500).optional(),
         category: z.string().max(100).optional(),
-        condition: z.enum(["new", "like-new", "good", "fair"]).optional(),
-      }),
+      })
     )
     .mutation(async ({ input }) => {
       const { id, ...raw } = input;
@@ -304,7 +353,9 @@ export const bookRouter = createRouter({
         ...raw,
         ...(raw.title !== undefined && { title: stripHtml(raw.title) }),
         ...(raw.author !== undefined && { author: stripHtml(raw.author) }),
-        ...(raw.description !== undefined && { description: stripHtml(raw.description) }),
+        ...(raw.description !== undefined && {
+          description: stripHtml(raw.description),
+        }),
         ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
       };
       return updateBook(id, data);

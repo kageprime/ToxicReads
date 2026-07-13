@@ -10,7 +10,7 @@ export default function MyPurchases() {
 
   const { data: purchases, isLoading } = trpc.purchase.myPurchases.useQuery(
     undefined,
-    { enabled: isAuthenticated },
+    { enabled: isAuthenticated }
   );
 
   useEffect(() => {
@@ -24,63 +24,168 @@ export default function MyPurchases() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm-white)" }}>
-      <header 
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-warm-white)" }}
+    >
+      <header
         className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{ 
-          height: "48px", 
-          backgroundColor: "var(--bg-warm-white)", 
-          borderBottom: "1px solid var(--border-light)" 
+        style={{
+          height: "48px",
+          backgroundColor: "var(--bg-warm-white)",
+          borderBottom: "1px solid var(--border-light)",
         }}
       >
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate("/home")} className="p-1.5 rounded hover:bg-gray-100 transition-colors">
+          <button
+            onClick={() => navigate("/home")}
+            className="p-1.5 rounded hover:bg-gray-100 transition-colors"
+          >
             <ChevronLeft size={18} style={{ color: "var(--text-charcoal)" }} />
           </button>
-          <button onClick={() => navigate("/home")} className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity">
+          <button
+            onClick={() => navigate("/home")}
+            className="text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          >
             TOXICREADS
           </button>
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", marginLeft: "8px" }}>/ My Purchases</span>
+          <span
+            style={{
+              fontSize: "17px",
+              color: "var(--text-grey)",
+              marginLeft: "8px",
+            }}
+          >
+            / My Purchases
+          </span>
         </div>
-        </header>
+      </header>
 
-      <div className="mx-auto" style={{ maxWidth: "900px", padding: "64px 24px 80px" }}>
-        <h1 style={{ fontSize: "22px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "32px" }}>My Purchases</h1>
+      <div
+        className="mx-auto"
+        style={{ maxWidth: "900px", padding: "64px 24px 80px" }}
+      >
+        <h1
+          style={{
+            fontSize: "28px",
+            fontWeight: 400,
+            color: "var(--text-charcoal)",
+            marginBottom: "32px",
+          }}
+        >
+          My Purchases
+        </h1>
 
         {isLoading ? (
-          <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+          <p
+            style={{
+              fontSize: "18px",
+              color: "var(--text-grey)",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            }}
+          >
+            LOADING...
+          </p>
         ) : purchases && purchases.length > 0 ? (
           <div className="space-y-4">
-            {purchases.map((purchase) => (
+            {purchases.map(purchase => (
               <div
                 key={purchase.id}
                 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
-                style={{ padding: "16px 0", borderBottom: "1px solid var(--border-light)" }}
+                style={{
+                  padding: "16px 0",
+                  borderBottom: "1px solid var(--border-light)",
+                }}
               >
                 <div className="flex items-center gap-3 sm:gap-4">
                   <img
                     src={purchase.book?.coverImage || ""}
                     alt={purchase.book?.title || ""}
-                    style={{ width: "60px", height: "80px", objectFit: "cover", border: "1px solid var(--border-light)", flexShrink: 0, cursor: "pointer" }}
+                    style={{
+                      width: "60px",
+                      height: "80px",
+                      objectFit: "cover",
+                      border: "1px solid var(--border-light)",
+                      flexShrink: 0,
+                      cursor: "pointer",
+                    }}
                     onClick={() => navigate(`/book/${purchase.book?.id}`)}
                   />
                   <div className="flex-1 min-w-0 sm:hidden">
-                    <p style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 400,
+                        color: "var(--text-charcoal)",
+                        marginBottom: "4px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                    >
                       {purchase.book?.title}
                     </p>
-                    <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
-                    <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
-                      ${purchase.purchasePrice} · {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : ""}
+                    <p
+                      style={{
+                        fontSize: "18px",
+                        color: "var(--text-grey)",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      {purchase.book?.author}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "17px",
+                        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        color: "var(--text-grey)",
+                      }}
+                    >
+                      ₦{purchase.purchasePrice} ·{" "}
+                      {purchase.createdAt
+                        ? new Date(purchase.createdAt).toLocaleDateString()
+                        : ""}
                     </p>
                   </div>
                 </div>
                 <div className="hidden sm:block flex-1 min-w-0">
-                  <p style={{ fontSize: "15px", fontWeight: 400, color: "var(--text-charcoal)", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }} onClick={() => navigate(`/book/${purchase.book?.id}`)}>
+                  <p
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 400,
+                      color: "var(--text-charcoal)",
+                      marginBottom: "4px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                  >
                     {purchase.book?.title}
                   </p>
-                  <p style={{ fontSize: "12px", color: "var(--text-grey)", marginBottom: "2px" }}>{purchase.book?.author}</p>
-                  <p style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)" }}>
-                    ${purchase.purchasePrice} · {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : ""}
+                  <p
+                    style={{
+                      fontSize: "18px",
+                      color: "var(--text-grey)",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    {purchase.book?.author}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "17px",
+                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      color: "var(--text-grey)",
+                    }}
+                  >
+                    ₦{purchase.purchasePrice} ·{" "}
+                    {purchase.createdAt
+                      ? new Date(purchase.createdAt).toLocaleDateString()
+                      : ""}
                   </p>
                 </div>
                 {purchase.book?.content && (
@@ -88,8 +193,8 @@ export default function MyPurchases() {
                     onClick={() => navigate(`/read/${purchase.book?.id}`)}
                     className="w-full sm:w-auto ml-[76px] sm:ml-0"
                     style={{
-                      fontSize: "10px",
-                      fontFamily: "'Space Mono', monospace",
+                      fontSize: "16px",
+                      fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                       letterSpacing: "0.1em",
                       color: "var(--bg-warm-white)",
                       background: "var(--text-charcoal)",
@@ -107,12 +212,20 @@ export default function MyPurchases() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p style={{ fontSize: "13px", color: "var(--text-grey)", marginBottom: "16px" }}>No purchases yet</p>
+            <p
+              style={{
+                fontSize: "19px",
+                color: "var(--text-grey)",
+                marginBottom: "16px",
+              }}
+            >
+              No purchases yet
+            </p>
             <button
               onClick={() => navigate("/home")}
               style={{
-                fontSize: "11px",
-                fontFamily: "'Space Mono', monospace",
+                fontSize: "17px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                 color: "var(--text-charcoal)",
                 background: "none",
                 border: "1px solid var(--border-light)",

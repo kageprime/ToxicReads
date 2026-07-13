@@ -4,7 +4,11 @@ import { createClient } from "@libsql/client";
 import path from "path";
 import fs from "fs";
 
-const dbUrl = process.env.TURSO_DATABASE_URL ?? (() => { throw new Error("TURSO_DATABASE_URL is not set"); })();
+const dbUrl =
+  process.env.TURSO_DATABASE_URL ??
+  (() => {
+    throw new Error("TURSO_DATABASE_URL is not set");
+  })();
 const authToken = process.env.TURSO_AUTH_TOKEN ?? undefined;
 const client = createClient({ url: dbUrl, authToken });
 
@@ -51,13 +55,23 @@ async function importBooks() {
       const description = `An immersive reading experience.`;
       const price = (Math.random() * 15 + 5).toFixed(2);
       const coverImage = "/images/hero-art.jpg";
-      const category = "Fiction";
-      const condition = "good";
+      const category = "Sci-Fi";
       const status = "approved";
 
       await client.execute({
-        sql: "INSERT INTO books (title, author, description, content, price, coverImage, category, condition, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [title, author, description, content, price, coverImage, category, condition, status, now, now],
+          sql: "INSERT INTO books (title, author, description, content, price, coverImage, category, status, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          args: [
+            title,
+            author,
+            description,
+            content,
+            price,
+            coverImage,
+            category,
+            status,
+            now,
+            now,
+          ],
       });
       console.log(`Imported: ${title}`);
     } catch (err) {

@@ -30,10 +30,7 @@ export async function hasUserPurchasedBook(buyerId: number, bookId: number) {
 }
 
 export async function createPurchase(data: InsertPurchase) {
-  const result = await getDb()
-    .insert(purchases)
-    .values(data)
-    .returning();
+  const result = await getDb().insert(purchases).values(data).returning();
   const id = result[0]?.id;
   if (!id) throw new Error("Failed to create purchase");
   return findPurchaseById(id);
@@ -49,7 +46,7 @@ export async function findPurchasesWithBookDetails(buyerId: number) {
 
   // Fetch book details for each purchase
   const purchasesWithBooks = await Promise.all(
-    userPurchases.map(async (purchase) => {
+    userPurchases.map(async purchase => {
       const bookRows = await db
         .select()
         .from(books)
@@ -59,7 +56,7 @@ export async function findPurchasesWithBookDetails(buyerId: number) {
         ...purchase,
         book: bookRows.at(0) ?? null,
       };
-    }),
+    })
   );
 
   return purchasesWithBooks;

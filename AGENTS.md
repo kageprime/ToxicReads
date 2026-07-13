@@ -3,6 +3,7 @@
 ## Current Status
 
 ### Done
+
 - [x] Project setup with React 19 + Vite + Hono + tRPC
 - [x] SQLite database with Drizzle ORM + libsql (Turso)
 - [x] Local auth system (register, login, logout) with JWT in httpOnly cookies
@@ -28,6 +29,7 @@
 - [x] "ToxicReads" branding throughout
 
 ### In Progress
+
 - [ ] User profile/account settings
 - [ ] Book cover image upload
 - [ ] Search/filter functionality
@@ -35,11 +37,13 @@
 - [ ] Book conditions management
 
 ### Blocked
+
 - [ ] None
 
 ## Tech Stack
 
 ### Frontend
+
 - React 19 with TypeScript
 - Vite 7 dev server with Hono backend injection
 - React Router 7 for routing
@@ -49,11 +53,13 @@
 - GSAP for animations
 
 ### Backend
+
 - Hono server (entry: `api/boot.ts`)
 - tRPC v11 for API
 - Drizzle ORM with libsql driver (@libsql/client)
 
 ### Database
+
 - SQLite (dev) & Turso (prod) via @libsql/client
 - Tables: `localUsers`, `books`, `purchases`
 - Admin credentials: admin / 123456
@@ -78,23 +84,24 @@ npm run db:reset   # Drop and recreate all tables
 
 ## Routes
 
-| Path | Component | Description |
-|------|-----------|-------------|
-| `/` | Landing | Marketing page with hero, featured books, how it works |
-| `/home` | HomePage | Browse books catalog |
-| `/book/:id` | BookDetail | Book details + buy |
-| `/read/:id` | Reader | Read purchased book |
-| `/login` | Login | Sign in |
-| `/register` | Register | Create account |
-| `/submit-book` | SubmitBook | Submit new book |
-| `/my-submissions` | MySubmissions | Manage submissions |
-| `/my-purchases` | MyPurchases | View purchased books |
-| `/admin` | AdminDashboard | Admin panel |
-| `/add-book` | AddBook | Admin add book |
+| Path              | Component      | Description                                            |
+| ----------------- | -------------- | ------------------------------------------------------ |
+| `/`               | Landing        | Marketing page with hero, featured books, how it works |
+| `/home`           | HomePage       | Browse books catalog                                   |
+| `/book/:id`       | BookDetail     | Book details + buy                                     |
+| `/read/:id`       | Reader         | Read purchased book                                    |
+| `/login`          | Login          | Sign in                                                |
+| `/register`       | Register       | Create account                                         |
+| `/submit-book`    | SubmitBook     | Submit new book                                        |
+| `/my-submissions` | MySubmissions  | Manage submissions                                     |
+| `/my-purchases`   | MyPurchases    | View purchased books                                   |
+| `/admin`          | AdminDashboard | Admin panel                                            |
+| `/add-book`       | AddBook        | Admin add book                                         |
 
 ## Database Schema
 
 ### localUsers
+
 - id (integer, primary key)
 - username (text, unique)
 - passwordHash (text)
@@ -103,6 +110,7 @@ npm run db:reset   # Drop and recreate all tables
 - createdAt (integer timestamp)
 
 ### books
+
 - id (integer, primary key)
 - title (text)
 - author (text)
@@ -118,6 +126,7 @@ npm run db:reset   # Drop and recreate all tables
 - createdAt, updatedAt (integer timestamps)
 
 ### purchases
+
 - id (integer, primary key)
 - bookId (integer, foreign key)
 - buyerId (integer, foreign key)
@@ -127,6 +136,7 @@ npm run db:reset   # Drop and recreate all tables
 ## API Endpoints (tRPC)
 
 ### Auth
+
 - `auth.me` - Get current user
 - `auth.login` - Sign in
 - `auth.register` - Create account
@@ -134,6 +144,7 @@ npm run db:reset   # Drop and recreate all tables
 - `auth.updateCredentials` - Change username/password
 
 ### Books
+
 - `book.list` - List approved books
 - `book.byId` - Get book by ID
 - `book.pendingList` - List pending books (admin)
@@ -150,6 +161,7 @@ npm run db:reset   # Drop and recreate all tables
 - `book.read` - Get book content (requires purchase)
 
 ### Purchases
+
 - `purchase.buy` - Purchase a book
 - `purchase.myPurchases` - List user's purchases
 - `purchase.adminList` - List all purchases (admin)
@@ -157,6 +169,7 @@ npm run db:reset   # Drop and recreate all tables
 ## Environment Variables
 
 Required in `.env`:
+
 - `DATABASE_URL` — Turso connection string (`file:./data/bookhaven.db` for local, `libsql://...` for production)
 - `DATABASE_AUTH_TOKEN` — Turso auth token (empty for local file)
 - `APP_SECRET` — JWT signing secret
@@ -179,18 +192,21 @@ Run `npx tsx scripts/import-books.ts` to import docx files from `/books` folder 
 ## Admin Features
 
 ### Pending Submissions Tab
+
 - View all pending book submissions
 - Select individual books or select all
 - Bulk approve/reject with one click
 - Click book cover or title to preview
 
 ### All Books Tab
+
 - View all books regardless of status
 - Inline edit any book (title, author, price, category, condition, cover, description)
 - Delete books with confirmation
 - Visual status badges (pending/approved/rejected)
 
 ### Purchases Tab
+
 - View all purchase transactions
 - See buyer username, book details, price, date
 - Click book cover or title to preview

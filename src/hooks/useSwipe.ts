@@ -28,7 +28,8 @@ export function useSwipe({
       if (!touch) return;
 
       // Edge-only: only track touches within 40px of the specified edge
-      if (edgeOnly === "right" && touch.clientX < window.innerWidth - 40) return;
+      if (edgeOnly === "right" && touch.clientX < window.innerWidth - 40)
+        return;
       if (edgeOnly === "left" && touch.clientX > 40) return;
 
       startX.current = touch.clientX;

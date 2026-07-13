@@ -11,10 +11,7 @@ export type AuthUser = {
 export function useAuth() {
   const utils = trpc.useUtils();
 
-  const {
-    data: user,
-    isLoading,
-  } = trpc.auth.me.useQuery(undefined, {
+  const { data: user, isLoading } = trpc.auth.me.useQuery(undefined, {
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
@@ -25,10 +22,7 @@ export function useAuth() {
     },
   });
 
-  const logout = useCallback(
-    () => logoutMutation.mutate(),
-    [logoutMutation],
-  );
+  const logout = useCallback(() => logoutMutation.mutate(), [logoutMutation]);
 
   return useMemo(
     () => ({
@@ -38,6 +32,6 @@ export function useAuth() {
       isLoading: isLoading || logoutMutation.isPending,
       logout,
     }),
-    [user, isLoading, logoutMutation.isPending, logout],
+    [user, isLoading, logoutMutation.isPending, logout]
   );
 }

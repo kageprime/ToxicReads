@@ -3,12 +3,13 @@
 @tailwind utilities;
 
 @layer base {
-  :root, [data-theme="light"] {
-    --bg-warm-white: #F4EDE4;
-    --text-charcoal: #1A1A1A;
-    --text-grey: #6B6B6B;
-    --accent-teal: #B85C38;
-    --border-light: #E0DDD8;
+  :root,
+  [data-theme="light"] {
+    --bg-warm-white: #f4ede4;
+    --text-charcoal: #1a1a1a;
+    --text-grey: #6b6b6b;
+    --accent-teal: #b85c38;
+    --border-light: #e0ddd8;
 
     /* Theme-aware African palette (RGB format for Tailwind opacity) */
     --color-cream: 244 237 228;
@@ -40,10 +41,10 @@
   }
 
   [data-theme="dark"] {
-    --bg-warm-white: #1A1A1A;
-    --text-charcoal: #F4EDE4;
+    --bg-warm-white: #1a1a1a;
+    --text-charcoal: #f4ede4;
     --text-grey: #999999;
-    --accent-teal: #D4A017;
+    --accent-teal: #d4a017;
     --border-light: #333333;
 
     /* Theme-aware African palette (RGB format for Tailwind opacity) */
@@ -75,13 +76,15 @@
   }
 
   body {
-    font-family: 'Space Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: var(--bg-warm-white);
     color: var(--text-charcoal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
@@ -93,13 +96,13 @@
   }
 
   ::selection {
-    background-color: #B85C38;
-    color: #F4EDE4;
+    background-color: #b85c38;
+    color: #f4ede4;
   }
 
   [data-theme="dark"] ::selection {
-    background-color: #D4A017;
-    color: #1A1A1A;
+    background-color: #d4a017;
+    color: #1a1a1a;
   }
 
   ::-webkit-scrollbar {
@@ -112,40 +115,40 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #B85C38;
+    background: #b85c38;
     border-radius: 8px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #D4A017;
+    background: #d4a017;
   }
 }
 
 /* ── Sankofa Design System ─────────────────────────────── */
 
 .font-serif {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 }
 
 .kente {
   background: repeating-linear-gradient(
     90deg,
-    #B85C38 0 14px,
-    #D4A017 14px 28px,
-    #5C3A21 28px 42px,
-    #1A1A1A 42px 56px,
-    #F4EDE4 56px 60px
+    #b85c38 0 14px,
+    #d4a017 14px 28px,
+    #5c3a21 28px 42px,
+    #1a1a1a 42px 56px,
+    #f4ede4 56px 60px
   );
 }
 
 [data-theme="dark"] .kente {
   background: repeating-linear-gradient(
     90deg,
-    #E07850 0 14px,
-    #E8B84A 14px 28px,
-    #D4A574 28px 42px,
-    #F4EDE4 42px 56px,
-    #1A1A1A 56px 60px
+    #e07850 0 14px,
+    #e8b84a 14px 28px,
+    #d4a574 28px 42px,
+    #f4ede4 42px 56px,
+    #1a1a1a 56px 60px
   );
 }
 
@@ -160,7 +163,9 @@
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
 }
 
 .reveal.active {
@@ -173,8 +178,8 @@
 }
 
 .book-cover::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.45));
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.45));
 }

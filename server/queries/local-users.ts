@@ -5,7 +5,7 @@ import { localUsers } from "../../db/schema.js";
 import type { LocalUser } from "../../db/schema.js";
 
 export async function findLocalUserByUsername(
-  username: string,
+  username: string
 ): Promise<LocalUser | undefined> {
   const rows = await getDb()
     .select()
@@ -16,7 +16,7 @@ export async function findLocalUserByUsername(
 }
 
 export async function findLocalUserById(
-  id: number,
+  id: number
 ): Promise<LocalUser | undefined> {
   const rows = await getDb()
     .select()
@@ -51,7 +51,7 @@ export async function createLocalUser(data: {
 
 export async function verifyLocalPassword(
   user: LocalUser,
-  password: string,
+  password: string
 ): Promise<boolean> {
   return bcrypt.compare(password, user.passwordHash);
 }
@@ -71,7 +71,7 @@ export async function updateLocalUser(
     username?: string;
     password?: string;
     name?: string;
-  },
+  }
 ): Promise<LocalUser> {
   const updateData: Partial<typeof localUsers.$inferInsert> = {};
   if (data.username !== undefined) updateData.username = data.username;
@@ -81,10 +81,7 @@ export async function updateLocalUser(
     await incrementTokenVersion(id);
   }
 
-  await getDb()
-    .update(localUsers)
-    .set(updateData)
-    .where(eq(localUsers.id, id));
+  await getDb().update(localUsers).set(updateData).where(eq(localUsers.id, id));
 
   const user = await findLocalUserById(id);
   if (!user) throw new Error("User not found after update");

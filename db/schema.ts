@@ -13,10 +13,16 @@ export const localUsers = sqliteTable("localUsers", {
   username: text("username").notNull().unique(),
   passwordHash: text("passwordHash").notNull(),
   name: text("name"),
-  role: text("role", { enum: ["user", "admin"] }).default("user").notNull(),
+  role: text("role", { enum: ["user", "admin"] })
+    .default("user")
+    .notNull(),
   tokenVersion: integer("tokenVersion").notNull().default(0),
-  createdAt: integer("createdAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export type LocalUser = typeof localUsers.$inferSelect;
@@ -33,13 +39,20 @@ export const books = sqliteTable("books", {
   price: text("price").notNull(),
   coverImage: text("coverImage").notNull(),
   category: text("category").notNull(),
-  condition: text("condition").notNull(),
   sellerId: integer("sellerId"),
-  sellerType: text("sellerType", { enum: ["admin", "user"] }).default("user").notNull(),
+  sellerType: text("sellerType", { enum: ["admin", "user"] })
+    .default("user")
+    .notNull(),
   views: integer("views").default(0).notNull(),
-  status: text("status", { enum: ["pending", "approved", "rejected"] }).default("pending").notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  status: text("status", { enum: ["pending", "approved", "rejected"] })
+    .default("pending")
+    .notNull(),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export type Book = typeof books.$inferSelect;
@@ -52,7 +65,9 @@ export const purchases = sqliteTable("purchases", {
   buyerId: integer("buyerId").notNull(),
   bookId: integer("bookId").notNull(),
   purchasePrice: text("purchasePrice").notNull(),
-  createdAt: integer("createdAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export type Purchase = typeof purchases.$inferSelect;
@@ -60,16 +75,25 @@ export type InsertPurchase = typeof purchases.$inferInsert;
 
 // ── Reading Progress (auto-resume) ────────────────────────────
 
-export const readingProgress = sqliteTable("readingProgress", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: integer("userId").notNull(),
-  bookId: integer("bookId").notNull(),
-  chunk: integer("chunk").notNull().default(0),
-  scrollPercent: integer("scrollPercent").notNull().default(0),
-  updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
-}, (table) => ({
-  uniqueUserBook: uniqueIndex("uq_readingProgress_user_book").on(table.userId, table.bookId),
-}));
+export const readingProgress = sqliteTable(
+  "readingProgress",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("userId").notNull(),
+    bookId: integer("bookId").notNull(),
+    chunk: integer("chunk").notNull().default(0),
+    scrollPercent: integer("scrollPercent").notNull().default(0),
+    updatedAt: integer("updatedAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  table => ({
+    uniqueUserBook: uniqueIndex("uq_readingProgress_user_book").on(
+      table.userId,
+      table.bookId
+    ),
+  })
+);
 
 export type ReadingProgress = typeof readingProgress.$inferSelect;
 export type InsertReadingProgress = typeof readingProgress.$inferInsert;

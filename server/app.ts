@@ -19,11 +19,20 @@ app.use("*", async (c, next) => {
   c.res.headers.set("X-Frame-Options", "DENY");
   c.res.headers.set("X-XSS-Protection", "1; mode=block");
   c.res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  c.res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  c.res.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
   if (env.isProduction) {
-    c.res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    c.res.headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload"
+    );
   }
-  c.res.headers.set("Content-Security-Policy", "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://toxic-reads.vercel.app; font-src 'self' data:;");
+  c.res.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://toxic-reads.vercel.app; font-src 'self' data:;"
+  );
 });
 
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
@@ -31,8 +40,8 @@ app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 // ── Helpers ────────────────────────────────────────────────────
 
 const IMAGE_MAGIC_BYTES: Record<string, Uint8Array[]> = {
-  "image/jpeg": [new Uint8Array([0xFF, 0xD8, 0xFF])],
-  "image/png": [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
+  "image/jpeg": [new Uint8Array([0xff, 0xd8, 0xff])],
+  "image/png": [new Uint8Array([0x89, 0x50, 0x4e, 0x47])],
   "image/gif": [new Uint8Array([0x47, 0x49, 0x46])],
   "image/webp": [
     new Uint8Array([0x52, 0x49, 0x46, 0x46]),
@@ -44,8 +53,8 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 function isAllowedImageMagic(buffer: Uint8Array, mimeType: string): boolean {
   const signatures = IMAGE_MAGIC_BYTES[mimeType];
   if (!signatures) return false;
-  return signatures.some(sig =>
-    sig.length <= buffer.length && sig.every((b, i) => buffer[i] === b),
+  return signatures.some(
+    sig => sig.length <= buffer.length && sig.every((b, i) => buffer[i] === b)
   );
 }
 
@@ -54,14 +63,16 @@ function stripHtml(input: string): string {
 }
 
 function getClientIp(c: { req: { raw: Request } }): string {
-  return c.req.raw.headers.get("x-forwarded-for")
-    || c.req.raw.headers.get("cf-connecting-ip")
-    || "unknown";
+  return (
+    c.req.raw.headers.get("x-forwarded-for") ||
+    c.req.raw.headers.get("cf-connecting-ip") ||
+    "unknown"
+  );
 }
 
 // ── File Upload ───────────────────────────────────────────────
 
-app.post("/api/upload", async (c) => {
+app.post("/api/upload", async c => {
   try {
     const body = await c.req.parseBody({ all: false });
     const file = body.file as File | undefined;
@@ -106,7 +117,7 @@ app.post("/api/upload", async (c) => {
 
 // ── Text Extraction (docx, pdf, epub) ─────────────────────────
 
-app.post("/api/extract-text", async (c) => {
+app.post("/api/extract-text", async c => {
   try {
     const body = await c.req.parseBody({ all: false });
     const file = body.file as File | undefined;
@@ -146,7 +157,11 @@ app.post("/api/extract-text", async (c) => {
           // skip unreadable chapters
         }
       }
-      text = texts.join("\n\n").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      text = texts
+        .join("\n\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
     }
 
     return c.json({ text });
@@ -158,7 +173,7 @@ app.post("/api/extract-text", async (c) => {
 
 // ── tRPC ──────────────────────────────────────────────────────
 
-app.use("/api/trpc/*", async (c) => {
+app.use("/api/trpc/*", async c => {
   return fetchRequestHandler({
     endpoint: "/api/trpc",
     req: c.req.raw,
@@ -166,6 +181,6 @@ app.use("/api/trpc/*", async (c) => {
     createContext,
   });
 });
-app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
+app.all("/api/*", c => c.json({ error: "Not Found" }, 404));
 
 export default app;

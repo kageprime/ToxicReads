@@ -11,7 +11,9 @@ export type ReadTokenPayload = {
 
 const getSecret = () => new TextEncoder().encode(env.readTokenSecret);
 
-export async function signReadToken(payload: ReadTokenPayload): Promise<string> {
+export async function signReadToken(
+  payload: ReadTokenPayload
+): Promise<string> {
   return new jose.SignJWT({ ...payload })
     .setProtectedHeader({ alg: ALG })
     .setIssuedAt()
@@ -19,11 +21,18 @@ export async function signReadToken(payload: ReadTokenPayload): Promise<string> 
     .sign(getSecret());
 }
 
-export async function verifyReadToken(token: string): Promise<ReadTokenPayload | null> {
+export async function verifyReadToken(
+  token: string
+): Promise<ReadTokenPayload | null> {
   try {
-    const { payload } = await jose.jwtVerify(token, getSecret(), { algorithms: [ALG] });
+    const { payload } = await jose.jwtVerify(token, getSecret(), {
+      algorithms: [ALG],
+    });
     if (!payload.bookId || !payload.userId) return null;
-    return { bookId: payload.bookId as number, userId: payload.userId as number };
+    return {
+      bookId: payload.bookId as number,
+      userId: payload.userId as number,
+    };
   } catch {
     return null;
   }

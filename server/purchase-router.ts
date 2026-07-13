@@ -33,7 +33,7 @@ export const purchaseRouter = createRouter({
       // Check if already purchased
       const alreadyPurchased = await hasUserPurchasedBook(
         ctx.user.id,
-        input.bookId,
+        input.bookId
       );
       if (alreadyPurchased) {
         throw new TRPCError({
@@ -62,7 +62,11 @@ export const purchaseRouter = createRouter({
   adminList: adminQuery.query(async () => {
     // Return all purchases with details
     const { getDb } = await import("./queries/connection.js");
-    const { purchases, books: booksTable, localUsers } = await import("../db/schema.js");
+    const {
+      purchases,
+      books: booksTable,
+      localUsers,
+    } = await import("../db/schema.js");
     const { eq, desc } = await import("drizzle-orm");
     const db = getDb();
 
@@ -72,7 +76,7 @@ export const purchaseRouter = createRouter({
       .orderBy(desc(purchases.createdAt));
 
     return Promise.all(
-      allPurchases.map(async (purchase) => {
+      allPurchases.map(async purchase => {
         const bookRows = await db
           .select()
           .from(booksTable)
@@ -88,7 +92,7 @@ export const purchaseRouter = createRouter({
           book: bookRows.at(0) ?? null,
           buyer: buyerRows.at(0) ?? null,
         };
-      }),
+      })
     );
   }),
 });

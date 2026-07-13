@@ -34,10 +34,7 @@ export async function findApprovedBookById(id: number) {
 // ── Admin: all books with filters ─────────────────────────────
 
 export async function findAllBooks() {
-  return getDb()
-    .select()
-    .from(books)
-    .orderBy(desc(books.createdAt));
+  return getDb().select().from(books).orderBy(desc(books.createdAt));
 }
 
 export async function findPendingBooks() {
@@ -48,43 +45,33 @@ export async function findPendingBooks() {
     .orderBy(desc(books.createdAt));
 }
 
-export async function findBooksBySeller(sellerId: number, sellerType: "admin" | "user") {
+export async function findBooksBySeller(
+  sellerId: number,
+  sellerType: "admin" | "user"
+) {
   return getDb()
     .select()
     .from(books)
-    .where(
-      and(
-        eq(books.sellerId, sellerId),
-        eq(books.sellerType, sellerType),
-      ),
-    )
+    .where(and(eq(books.sellerId, sellerId), eq(books.sellerType, sellerType)))
     .orderBy(desc(books.createdAt));
 }
 
 // ── Mutations ─────────────────────────────────────────────────
 
 export async function createBook(data: InsertBook) {
-  const result = await getDb()
-    .insert(books)
-    .values(data)
-    .returning();
+  const result = await getDb().insert(books).values(data).returning();
   const id = result[0]?.id;
   if (!id) throw new Error("Failed to create book");
   return findBookById(id);
 }
 
 export async function updateBook(id: number, data: Partial<InsertBook>) {
-  await getDb()
-    .update(books)
-    .set(data)
-    .where(eq(books.id, id));
+  await getDb().update(books).set(data).where(eq(books.id, id));
   return findBookById(id);
 }
 
 export async function deleteBook(id: number) {
-  await getDb()
-    .delete(books)
-    .where(eq(books.id, id));
+  await getDb().delete(books).where(eq(books.id, id));
 }
 
 export async function approveBook(id: number) {

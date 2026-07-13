@@ -17,7 +17,12 @@ export default function BottomNav() {
 
   // Only on mobile, not on landing, reader, admin pages
   if (!isMobile) return null;
-  if (location.pathname === "/" || location.pathname.startsWith("/read/") || location.pathname.startsWith("/admin")) return null;
+  if (
+    location.pathname === "/" ||
+    location.pathname.startsWith("/read/") ||
+    location.pathname.startsWith("/admin")
+  )
+    return null;
   // Hide while sidebar is open
   if (!collapsed) return null;
 
@@ -26,8 +31,17 @@ export default function BottomNav() {
     // Handle dynamic paths — show active if current path starts with the item path
     // For /my-purchases, /profile, /submit-book — exact match
     if (path === "/my-purchases") return location.pathname === "/my-purchases";
-    if (path === "/profile") return location.pathname === "/profile" || location.pathname === "/login" || location.pathname === "/register";
-    if (path === "/submit-book") return location.pathname === "/submit-book" || location.pathname === "/my-submissions";
+    if (path === "/profile")
+      return (
+        location.pathname === "/profile" ||
+        location.pathname === "/login" ||
+        location.pathname === "/register"
+      );
+    if (path === "/submit-book")
+      return (
+        location.pathname === "/submit-book" ||
+        location.pathname === "/my-submissions"
+      );
     return false;
   };
 
@@ -41,11 +55,14 @@ export default function BottomNav() {
         height: "calc(56px + env(safe-area-inset-bottom, 0px))",
       }}
     >
-      {navItems.map((item) => (
+      {navItems.map(item => (
         <button
           key={item.path}
           onClick={() => {
-            if (!isAuthenticated && (item.path === "/my-purchases" || item.path === "/profile")) {
+            if (
+              !isAuthenticated &&
+              (item.path === "/my-purchases" || item.path === "/profile")
+            ) {
               navigate("/login");
             } else {
               navigate(item.path);
@@ -54,19 +71,33 @@ export default function BottomNav() {
           }}
           className="flex flex-col items-center justify-center gap-0.5 transition-opacity hover:opacity-70"
           style={{
-            minWidth: "56px", minHeight: "44px", background: "none", border: "none", cursor: "pointer",
+            minWidth: "56px",
+            minHeight: "44px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
           }}
         >
-          <span style={{
-            fontSize: "16px",
-            color: active(item.path) ? "var(--text-charcoal)" : "var(--text-grey)",
-          }}>
+          <span
+            style={{
+              fontSize: "22px",
+              color: active(item.path)
+                ? "var(--text-charcoal)"
+                : "var(--text-grey)",
+            }}
+          >
             {item.icon}
           </span>
-          <span style={{
-            fontSize: "9px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em",
-            color: active(item.path) ? "var(--text-charcoal)" : "var(--text-grey)",
-          }}>
+          <span
+            style={{
+              fontSize: "15px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              letterSpacing: "0.05em",
+              color: active(item.path)
+                ? "var(--text-charcoal)"
+                : "var(--text-grey)",
+            }}
+          >
             {item.label.toUpperCase()}
           </span>
         </button>
@@ -77,11 +108,24 @@ export default function BottomNav() {
         onClick={() => setCollapsed(false)}
         className="flex flex-col items-center justify-center gap-0.5 transition-opacity hover:opacity-70"
         style={{
-          minWidth: "56px", minHeight: "44px", background: "none", border: "none", cursor: "pointer",
+          minWidth: "56px",
+          minHeight: "44px",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
         }}
       >
-        <span style={{ fontSize: "16px", color: "var(--text-charcoal)" }}>···</span>
-        <span style={{ fontSize: "9px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", color: "var(--text-grey)" }}>
+        <span style={{ fontSize: "22px", color: "var(--text-charcoal)" }}>
+          ···
+        </span>
+        <span
+          style={{
+            fontSize: "15px",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            letterSpacing: "0.05em",
+            color: "var(--text-grey)",
+          }}
+        >
           MORE
         </span>
       </button>

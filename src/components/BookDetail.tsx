@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
-import { conditionLabels, conditionColors } from "../../contracts/blog";
 import PaymentModal from "./PaymentModal";
 
 export default function BookDetail() {
@@ -14,18 +13,17 @@ export default function BookDetail() {
   const bookId = Number(id);
   const { data: book, isLoading } = trpc.book.byId.useQuery(
     { id: bookId },
-    { enabled: !isNaN(bookId) },
+    { enabled: !isNaN(bookId) }
   );
 
   const { data: hasPurchased } = trpc.book.hasPurchased.useQuery(
     { id: bookId },
-    { enabled: isAuthenticated && !isNaN(bookId) },
+    { enabled: isAuthenticated && !isNaN(bookId) }
   );
 
-  const { data: similarBooks } = trpc.book.list.useQuery(
-    undefined,
-    { enabled: !!book },
-  );
+  const { data: similarBooks } = trpc.book.list.useQuery(undefined, {
+    enabled: !!book,
+  });
 
   const utils = trpc.useUtils();
 
@@ -35,7 +33,7 @@ export default function BookDetail() {
       utils.book.hasPurchased.invalidate();
       setBought(true);
     },
-    onError: (err) => {
+    onError: err => {
       setBuyError(err.message);
     },
   });
@@ -60,18 +58,46 @@ export default function BookDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center" style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}>
-        <p style={{ fontSize: "12px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>LOADING...</p>
+      <div
+        className="flex items-center justify-center"
+        style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}
+      >
+        <p
+          style={{
+            fontSize: "18px",
+            color: "var(--text-grey)",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+          }}
+        >
+          LOADING...
+        </p>
       </div>
     );
   }
 
   if (!book) {
     return (
-      <div className="flex items-center justify-center" style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}>
+      <div
+        className="flex items-center justify-center"
+        style={{ height: "100vh", backgroundColor: "var(--bg-warm-white)" }}
+      >
         <div className="text-center">
-          <p style={{ fontSize: "14px", color: "var(--text-grey)" }}>Book not found</p>
-          <button onClick={() => navigate("/home")} style={{ marginTop: "16px", fontSize: "12px", color: "var(--text-charcoal)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+          <p style={{ fontSize: "20px", color: "var(--text-grey)" }}>
+            Book not found
+          </p>
+          <button
+            onClick={() => navigate("/home")}
+            style={{
+              marginTop: "16px",
+              fontSize: "18px",
+              color: "var(--text-charcoal)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "underline",
+              textUnderlineOffset: "3px",
+            }}
+          >
             Back
           </button>
         </div>
@@ -82,47 +108,70 @@ export default function BookDetail() {
   const isFree = book.price === "0" || book.price === "0.00";
   const isOwner = hasPurchased || bought || isFree;
   const canRead = (isOwner || isFree) && !!book.content;
-  const conditionLabel = conditionLabels[book.condition] || book.condition.toUpperCase();
-  const conditionColor = conditionColors[book.condition] || "var(--text-grey)";
 
-  const similar = similarBooks?.filter(b => b.category === book.category && b.id !== book.id).slice(0, 4) || [];
+  const similar =
+    similarBooks
+      ?.filter(b => b.category === book.category && b.id !== book.id)
+      .slice(0, 4) || [];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-warm-white)" }}>
-      <header 
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-warm-white)" }}
+    >
+      <header
         className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
-        style={{ 
-          height: "48px", 
-          backgroundColor: "var(--bg-warm-white)", 
-          borderBottom: "1px solid var(--border-light)" 
+        style={{
+          height: "48px",
+          backgroundColor: "var(--bg-warm-white)",
+          borderBottom: "1px solid var(--border-light)",
         }}
       >
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={() => navigate("/home")}
             className="text-xs font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
           >
             TOXICREADS
           </button>
         </div>
+      </header>
 
-        </header>
-
-      <div className="mx-auto" style={{ maxWidth: "720px", padding: "64px 24px 80px", animation: "pageIn 0.4s ease-out both" }}>
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: "720px",
+          padding: "64px 24px 80px",
+          animation: "pageIn 0.4s ease-out both",
+        }}
+      >
         {/* Back Button - Before Image */}
-        <button 
+        <button
           onClick={() => navigate("/home")}
           className="flex items-center gap-1 mb-6 hover:opacity-70 transition-opacity"
         >
           <ChevronLeft size={14} style={{ color: "var(--text-grey)" }} />
-          <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
+          <span
+            style={{
+              fontSize: "17px",
+              color: "var(--text-grey)",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+            }}
+          >
             Back
           </span>
         </button>
 
         <div className="flex flex-col md:flex-row gap-8">
           {/* Cover Image */}
-          <div style={{ border: "1px solid var(--border-light)", flexShrink: 0, width: "100%", maxWidth: "320px" }}>
+          <div
+            style={{
+              border: "1px solid var(--border-light)",
+              flexShrink: 0,
+              width: "100%",
+              maxWidth: "320px",
+            }}
+          >
             <img
               src={book.coverImage}
               alt={book.title}
@@ -135,30 +184,69 @@ export default function BookDetail() {
           {/* Info */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
-              <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: conditionColor, border: `1px solid ${conditionColor}`, padding: "2px 8px" }}>
-                {conditionLabel}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--text-grey)", fontFamily: "'Space Mono', monospace" }}>
+              <span
+                style={{
+                  fontSize: "17px",
+                  color: "var(--text-grey)",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                }}
+              >
                 {book.category.toUpperCase()}
               </span>
               {book.content && (
-                <span style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "#666", border: "1px solid var(--border-light)", padding: "2px 8px" }}>
+                <span
+                  style={{
+                    fontSize: "16px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                    color: "#666",
+                    border: "1px solid var(--border-light)",
+                    padding: "2px 8px",
+                  }}
+                >
                   Includes reading content
                 </span>
               )}
             </div>
 
-            <h1 style={{ fontSize: "22px", fontWeight: 400, lineHeight: 1.3, color: "var(--text-charcoal)", marginBottom: "6px" }}>
+            <h1
+              style={{
+                fontSize: "28px",
+                fontWeight: 400,
+                lineHeight: 1.3,
+                color: "var(--text-charcoal)",
+                marginBottom: "6px",
+              }}
+            >
               {book.title}
             </h1>
-            <p style={{ fontSize: "14px", color: "var(--text-grey)", marginBottom: "16px" }}>
+            <p
+              style={{
+                fontSize: "20px",
+                color: "var(--text-grey)",
+                marginBottom: "16px",
+              }}
+            >
               by {book.author}
             </p>
 
-            <p style={{ fontSize: "14px", fontFamily: "'Space Mono', monospace", color: "var(--text-charcoal)", marginBottom: "4px" }}>
-              {isFree ? "Free" : `$${book.price}`}
+            <p
+              style={{
+                fontSize: "20px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                marginBottom: "4px",
+              }}
+            >
+              {isFree ? "Free" : `₦${book.price}`}
             </p>
-            <p style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", color: "var(--text-grey)", marginBottom: "24px" }}>
+            <p
+              style={{
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-grey)",
+                marginBottom: "24px",
+              }}
+            >
               {book.views} view{book.views !== 1 ? "s" : ""}
             </p>
 
@@ -170,8 +258,8 @@ export default function BookDetail() {
                   style={{
                     flex: 1,
                     padding: "12px",
-                    fontSize: "12px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "18px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                     color: "var(--bg-warm-white)",
                     background: "var(--text-charcoal)",
                     border: "none",
@@ -184,8 +272,8 @@ export default function BookDetail() {
                 <div
                   style={{
                     padding: "12px 16px",
-                    fontSize: "12px",
-                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "18px",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                     color: "#2ECC71",
                     border: "1px solid #2ECC71",
                     letterSpacing: "0.05em",
@@ -200,8 +288,8 @@ export default function BookDetail() {
               <div
                 style={{
                   padding: "12px",
-                  fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "18px",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                   color: "#2ECC71",
                   border: "1px solid #2ECC71",
                   textAlign: "center",
@@ -220,8 +308,8 @@ export default function BookDetail() {
                 style={{
                   width: "100%",
                   padding: "12px",
-                  fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "18px",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                   color: "var(--bg-warm-white)",
                   background: "var(--text-charcoal)",
                   border: "none",
@@ -238,8 +326,8 @@ export default function BookDetail() {
                 style={{
                   width: "100%",
                   padding: "12px",
-                  fontSize: "12px",
-                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "18px",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
                   color: "var(--text-grey)",
                   background: "transparent",
                   border: "1px solid var(--border-light)",
@@ -253,16 +341,43 @@ export default function BookDetail() {
             )}
 
             {(buyMutation.error?.message || buyError) && (
-              <p style={{ fontSize: "11px", color: "#E74C3C", marginBottom: "12px", fontFamily: "'Space Mono', monospace" }}>
+              <p
+                style={{
+                  fontSize: "17px",
+                  color: "#E74C3C",
+                  marginBottom: "12px",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                }}
+              >
                 {buyError || buyMutation.error?.message}
               </p>
             )}
 
-            <div style={{ borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
-              <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "8px" }}>
+            <div
+              style={{
+                borderTop: "1px solid var(--border-light)",
+                paddingTop: "16px",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-grey)",
+                  marginBottom: "8px",
+                }}
+              >
                 DESCRIPTION
               </h3>
-              <p style={{ fontSize: "13px", lineHeight: 1.8, color: "var(--text-charcoal)" }}>
+              <p
+                style={{
+                  fontSize: "19px",
+                  lineHeight: 1.8,
+                  color: "var(--text-charcoal)",
+                }}
+              >
                 {book.description}
               </p>
             </div>
@@ -270,20 +385,46 @@ export default function BookDetail() {
         </div>
 
         {/* Share */}
-        <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "32px", paddingTop: "24px" }}>
-          <h3 style={{ fontSize: "10px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
+        <div
+          style={{
+            borderTop: "1px solid var(--border-light)",
+            marginTop: "32px",
+            paddingTop: "24px",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "16px",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-grey)",
+              marginBottom: "16px",
+            }}
+          >
             SHARE THIS BOOK
           </h3>
           <div style={{ display: "flex", gap: 12 }}>
             <button
               onClick={() => {
                 const url = window.location.origin + "/book/" + book.id;
-                window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url), "fb-share", "width=600,height=400");
+                window.open(
+                  "https://www.facebook.com/sharer/sharer.php?u=" +
+                    encodeURIComponent(url),
+                  "fb-share",
+                  "width=600,height=400"
+                );
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
-                color: "var(--text-charcoal)", background: "transparent",
-                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+                flex: 1,
+                padding: "10px",
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.1em",
               }}
             >
               FACEBOOK
@@ -292,12 +433,22 @@ export default function BookDetail() {
               onClick={() => {
                 const url = window.location.origin + "/book/" + book.id;
                 const text = "Check out this book: " + book.title + " - ";
-                window.open("https://wa.me/?text=" + encodeURIComponent(text + url), "wa-share", "width=600,height=400");
+                window.open(
+                  "https://wa.me/?text=" + encodeURIComponent(text + url),
+                  "wa-share",
+                  "width=600,height=400"
+                );
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
-                color: "var(--text-charcoal)", background: "transparent",
-                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+                flex: 1,
+                padding: "10px",
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.1em",
               }}
             >
               WHATSAPP
@@ -307,7 +458,9 @@ export default function BookDetail() {
                 const url = window.location.origin + "/book/" + book.id;
                 const text = "Check out this book: " + book.title;
                 if (navigator.share) {
-                  try { await navigator.share({ title: book.title, text, url }); } catch {}
+                  try {
+                    await navigator.share({ title: book.title, text, url });
+                  } catch {}
                 } else {
                   try {
                     await navigator.clipboard.writeText(url);
@@ -316,9 +469,15 @@ export default function BookDetail() {
                 }
               }}
               style={{
-                flex: 1, padding: "10px", fontSize: "10px", fontFamily: "'Space Mono', monospace",
-                color: "var(--text-charcoal)", background: "transparent",
-                border: "1px solid var(--border-light)", cursor: "pointer", letterSpacing: "0.1em",
+                flex: 1,
+                padding: "10px",
+                fontSize: "16px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                color: "var(--text-charcoal)",
+                background: "transparent",
+                border: "1px solid var(--border-light)",
+                cursor: "pointer",
+                letterSpacing: "0.1em",
               }}
             >
               INSTAGRAM
@@ -328,29 +487,58 @@ export default function BookDetail() {
 
         {/* Similar Books */}
         {similar.length > 0 && (
-          <div style={{ borderTop: "1px solid var(--border-light)", marginTop: "48px", paddingTop: "24px" }}>
-            <h3 style={{ fontSize: "11px", fontFamily: "'Space Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-grey)", marginBottom: "16px" }}>
+          <div
+            style={{
+              borderTop: "1px solid var(--border-light)",
+              marginTop: "48px",
+              paddingTop: "24px",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "17px",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "var(--text-grey)",
+                marginBottom: "16px",
+              }}
+            >
               SIMILAR BOOKS
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {similar.map((similarBook) => (
-                <div 
+              {similar.map(similarBook => (
+                <div
                   key={similarBook.id}
                   onClick={() => navigate(`/book/${similarBook.id}`)}
                   className="cursor-pointer"
                 >
-                  <div style={{ border: "1px solid var(--border-light)", aspectRatio: "3/4", marginBottom: "8px", overflow: "hidden" }}>
-                    <img 
-                      src={similarBook.coverImage} 
+                  <div
+                    style={{
+                      border: "1px solid var(--border-light)",
+                      aspectRatio: "3/4",
+                      marginBottom: "8px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={similarBook.coverImage}
                       alt={similarBook.title}
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                     />
                   </div>
-                  <p style={{ fontSize: "11px", color: "var(--text-charcoal)", lineHeight: 1.3, marginBottom: "2px" }}>
+                  <p
+                    style={{
+                      fontSize: "17px",
+                      color: "var(--text-charcoal)",
+                      lineHeight: 1.3,
+                      marginBottom: "2px",
+                    }}
+                  >
                     {similarBook.title}
                   </p>
-                  <p style={{ fontSize: "10px", color: "var(--text-grey)" }}>
-                    ${similarBook.price}
+                  <p style={{ fontSize: "16px", color: "var(--text-grey)" }}>
+                    ₦{similarBook.price}
                   </p>
                 </div>
               ))}

@@ -1,15 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        terracotta: 'rgb(var(--color-terracotta) / <alpha-value>)',
-        ochre: 'rgb(var(--color-ochre) / <alpha-value>)',
-        baobab: 'rgb(var(--color-baobab) / <alpha-value>)',
-        cream: 'rgb(var(--color-cream) / <alpha-value>)',
-        charcoal: 'rgb(var(--color-charcoal) / <alpha-value>)',
+        terracotta: "rgb(var(--color-terracotta) / <alpha-value>)",
+        ochre: "rgb(var(--color-ochre) / <alpha-value>)",
+        baobab: "rgb(var(--color-baobab) / <alpha-value>)",
+        cream: "rgb(var(--color-cream) / <alpha-value>)",
+        charcoal: "rgb(var(--color-charcoal) / <alpha-value>)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -55,8 +55,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        serif: ['"Playfair Display"', 'serif'],
-        sans: ['"Space Mono"', 'monospace'],
+        serif: ['"Playfair Display"', "serif"],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
@@ -90,4 +90,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};

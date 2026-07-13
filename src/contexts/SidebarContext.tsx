@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 
 interface SidebarContextType {
   collapsed: boolean;
@@ -15,8 +22,12 @@ const SidebarContext = createContext<SidebarContextType>({
 const MOBILE_BREAKPOINT = 768;
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
-  const [collapsed, setCollapsed] = useState(() => window.innerWidth >= MOBILE_BREAKPOINT ? false : true);
+  const [isMobile, setIsMobile] = useState(
+    () => window.innerWidth < MOBILE_BREAKPOINT
+  );
+  const [collapsed, setCollapsed] = useState(() =>
+    window.innerWidth >= MOBILE_BREAKPOINT ? false : true
+  );
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);

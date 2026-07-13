@@ -11,7 +11,10 @@ let client: ReturnType<typeof createClient>;
 
 export function getDb() {
   if (!instance) {
-    client = createClient({ url: env.databaseUrl, authToken: env.databaseAuthToken });
+    client = createClient({
+      url: env.databaseUrl,
+      authToken: env.databaseAuthToken,
+    });
     instance = drizzle(client, { schema: fullSchema });
   }
   return instance;
@@ -19,7 +22,10 @@ export function getDb() {
 
 export function getClient() {
   if (!client) {
-    client = createClient({ url: env.databaseUrl, authToken: env.databaseAuthToken });
+    client = createClient({
+      url: env.databaseUrl,
+      authToken: env.databaseAuthToken,
+    });
   }
   return client;
 }

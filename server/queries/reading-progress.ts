@@ -6,16 +6,18 @@ export async function upsertProgress(
   userId: number,
   bookId: number,
   chunk: number,
-  scrollPercent: number,
+  scrollPercent: number
 ) {
   const db = getDb();
   const existing = await db
     .select()
     .from(readingProgress)
-    .where(and(
-      eq(readingProgress.userId, userId),
-      eq(readingProgress.bookId, bookId),
-    ))
+    .where(
+      and(
+        eq(readingProgress.userId, userId),
+        eq(readingProgress.bookId, bookId)
+      )
+    )
     .limit(1);
 
   if (existing.length > 0) {
@@ -38,10 +40,12 @@ export async function getProgress(userId: number, bookId: number) {
   const rows = await db
     .select()
     .from(readingProgress)
-    .where(and(
-      eq(readingProgress.userId, userId),
-      eq(readingProgress.bookId, bookId),
-    ))
+    .where(
+      and(
+        eq(readingProgress.userId, userId),
+        eq(readingProgress.bookId, bookId)
+      )
+    )
     .limit(1);
   return rows[0] || null;
 }
