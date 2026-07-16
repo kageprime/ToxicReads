@@ -6,6 +6,8 @@ export type AuthUser = {
   username: string;
   name: string | null;
   role: string;
+  status: string;
+  location?: string | null;
 };
 
 export function useAuth() {

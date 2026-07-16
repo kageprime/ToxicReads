@@ -3,7 +3,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { Session } from "../contracts/constants.js";
 import { getSessionCookieOptions } from "./lib/cookies.js";
-import { createRouter, publicQuery } from "./middleware.js";
+import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { env } from "./lib/env.js";
 import {
@@ -12,6 +12,9 @@ import {
   verifyLocalPassword,
   createLocalUser,
   updateLocalUser,
+  listLocalUsers,
+  updateLocalUserStatus,
+  deleteLocalUser,
 } from "./queries/local-users.js";
 import {
   signLocalSessionToken,
@@ -28,13 +31,15 @@ export const localAuthRouter = createRouter({
     if (!claim) return null;
 
     const user = await findLocalUserById(claim.userId);
-    if (!user) return null;
+    if (!user || user.status === "banned") return null;
 
     return {
       id: user.id,
       username: user.username,
       name: user.name,
       role: user.role,
+      status: user.status,
+      location: user.location ?? null,
     };
   }),
 
@@ -76,6 +81,13 @@ export const localAuthRouter = createRouter({
         });
       }
 
+      if (user.status === "banned") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Your account has been suspended. Contact support.",
+        });
+      }
+
       const token = await signLocalSessionToken({
         username: user.username,
         userId: user.id,
@@ -99,6 +111,8 @@ export const localAuthRouter = createRouter({
         username: user.username,
         name: user.name,
         role: user.role,
+        status: user.status,
+        location: user.location ?? null,
       };
     }),
 
@@ -144,6 +158,8 @@ export const localAuthRouter = createRouter({
         username: user.username,
         name: user.name,
         role: user.role,
+        status: user.status,
+        location: user.location ?? null,
       };
     }),
 
@@ -154,6 +170,7 @@ export const localAuthRouter = createRouter({
         newName: z.string().max(100).optional(),
         newUsername: z.string().min(3).max(100).optional(),
         newPassword: z.string().min(6).max(100).optional(),
+        newLocation: z.string().max(200).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -202,6 +219,7 @@ export const localAuthRouter = createRouter({
         name: input.newName,
         username: input.newUsername,
         password: input.newPassword,
+        location: input.newLocation,
       });
 
       // Re-issue session token with new username and current tokenVersion
@@ -228,6 +246,8 @@ export const localAuthRouter = createRouter({
         username: updated.username,
         name: updated.name,
         role: updated.role,
+        status: updated.status,
+        location: updated.location ?? null,
       };
     }),
 
@@ -245,4 +265,67 @@ export const localAuthRouter = createRouter({
     );
     return { success: true };
   }),
+
+  updateLocation: authedQuery
+    .input(z.object({ location: z.string().max(200).optional() }))
+    .mutation(async ({ ctx, input }) => {
+      await updateLocalUser(ctx.user.id, {
+        location: input.location || "",
+      });
+      return { success: true };
+    }),
+
+  // ── Admin: user management ─────────────────────────────────
+
+  adminList: adminQuery.query(async () => {
+    const users = await listLocalUsers();
+    return users.map(u => ({
+      id: u.id,
+      username: u.username,
+      name: u.name,
+      role: u.role,
+      status: u.status,
+      location: u.location ?? null,
+      createdAt: u.createdAt,
+    }));
+  }),
+
+  adminUpdateStatus: adminQuery
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum(["active", "banned"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const user = await findLocalUserById(input.id);
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
+      if (user.role === "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot change status of another admin",
+        });
+      }
+      await updateLocalUserStatus(input.id, input.status);
+      return { success: true, status: input.status };
+    }),
+
+  adminDelete: adminQuery
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      const user = await findLocalUserById(input.id);
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
+      if (user.role === "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Cannot delete another admin",
+        });
+      }
+      await deleteLocalUser(input.id);
+      return { success: true };
+    }),
 });

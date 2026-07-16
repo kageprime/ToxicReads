@@ -25,7 +25,7 @@ export default function MyPurchases() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ backgroundColor: "hsl(var(--background))" }}
     >
       <div
         className="mx-auto"
@@ -36,7 +36,7 @@ export default function MyPurchases() {
               fontSize: "34px",
               fontWeight: 400,
               fontFamily: "var(--font-serif)",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
               marginBottom: "32px",
               letterSpacing: "-0.01em",
             }}
@@ -48,7 +48,7 @@ export default function MyPurchases() {
           <p
             style={{
               fontSize: "18px",
-              color: "var(--muted-foreground)",
+              color: "hsl(var(--muted-foreground))",
               fontFamily: "var(--font-mono)",
             }}
           >
@@ -84,7 +84,7 @@ export default function MyPurchases() {
                       style={{
                         fontSize: "15px",
                         fontWeight: 400,
-                        color: "var(--foreground)",
+                        color: "hsl(var(--foreground))",
                         marginBottom: "4px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -98,7 +98,7 @@ export default function MyPurchases() {
                     <p
                       style={{
                         fontSize: "18px",
-                        color: "var(--muted-foreground)",
+                        color: "hsl(var(--muted-foreground))",
                         marginBottom: "2px",
                       }}
                     >
@@ -108,7 +108,7 @@ export default function MyPurchases() {
                       style={{
                         fontSize: "17px",
                         fontFamily: "var(--font-mono)",
-                        color: "var(--muted-foreground)",
+                        color: "hsl(var(--muted-foreground))",
                       }}
                     >
                       ₦{purchase.purchasePrice} ·{" "}
@@ -123,7 +123,7 @@ export default function MyPurchases() {
                     style={{
                       fontSize: "15px",
                       fontWeight: 400,
-                      color: "var(--foreground)",
+                      color: "hsl(var(--foreground))",
                       marginBottom: "4px",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -137,7 +137,7 @@ export default function MyPurchases() {
                   <p
                     style={{
                       fontSize: "18px",
-                      color: "var(--muted-foreground)",
+                      color: "hsl(var(--muted-foreground))",
                       marginBottom: "2px",
                     }}
                   >
@@ -147,7 +147,7 @@ export default function MyPurchases() {
                     style={{
                       fontSize: "17px",
                       fontFamily: "var(--font-mono)",
-                      color: "var(--muted-foreground)",
+                      color: "hsl(var(--muted-foreground))",
                     }}
                   >
                     ₦{purchase.purchasePrice} ·{" "}
@@ -164,8 +164,8 @@ export default function MyPurchases() {
                       fontSize: "16px",
                       fontFamily: "var(--font-mono)",
                       letterSpacing: "0.1em",
-                      color: "var(--background)",
-                      background: "var(--foreground)",
+                      color: "hsl(var(--background))",
+                      background: "hsl(var(--foreground))",
                       border: "none",
                       padding: "10px 20px",
                       cursor: "pointer",
@@ -183,7 +183,7 @@ export default function MyPurchases() {
             <p
               style={{
                 fontSize: "19px",
-                color: "var(--muted-foreground)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "16px",
               }}
             >
@@ -195,7 +195,7 @@ export default function MyPurchases() {
               style={{
                 fontSize: "17px",
                 fontFamily: "var(--font-mono)",
-                color: "var(--foreground)",
+                color: "hsl(var(--foreground))",
                 background: "none",
                 border: "1px solid var(--border)",
                 padding: "8px 16px",

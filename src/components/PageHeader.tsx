@@ -27,8 +27,8 @@ export default function PageHeader({
       className="fixed top-0 left-0 right-0 flex items-center justify-between px-4 z-50"
       style={{
         height: "48px",
-        backgroundColor: "var(--background)",
-        borderBottom: "1px solid var(--border)",
+        backgroundColor: "hsl(var(--background))",
+        borderBottom: "1px solid hsl(var(--border))",
       }}
     >
       <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export default function PageHeader({
             className="p-1.5 rounded hover:bg-accent transition-colors"
             aria-label="Go back"
           >
-            <PiCaretLeft size={18} style={{ color: "var(--foreground)" }} />
+            <PiCaretLeft size={18} style={{ color: "hsl(var(--foreground))" }} />
           </button>
         )}
         <button
@@ -51,7 +51,7 @@ export default function PageHeader({
           <span
             style={{
               fontSize: "17px",
-              color: "var(--muted-foreground)",
+              color: "hsl(var(--muted-foreground))",
               marginLeft: "8px",
             }}
           >
@@ -67,7 +67,7 @@ export default function PageHeader({
             className="p-1.5 rounded hover:bg-red-50 transition-colors"
             aria-label="Delete"
           >
-            <PiTrash size={16} style={{ color: "var(--color-p-red-fg)" }} />
+            <PiTrash size={16} style={{ color: "rgb(var(--color-p-red-fg))" }} />
           </button>
         )}
         {showAdmin && isAdmin && (
@@ -84,7 +84,7 @@ export default function PageHeader({
             className="p-1.5 rounded hover:bg-accent transition-colors"
             aria-label="Sign out"
           >
-            <PiSignOut size={16} style={{ color: "var(--muted-foreground)" }} />
+            <PiSignOut size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
           </button>
         )}
       </div>

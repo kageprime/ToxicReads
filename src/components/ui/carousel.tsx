@@ -52,7 +52,7 @@ function Carousel({
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
-      axis: orientation === "horizontal" ? "PiX" : "y",
+      axis: orientation === "horizontal" ? "x" : "y",
     },
     plugins
   );

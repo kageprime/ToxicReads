@@ -1,10 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { PiWarningCircle, PiPencilSimple, PiCheck, PiX } from "react-icons/pi";
+import {
+  PiWarningCircle,
+  PiPencilSimple,
+  PiCheck,
+  PiX,
+  PiPlus,
+  PiUser,
+  PiUserMinus,
+  PiTrash,
+} from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
-type Tab = "pending" | "books" | "purchases";
+type Tab = "pending" | "books" | "purchases" | "users";
 
 interface BookFormData {
   title: string;
@@ -37,6 +46,9 @@ export default function AdminDashboard() {
   const { data: allPurchases, isLoading: purchasesLoading } =
     trpc.purchase.adminList.useQuery(undefined, { enabled: isAdmin });
 
+  const { data: allUsers, isLoading: usersLoading } =
+    trpc.auth.adminList.useQuery(undefined, { enabled: isAdmin });
+
   const approveMutation = trpc.book.approve.useMutation({
     onSuccess: () => {
       utils.book.pendingList.invalidate();
@@ -66,6 +78,18 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateUserStatusMutation = trpc.auth.adminUpdateStatus.useMutation({
+    onSuccess: () => {
+      utils.auth.adminList.invalidate();
+    },
+  });
+
+  const deleteUserMutation = trpc.auth.adminDelete.useMutation({
+    onSuccess: () => {
+      utils.auth.adminList.invalidate();
+    },
+  });
+
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
   const [editingBook, setEditingBook] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<BookFormData>({
@@ -83,9 +107,14 @@ export default function AdminDashboard() {
   }
 
   const statusColors: Record<string, string> = {
-    pending: "var(--color-p-yellow-fg)",
-    approved: "var(--color-p-green-fg)",
-    rejected: "var(--color-p-red-fg)",
+    pending: "rgb(var(--color-p-yellow-fg))",
+    approved: "rgb(var(--color-p-green-fg))",
+    rejected: "rgb(var(--color-p-red-fg))",
+  };
+
+  const userStatusColors: Record<string, string> = {
+    active: "rgb(var(--color-p-green-fg))",
+    banned: "rgb(var(--color-p-red-fg))",
   };
 
   const categories = ["Sci-Fi", "Horror", "Thriller"];
@@ -153,13 +182,39 @@ export default function AdminDashboard() {
     });
   };
 
+  const toggleUserStatus = (user: NonNullable<typeof allUsers>[number]) => {
+    const nextStatus = user.status === "banned" ? "active" : "banned";
+    const action = user.status === "banned" ? "unban" : "ban";
+    if (confirm(`${action === "ban" ? "Ban" : "Unban"} user @${user.username}?`)) {
+      updateUserStatusMutation.mutate({ id: user.id, status: nextStatus });
+    }
+  };
+
+  const deleteUser = (user: NonNullable<typeof allUsers>[number]) => {
+    if (confirm(`Delete user @${user.username}? This cannot be undone.`)) {
+      deleteUserMutation.mutate({ id: user.id });
+    }
+  };
+
+  const formatNgn = (price: string | number) => {
+    const value = typeof price === "string" ? Number(price) : price;
+    return `₦${value.toLocaleString("en-NG")}`;
+  };
+
+  const totalRevenue =
+    allPurchases?.reduce(
+      (sum: number, p: { purchasePrice: string }) =>
+        sum + Number(p.purchasePrice || 0),
+      0,
+    ) || 0;
+
   const inputStyle = {
     width: "100%",
     fontSize: "18px",
     padding: "8px 10px",
-    border: "1px solid var(--border)",
+    border: "1px solid hsl(var(--border))",
     outline: "none",
-    color: "var(--foreground)",
+    color: "hsl(var(--foreground))",
     fontFamily: "var(--font-mono)",
     background: "transparent",
   };
@@ -167,44 +222,47 @@ export default function AdminDashboard() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ backgroundColor: "hsl(var(--background))" }}
     >
       <div
         className="mx-auto"
         style={{ maxWidth: "960px", padding: "32px 24px 80px" }}
       >
-          <h1
-            style={{
-              fontSize: "34px",
-              fontWeight: 400,
-              fontFamily: "var(--font-serif)",
-              color: "var(--foreground)",
-              marginBottom: "24px",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Admin Dashboard
-          </h1>
+        <h1
+          style={{
+            fontSize: "34px",
+            fontWeight: 400,
+            fontFamily: "var(--font-serif)",
+            color: "hsl(var(--foreground))",
+            marginBottom: "24px",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Admin Dashboard
+        </h1>
 
         <div className="flex items-center justify-between mb-6">
           <div
             style={{
               display: "flex",
               gap: "1px",
-              borderBottom: "1px solid var(--border)",
+              borderBottom: "1px solid hsl(var(--border))",
             }}
           >
-            {(["pending", "books", "purchases"] as Tab[]).map(tab => {
+            {(["pending", "books", "purchases", "users"] as Tab[]).map(tab => {
               const count =
                 tab === "pending"
                   ? pendingBooks?.length
                   : tab === "books"
                     ? allBooks?.length
-                    : allPurchases?.length;
+                    : tab === "purchases"
+                      ? allPurchases?.length
+                      : allUsers?.length;
               const labels = {
                 pending: "Pending",
                 books: "All Books",
                 purchases: "Purchases",
+                users: "Users",
               };
               return (
                 <button
@@ -218,13 +276,13 @@ export default function AdminDashboard() {
                     border: "none",
                     borderBottom:
                       activeTab === tab
-                        ? "2px solid var(--foreground)"
+                        ? "2px solid hsl(var(--foreground))"
                         : "2px solid transparent",
                     background: "transparent",
                     color:
                       activeTab === tab
-                        ? "var(--foreground)"
-                        : "var(--muted-foreground)",
+                        ? "hsl(var(--foreground))"
+                        : "hsl(var(--muted-foreground))",
                     cursor: "pointer",
                   }}
                 >
@@ -239,7 +297,7 @@ export default function AdminDashboard() {
               <span
                 style={{
                   fontSize: "17px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   fontFamily: "var(--font-mono)",
                   alignSelf: "center",
                 }}
@@ -253,7 +311,7 @@ export default function AdminDashboard() {
                   fontSize: "16px",
                   fontFamily: "var(--font-mono)",
                   color: "#fff",
-                  background: "var(--color-p-green-fg)",
+                  background: "rgb(var(--color-p-green-fg))",
                   border: "none",
                   padding: "6px 12px",
                   cursor: "pointer",
@@ -268,7 +326,7 @@ export default function AdminDashboard() {
                 style={{
                   fontSize: "16px",
                   fontFamily: "var(--font-mono)",
-                  color: "var(--color-p-red-fg)",
+                  color: "rgb(var(--color-p-red-fg))",
                   background: "transparent",
                   border: "1px solid var(--color-p-red-fg)",
                   padding: "6px 12px",
@@ -301,13 +359,13 @@ export default function AdminDashboard() {
               >
                 <PiWarningCircle
                   size={12}
-                  style={{ color: "var(--color-p-yellow-fg)", marginTop: "3px", flexShrink: 0 }}
+                  style={{ color: "rgb(var(--color-p-yellow-fg))", marginTop: "3px", flexShrink: 0 }}
                 />
                 <p
                   style={{
                     fontSize: "15px",
                     fontFamily: "var(--font-mono)",
-                    color: "var(--foreground)",
+                    color: "hsl(var(--foreground))",
                     lineHeight: 1.6,
                   }}
                 >
@@ -321,7 +379,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   fontFamily: "var(--font-mono)",
                 }}
               >
@@ -342,7 +400,7 @@ export default function AdminDashboard() {
                   <span
                     style={{
                       fontSize: "16px",
-                      color: "var(--muted-foreground)",
+                      color: "hsl(var(--muted-foreground))",
                       fontFamily: "var(--font-mono)",
                     }}
                   >
@@ -353,7 +411,7 @@ export default function AdminDashboard() {
                   <div
                     key={book.id}
                     style={{
-                      border: "1px solid var(--border)",
+                      border: "1px solid hsl(var(--border))",
                       padding: "16px",
                     }}
                   >
@@ -373,7 +431,7 @@ export default function AdminDashboard() {
                           objectFit: "cover",
                           flexShrink: 0,
                           cursor: "pointer",
-                          border: "1px solid var(--border)",
+                          border: "1px solid hsl(var(--border))",
                         }}
                         onClick={() => navigate(`/book/${book.id}`)}
                       />
@@ -385,7 +443,7 @@ export default function AdminDashboard() {
                                 fontSize: "21px",
                                 fontWeight: 400,
                                 fontFamily: "var(--font-serif)",
-                                color: "var(--foreground)",
+                                color: "hsl(var(--foreground))",
                                 marginBottom: "4px",
                               }}
                             >
@@ -394,7 +452,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "18px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 marginBottom: "4px",
                               }}
                             >
@@ -404,7 +462,7 @@ export default function AdminDashboard() {
                               style={{
                                 fontSize: "18px",
                                 fontFamily: "var(--font-mono)",
-                                color: "var(--foreground)",
+                                color: "hsl(var(--foreground))",
                                 marginBottom: "4px",
                               }}
                             >
@@ -413,7 +471,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                               }}
                             >
                               {book.category}
@@ -434,7 +492,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "18px",
-                            color: "var(--foreground)",
+                            color: "hsl(var(--foreground))",
                             lineHeight: 1.6,
                             marginBottom: "12px",
                             maxWidth: "600px",
@@ -452,7 +510,7 @@ export default function AdminDashboard() {
                               fontSize: "16px",
                               fontFamily: "var(--font-mono)",
                               color: "#fff",
-                              background: "var(--color-p-green-fg)",
+                              background: "rgb(var(--color-p-green-fg))",
                               border: "none",
                               padding: "6px 16px",
                               cursor: "pointer",
@@ -469,7 +527,7 @@ export default function AdminDashboard() {
                             style={{
                               fontSize: "16px",
                               fontFamily: "var(--font-mono)",
-                              color: "var(--color-p-red-fg)",
+                              color: "rgb(var(--color-p-red-fg))",
                               background: "transparent",
                               border: "1px solid var(--color-p-red-fg)",
                               padding: "6px 16px",
@@ -489,7 +547,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   textAlign: "center",
                   padding: "40px 0",
                 }}
@@ -502,11 +560,41 @@ export default function AdminDashboard() {
 
         {activeTab === "books" && (
           <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 400,
+                  fontFamily: "var(--font-serif)",
+                  color: "hsl(var(--foreground))",
+                }}
+              >
+                All Books
+              </h2>
+              <button
+                onClick={() => navigate("/add-book")}
+                style={{
+                  fontSize: "16px",
+                  fontFamily: "var(--font-mono)",
+                  color: "#fff",
+                  background: "rgb(var(--color-p-green-fg))",
+                  border: "none",
+                  padding: "8px 14px",
+                  cursor: "pointer",
+                  letterSpacing: "0.05em",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                <PiPlus size={14} /> Add Book
+              </button>
+            </div>
             {booksLoading ? (
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   fontFamily: "var(--font-mono)",
                 }}
               >
@@ -518,10 +606,10 @@ export default function AdminDashboard() {
                   className="hidden md:flex items-center gap-4"
                   style={{
                     padding: "8px 0",
-                    borderBottom: "2px solid var(--foreground)",
+                    borderBottom: "2px solid hsl(var(--foreground))",
                     fontSize: "16px",
                     fontFamily: "var(--font-mono)",
-                    color: "var(--muted-foreground)",
+                    color: "hsl(var(--muted-foreground))",
                   }}
                 >
                   <div style={{ width: "40px" }}></div>
@@ -537,7 +625,7 @@ export default function AdminDashboard() {
                       <div
                         style={{
                           padding: "16px",
-                          borderBottom: "1px solid var(--border)",
+                          borderBottom: "1px solid hsl(var(--border))",
                           backgroundColor: "rgba(0,0,0,0.02)",
                         }}
                       >
@@ -546,7 +634,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -568,7 +656,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -590,7 +678,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -612,7 +700,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -640,7 +728,7 @@ export default function AdminDashboard() {
                             <label
                               style={{
                                 fontSize: "16px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                                 display: "block",
                                 marginBottom: "4px",
                               }}
@@ -663,7 +751,7 @@ export default function AdminDashboard() {
                           <label
                             style={{
                               fontSize: "16px",
-                              color: "var(--muted-foreground)",
+                              color: "hsl(var(--muted-foreground))",
                               display: "block",
                               marginBottom: "4px",
                             }}
@@ -690,7 +778,7 @@ export default function AdminDashboard() {
                               fontSize: "16px",
                               fontFamily: "var(--font-mono)",
                               color: "#fff",
-                              background: "var(--color-p-green-fg)",
+                              background: "rgb(var(--color-p-green-fg))",
                               border: "none",
                               padding: "6px 16px",
                               cursor: "pointer",
@@ -705,7 +793,7 @@ export default function AdminDashboard() {
                             style={{
                               fontSize: "16px",
                               fontFamily: "var(--font-mono)",
-                              color: "var(--color-p-red-fg)",
+                              color: "rgb(var(--color-p-red-fg))",
                               background: "transparent",
                               border: "1px solid var(--color-p-red-fg)",
                               padding: "6px 16px",
@@ -723,7 +811,7 @@ export default function AdminDashboard() {
                         className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-colors hover:bg-accent"
                         style={{
                           padding: "12px",
-                          borderBottom: "1px solid var(--border)",
+                          borderBottom: "1px solid hsl(var(--border))",
                         }}
                       >
                         <div className="flex items-center gap-3 md:gap-4">
@@ -732,7 +820,7 @@ export default function AdminDashboard() {
                               width: "40px",
                               height: "52px",
                               objectFit: "cover",
-                              border: "1px solid var(--border)",
+                              border: "1px solid hsl(var(--border))",
                               flexShrink: 0,
                             }}
                           >
@@ -753,7 +841,7 @@ export default function AdminDashboard() {
                               style={{
                                 fontSize: "19px",
                                 fontFamily: "var(--font-serif)",
-                                color: "var(--foreground)",
+                                color: "hsl(var(--foreground))",
                                 cursor: "pointer",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -766,7 +854,7 @@ export default function AdminDashboard() {
                             <p
                               style={{
                                 fontSize: "17px",
-                                color: "var(--muted-foreground)",
+                                color: "hsl(var(--muted-foreground))",
                               }}
                             >
                               {book.author}
@@ -777,7 +865,7 @@ export default function AdminDashboard() {
                           <p
                             style={{
                               fontSize: "19px",
-                              color: "var(--foreground)",
+                              color: "hsl(var(--foreground))",
                               cursor: "pointer",
                               overflow: "hidden",
                               textOverflow: "ellipsis",
@@ -790,7 +878,7 @@ export default function AdminDashboard() {
                           <p
                             style={{
                               fontSize: "17px",
-                              color: "var(--muted-foreground)",
+                              color: "hsl(var(--muted-foreground))",
                             }}
                           >
                             {book.author}
@@ -801,7 +889,7 @@ export default function AdminDashboard() {
                             style={{
                               fontSize: "18px",
                               fontFamily: "var(--font-mono)",
-                              color: "var(--foreground)",
+                              color: "hsl(var(--foreground))",
                               width: "60px",
                             }}
                           >
@@ -825,9 +913,9 @@ export default function AdminDashboard() {
                               style={{
                                 fontSize: "15px",
                                 fontFamily: "var(--font-mono)",
-                                color: "var(--foreground)",
+                                color: "hsl(var(--foreground))",
                                 background: "none",
-                                border: "1px solid var(--border)",
+                                border: "1px solid hsl(var(--border))",
                                 padding: "4px 6px",
                                 cursor: "pointer",
                               }}
@@ -843,7 +931,7 @@ export default function AdminDashboard() {
                               style={{
                                 fontSize: "15px",
                                 fontFamily: "var(--font-mono)",
-                                color: "var(--color-p-red-fg)",
+                                color: "rgb(var(--color-p-red-fg))",
                                 background: "none",
                                 border: "1px solid var(--color-p-red-fg)",
                                 padding: "4px 6px",
@@ -864,7 +952,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   textAlign: "center",
                   padding: "40px 0",
                 }}
@@ -881,7 +969,7 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "18px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   fontFamily: "var(--font-mono)",
                 }}
               >
@@ -890,13 +978,71 @@ export default function AdminDashboard() {
             ) : allPurchases && allPurchases.length > 0 ? (
               <div>
                 <div
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"
+                >
+                  <div
+                    style={{
+                      border: "1px solid hsl(var(--border))",
+                      padding: "16px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontFamily: "var(--font-mono)",
+                        color: "hsl(var(--muted-foreground))",
+                        letterSpacing: "0.05em",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      TOTAL PURCHASES
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "28px",
+                        fontFamily: "var(--font-mono)",
+                        color: "hsl(var(--foreground))",
+                      }}
+                    >
+                      {allPurchases.length}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      border: "1px solid hsl(var(--border))",
+                      padding: "16px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        fontFamily: "var(--font-mono)",
+                        color: "hsl(var(--muted-foreground))",
+                        letterSpacing: "0.05em",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      TOTAL REVENUE
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "28px",
+                        fontFamily: "var(--font-mono)",
+                        color: "hsl(var(--foreground))",
+                      }}
+                    >
+                      {formatNgn(totalRevenue)}
+                    </p>
+                  </div>
+                </div>
+                <div
                   className="hidden md:flex items-center gap-4"
                   style={{
                     padding: "8px 0",
-                    borderBottom: "2px solid var(--foreground)",
+                    borderBottom: "2px solid hsl(var(--foreground))",
                     fontSize: "16px",
                     fontFamily: "var(--font-mono)",
-                    color: "var(--muted-foreground)",
+                    color: "hsl(var(--muted-foreground))",
                   }}
                 >
                   <div style={{ width: "40px" }}>ID</div>
@@ -912,7 +1058,7 @@ export default function AdminDashboard() {
                     className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4"
                     style={{
                       padding: "12px 0",
-                      borderBottom: "1px solid var(--border)",
+                      borderBottom: "1px solid hsl(var(--border))",
                     }}
                   >
                     <div className="flex items-center gap-3 md:gap-4">
@@ -920,7 +1066,7 @@ export default function AdminDashboard() {
                         className="md:hidden"
                         style={{
                           fontSize: "16px",
-                          color: "var(--muted-foreground)",
+                          color: "hsl(var(--muted-foreground))",
                           fontFamily: "var(--font-mono)",
                         }}
                       >
@@ -931,7 +1077,7 @@ export default function AdminDashboard() {
                           width: "40px",
                           height: "52px",
                           objectFit: "cover",
-                          border: "1px solid var(--border)",
+                          border: "1px solid hsl(var(--border))",
                           flexShrink: 0,
                         }}
                       >
@@ -951,7 +1097,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "19px",
-                            color: "var(--foreground)",
+                            color: "hsl(var(--foreground))",
                             cursor: "pointer",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -964,7 +1110,7 @@ export default function AdminDashboard() {
                         <p
                           style={{
                             fontSize: "17px",
-                            color: "var(--muted-foreground)",
+                            color: "hsl(var(--muted-foreground))",
                           }}
                         >
                           {purchase.book?.author}
@@ -975,7 +1121,7 @@ export default function AdminDashboard() {
                       className="hidden md:inline"
                       style={{
                         fontSize: "17px",
-                        color: "var(--muted-foreground)",
+                        color: "hsl(var(--muted-foreground))",
                         fontFamily: "var(--font-mono)",
                         width: "40px",
                       }}
@@ -988,7 +1134,7 @@ export default function AdminDashboard() {
                         width: "40px",
                         height: "52px",
                         objectFit: "cover",
-                        border: "1px solid var(--border)",
+                        border: "1px solid hsl(var(--border))",
                         flexShrink: 0,
                       }}
                     >
@@ -1008,7 +1154,7 @@ export default function AdminDashboard() {
                       <p
                         style={{
                           fontSize: "19px",
-                          color: "var(--foreground)",
+                          color: "hsl(var(--foreground))",
                           cursor: "pointer",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -1019,18 +1165,18 @@ export default function AdminDashboard() {
                         {purchase.book?.title}
                       </p>
                       <p
-                        style={{ fontSize: "17px", color: "var(--muted-foreground)" }}
+                        style={{ fontSize: "17px", color: "hsl(var(--muted-foreground))" }}
                       >
                         {purchase.book?.author}
                       </p>
                     </div>
                     <div
                       className="flex flex-wrap items-center gap-2 ml-[52px] md:ml-0 text-xs"
-                      style={{ color: "var(--muted-foreground)" }}
+                      style={{ color: "hsl(var(--muted-foreground))" }}
                     >
                       <span
                         style={{
-                          color: "var(--foreground)",
+                          color: "hsl(var(--foreground))",
                           fontFamily: "var(--font-mono)",
                         }}
                       >
@@ -1040,7 +1186,7 @@ export default function AdminDashboard() {
                       <span
                         style={{
                           fontFamily: "var(--font-mono)",
-                          color: "var(--foreground)",
+                          color: "hsl(var(--foreground))",
                         }}
                       >
                         ₦{purchase.purchasePrice}
@@ -1059,12 +1205,216 @@ export default function AdminDashboard() {
               <p
                 style={{
                   fontSize: "19px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   textAlign: "center",
                   padding: "40px 0",
                 }}
               >
                 No purchases
+              </p>
+            )}
+          </div>
+        )}
+
+        {activeTab === "users" && (
+          <div>
+            {usersLoading ? (
+              <p
+                style={{
+                  fontSize: "18px",
+                  color: "hsl(var(--muted-foreground))",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                LOADING...
+              </p>
+            ) : allUsers && allUsers.length > 0 ? (
+              <div>
+                <div
+                  className="hidden md:flex items-center gap-4"
+                  style={{
+                    padding: "8px 0",
+                    borderBottom: "2px solid hsl(var(--foreground))",
+                    fontSize: "16px",
+                    fontFamily: "var(--font-mono)",
+                    color: "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  <div className="flex-1">USER</div>
+                  <div style={{ width: "80px" }}>ROLE</div>
+                  <div style={{ width: "80px" }}>STATUS</div>
+                  <div style={{ width: "120px" }}>JOINED</div>
+                  <div style={{ width: "100px" }}>ACTIONS</div>
+                </div>
+                {allUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4"
+                    style={{
+                      padding: "12px 0",
+                      borderBottom: "1px solid hsl(var(--border))",
+                    }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <PiUser
+                          size={16}
+                          style={{ color: "hsl(var(--muted-foreground))" }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "19px",
+                            color: "hsl(var(--foreground))",
+                            fontFamily: "var(--font-serif)",
+                          }}
+                        >
+                          {user.username}
+                        </span>
+                        {user.role === "admin" && (
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              fontFamily: "var(--font-mono)",
+                              color: "rgb(var(--color-p-green-fg))",
+                              border: "1px solid rgb(var(--color-p-green-fg))",
+                              padding: "1px 6px",
+                            }}
+                          >
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
+                      {user.name && (
+                        <p
+                          style={{
+                            fontSize: "17px",
+                            color: "hsl(var(--muted-foreground))",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {user.name}
+                        </p>
+                      )}
+                    </div>
+                    <div
+                      className="flex items-center gap-2 md:gap-4 ml-[20px] md:ml-0"
+                    >
+                      <span
+                        style={{
+                          fontSize: "16px",
+                          fontFamily: "var(--font-mono)",
+                          color: "hsl(var(--foreground))",
+                          width: "80px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {user.role}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "15px",
+                          fontFamily: "var(--font-mono)",
+                          color: userStatusColors[user.status],
+                          border: `1px solid ${userStatusColors[user.status]}`,
+                          padding: "2px 6px",
+                          textAlign: "center",
+                          width: "80px",
+                        }}
+                      >
+                        {user.status?.toUpperCase()}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "16px",
+                          color: "hsl(var(--muted-foreground))",
+                          fontFamily: "var(--font-mono)",
+                          width: "120px",
+                        }}
+                      >
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "—"}
+                      </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "4px",
+                          width: "100px",
+                        }}
+                      >
+                        {user.role === "admin" ? (
+                          <span
+                            style={{
+                              fontSize: "14px",
+                              fontFamily: "var(--font-mono)",
+                              color: "hsl(var(--muted-foreground))",
+                            }}
+                          >
+                            Protected
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => toggleUserStatus(user)}
+                              disabled={updateUserStatusMutation.isPending}
+                              style={{
+                                fontSize: "15px",
+                                fontFamily: "var(--font-mono)",
+                                color:
+                                  user.status === "banned"
+                                    ? "rgb(var(--color-p-green-fg))"
+                                    : "rgb(var(--color-p-yellow-fg))",
+                                background: "none",
+                                border: "1px solid hsl(var(--border))",
+                                padding: "4px 6px",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              title={
+                                user.status === "banned" ? "Unban user" : "Ban user"
+                              }
+                            >
+                              <PiUserMinus size={10} />
+                              {user.status === "banned" ? "Unban" : "Ban"}
+                            </button>
+                            <button
+                              onClick={() => deleteUser(user)}
+                              disabled={deleteUserMutation.isPending}
+                              style={{
+                                fontSize: "15px",
+                                fontFamily: "var(--font-mono)",
+                                color: "rgb(var(--color-p-red-fg))",
+                                background: "none",
+                                border: "1px solid var(--color-p-red-fg)",
+                                padding: "4px 6px",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              title="Delete user"
+                            >
+                              <PiTrash size={10} /> Del
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p
+                style={{
+                  fontSize: "19px",
+                  color: "hsl(var(--muted-foreground))",
+                  textAlign: "center",
+                  padding: "40px 0",
+                }}
+              >
+                No users
               </p>
             )}
           </div>

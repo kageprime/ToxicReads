@@ -35,15 +35,15 @@ export default function SafeImage({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--border)",
+            background: "hsl(var(--border))",
           }}
         >
           <div
             style={{
               width: 24,
               height: 24,
-              border: "2px solid var(--border)",
-              borderTopColor: "var(--foreground)",
+              border: "2px solid hsl(var(--border))",
+              borderTopColor: "hsl(var(--foreground))",
               borderRadius: "50%",
               animation: "spin 0.8s linear infinite",
             }}
@@ -58,9 +58,9 @@ export default function SafeImage({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--border)",
+            background: "hsl(var(--border))",
             fontSize: "15px",
-            color: "var(--muted-foreground)",
+            color: "hsl(var(--muted-foreground))",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             letterSpacing: "0.05em",
           }}

@@ -1,4 +1,4 @@
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getDb } from "./connection.js";
 import { readingProgress } from "../../db/schema.js";
 

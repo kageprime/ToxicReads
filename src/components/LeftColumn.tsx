@@ -75,6 +75,8 @@ export default function LeftColumn() {
     { label: "Sell your book", path: "/submit-book", icon: PiUpload, primary: true },
     { label: "Browse books", path: "/home", icon: PiCompass },
     { label: "My books", path: "/my-purchases", icon: PiBookOpen },
+    { label: "Sales", path: "/seller", icon: PiSquaresFour },
+    { label: "Wishlist", path: "/wishlist", icon: PiBookOpen },
     { label: "Submissions", path: "/my-submissions", icon: PiList },
     { label: "Account", path: "/profile", icon: PiUser },
     { label: "Admin", path: "/admin", icon: PiSquaresFour, adminOnly: true },
@@ -167,7 +169,7 @@ export default function LeftColumn() {
                 className="sidebar-item group flex items-center justify-center gap-2 w-full py-3 rounded-md bg-foreground text-background font-mono uppercase tracking-[0.12em] text-[12px] hover:opacity-90 active:scale-[0.98] transition disabled:opacity-70"
                 style={{ animationDelay: `${i * 45}ms` }}
               >
-                <Icon size={16} weight="bold" />
+                <Icon size={16} />
                 {item.label}
               </button>
             );
@@ -185,18 +187,17 @@ export default function LeftColumn() {
               />
               <Icon
                 size={19}
-                weight={active ? "fill" : "regular"}
                 className="transition-transform duration-200 group-hover:translate-x-0.5"
                 style={{
                   color: active
-                    ? "var(--foreground)"
-                    : "var(--muted-foreground)",
+                    ? "hsl(var(--foreground))"
+                    : "hsl(var(--muted-foreground))",
                 }}
               />
               <span
                 className="font-mono uppercase text-[12px] tracking-[0.1em] transition-colors"
                 style={{
-                  color: active ? "var(--foreground)" : "var(--muted-foreground)",
+                  color: active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
                 }}
               >
                 {item.label}
@@ -273,7 +274,7 @@ export default function LeftColumn() {
       </div>
 
       {/* ── Footer / auth ── */}
-      <div className="pt-4" style={{ borderTop: "1px solid var(--border)" }}>
+      <div className="pt-4" style={{ borderTop: "1px solid hsl(var(--border))" }}>
         {isAuthenticated ? (
           <button
             onClick={logout}
@@ -282,11 +283,11 @@ export default function LeftColumn() {
             <PiSignOut
               size={19}
               className="transition-transform duration-200 group-hover:translate-x-0.5"
-              style={{ color: "var(--muted-foreground)" }}
+              style={{ color: "hsl(var(--muted-foreground))" }}
             />
             <span
               className="font-mono uppercase text-[12px] tracking-[0.1em]"
-              style={{ color: "var(--muted-foreground)" }}
+              style={{ color: "hsl(var(--muted-foreground))" }}
             >
               Log out
             </span>
@@ -322,8 +323,8 @@ export default function LeftColumn() {
           className="fixed top-0 left-0 z-50 h-full transition-transform duration-300 ease-out"
           style={{
             width: "min(85vw, 320px)",
-            backgroundColor: "var(--background)",
-            borderRight: "1px solid var(--border)",
+            backgroundColor: "hsl(var(--background))",
+            borderRight: "1px solid hsl(var(--border))",
             transform: collapsed ? "translateX(-100%)" : "translateX(0)",
           }}
         >
@@ -339,8 +340,8 @@ export default function LeftColumn() {
       className="h-screen flex-shrink-0 transition-all duration-300 ease-out overflow-hidden"
       style={{
         width: collapsed ? "0px" : "280px",
-        backgroundColor: "var(--background)",
-        borderRight: collapsed ? "none" : "1px solid var(--border)",
+        backgroundColor: "hsl(var(--background))",
+        borderRight: collapsed ? "none" : "1px solid hsl(var(--border))",
       }}
     >
       {content}

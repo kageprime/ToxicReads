@@ -5,10 +5,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { Field } from "@/components/Field";
 
+const CONDITIONS = ["New", "Like New", "Good", "Fair"];
+
 export default function SubmitBook() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
+
+  const { data: categories } = trpc.book.categories.useQuery();
+  const categoryList = categories || ["Sci-Fi", "Horror", "Thriller"];
 
   const [form, setForm] = useState({
     title: "",
@@ -17,7 +22,8 @@ export default function SubmitBook() {
     content: "",
     price: "",
     coverImage: "",
-    category: "Sci-Fi",
+    category: categoryList[0] || "Sci-Fi",
+    condition: "New",
   });
 
   const [coverError, setCoverError] = useState(false);
@@ -52,6 +58,7 @@ export default function SubmitBook() {
       price: form.price,
       coverImage: form.coverImage,
       category: form.category,
+      condition: form.condition,
     });
   };
 
@@ -103,7 +110,7 @@ export default function SubmitBook() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "var(--background)" }}
+        style={{ backgroundColor: "hsl(var(--background))" }}
       >
         <div
           className="text-center"
@@ -127,7 +134,7 @@ export default function SubmitBook() {
             onClick={() => navigate("/home")}
             style={{
               fontSize: "18px",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
               background: "none",
               border: "none",
               cursor: "pointer",
@@ -145,7 +152,7 @@ export default function SubmitBook() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ backgroundColor: "hsl(var(--background))" }}
     >
       <div
         className="mx-auto measure"
@@ -277,7 +284,20 @@ export default function SubmitBook() {
                   value={form.category}
                   onChange={e => setForm({ ...form, category: e.target.value })}
                 >
-                  {["Sci-Fi", "Horror", "Thriller"].map(c => (
+                  {categoryList.map((c: string) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Condition">
+                <select
+                  className="field-input"
+                  value={form.condition}
+                  onChange={e => setForm({ ...form, condition: e.target.value })}
+                >
+                  {CONDITIONS.map(c => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -295,7 +315,7 @@ export default function SubmitBook() {
                     border: "1px solid var(--border)",
                     flexShrink: 0,
                     overflow: "hidden",
-                    backgroundColor: "var(--muted)",
+                    backgroundColor: "hsl(var(--muted))",
                   }}
                 >
                   {uploading ? (

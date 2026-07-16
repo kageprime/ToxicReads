@@ -50,8 +50,8 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t md:hidden"
       style={{
-        backgroundColor: "var(--background)",
-        borderColor: "var(--border)",
+        backgroundColor: "hsl(var(--background))",
+        borderColor: "hsl(var(--border))",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         height: "calc(56px + env(safe-area-inset-bottom, 0px))",
       }}
@@ -83,8 +83,8 @@ export default function BottomNav() {
             style={{
               fontSize: "22px",
               color: active(item.path)
-                ? "var(--foreground)"
-                : "var(--muted-foreground)",
+                ? "hsl(var(--foreground))"
+                : "hsl(var(--muted-foreground))",
             }}
           >
             {item.icon}
@@ -95,8 +95,8 @@ export default function BottomNav() {
               fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
               letterSpacing: "0.05em",
               color: active(item.path)
-                ? "var(--foreground)"
-                : "var(--muted-foreground)",
+                ? "hsl(var(--foreground))"
+                : "hsl(var(--muted-foreground))",
             }}
           >
             {item.label.toUpperCase()}
@@ -116,7 +116,7 @@ export default function BottomNav() {
           cursor: "pointer",
         }}
       >
-          <span style={{ color: "var(--foreground)" }}>
+          <span style={{ color: "hsl(var(--foreground))" }}>
             <PiDotsThree size={20} />
           </span>
         <span
@@ -124,7 +124,7 @@ export default function BottomNav() {
             fontSize: "15px",
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
             letterSpacing: "0.05em",
-            color: "var(--muted-foreground)",
+            color: "hsl(var(--muted-foreground))",
           }}
         >
           MORE

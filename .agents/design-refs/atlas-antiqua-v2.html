@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ATLAS ANTIQUA — Real Earth Edition</title>
+<link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #e7d6b3;
+    --parchment-dark: #d1b98f;
+    --ink: #24180e;
+    --brass: #c8a86a;
+    --brass-dark: #7a5e32;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; overflow:hidden; background:#0b0906; font-family:'Crimson Pro', Georgia, serif; color:var(--ink); }
+  
+  #map { position:absolute; inset:0; }
+  .maplibregl-canvas { filter: sepia(0.7) contrast(1.12) brightness(0.88) hue-rotate(-10deg) saturate(0.75); transition: filter 0.7s ease; }
+  body.realistic .maplibregl-canvas { filter: none; }
+  .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { filter: sepia(0.5) contrast(1.1); }
+
+  .vignette { position:absolute; inset:0; pointer-events:none; z-index:4; background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%),
+    radial-gradient(ellipse at center, transparent 70%, rgba(20,10,5,0.4) 100%);
+    mix-blend-mode: multiply; }
+  .grain { position:absolute; inset:0; pointer-events:none; z-index:5; opacity:0.18; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .top-bar { position:absolute; top:0; left:0; right:0; z-index:20; padding:16px; display:flex; justify-content:center; align-items:flex-start; pointer-events:none; }
+  .brass-plate { pointer-events:auto; background: linear-gradient(180deg, #5e4427 0%, #3c2815 45%, #211407 100%); border:2px solid #8d6e3c; border-radius:8px; padding:12px 30px 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,220,150,0.25), inset 0 -3px 6px rgba(0,0,0,0.6); position:relative; }
+  .brass-plate:before { content:''; position:absolute; inset:4px; border:1px solid rgba(200,168,106,0.4); border-radius:5px; }
+  .brass-plate h1 { margin:0; font-family:'Cinzel', serif; font-weight:900; font-size:24px; letter-spacing:3px; color:#f0ddb3; text-shadow: 0 2px 0 #000, 0 0 12px rgba(240,221,179,0.3); }
+  .brass-plate span { display:block; text-align:center; font-family:'Cinzel'; font-size:10px; letter-spacing:2px; color:#c9b27a; margin-top:2px; text-transform:uppercase; }
+
+  .brass-btn { background: linear-gradient(180deg,#6b4f29,#2e200f); border:1px solid #a17d44; color:#f3e4c1; font-family:'Cinzel', serif; font-weight:600; font-size:11px; letter-spacing:1.2px; padding:10px 14px; border-radius:5px; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,230,170,0.2); text-transform:uppercase; transition: all .2s; }
+  .brass-btn:hover { filter:brightness(1.12); transform:translateY(-1px); }
+  .brass-btn:active { transform:translateY(1px); }
+  .brass-btn.small { padding:8px 12px; font-size:11px; }
+
+  .bottom-controls { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:20; display:flex; gap:10px; background: rgba(20,14,8,0.6); padding:8px; border-radius:8px; border:1px solid rgba(141,110,60,0.5); backdrop-filter: blur(4px); }
+
+  .obelisk-marker { width:26px; height:38px; cursor:pointer; transform:translateY(-6px); }
+  .obelisk { width:100%; height:100%; position:relative; background: linear-gradient(180deg, #e4c987 0%, #b68d4a 35%, #7a5a2e 70%, #4a351a 100%); clip-path: polygon(35% 100%, 65% 100%, 60% 68%, 82% 22%, 50% 0%, 18% 22%, 40% 68%); border:1px solid #2a1a0a; box-shadow: 0 0 14px rgba(255,210,110,0.55), 0 3px 8px rgba(0,0,0,0.8); }
+  .obelisk:after { content:''; position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:7px; height:7px; background:#ffefc2; border-radius:50%; box-shadow: 0 0 8px #ffdb7e, 0 0 16px #ffcc4d, 0 0 24px rgba(255,204,77,0.6); animation:pulse 2.2s infinite ease-in-out; }
+  @keyframes pulse { 0%,100% { transform:translateX(-50%) scale(1); opacity:0.9; } 50% { transform:translateX(-50%) scale(1.4); opacity:1; } }
+  .obelisk-marker:hover .obelisk { filter:brightness(1.2); }
+
+  .tooltip { position:absolute; z-index:30; pointer-events:none; background:#f2e6c9; color:#2a1a0a; padding:6px 10px; border:1px solid #8c6b3f; border-radius:4px; font-family:'Cinzel', serif; font-size:12px; letter-spacing:0.5px; box-shadow:0 6px 16px rgba(0,0,0,0.45), inset 0 0 20px rgba(140,100,50,0.15); opacity:0; transition:opacity .15s; white-space:nowrap; transform:translateY(-4px); }
+
+  .parchment-panel { position:absolute; top:0; right:-440px; width:420px; max-width:94vw; height:100%; z-index:25; transition:right .55s cubic-bezier(.22,.8,.24,1); pointer-events:none; }
+  .parchment-panel.open { right:0; pointer-events:auto; }
+  .panel-content { position:absolute; inset:20px 20px 0; background: var(--parchment); background-image: 
+    linear-gradient(rgba(90,60,30,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90,60,30,0.04) 1px, transparent 1px),
+    radial-gradient(ellipse at top, rgba(255,255,255,0.4), transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(0,0,0,0.08), transparent 70%);
+    background-size: 100% 26px, 26px 100%, 100% 100%, 100% 100%; box-shadow: -12px 0 40px rgba(0,0,0,0.55), inset 0 0 80px rgba(100,70,40,0.25); border:1px solid #a58a62; border-left:none; overflow-y:auto; padding:32px 28px 40px 38px; color:var(--ink); }
+  .panel-content:before { content:''; position:absolute; left:-18px; top:0; bottom:0; width:28px; background:var(--parchment-dark); filter:brightness(0.92); clip-path: polygon(0 0,100% 0,75% 4%,100% 8%,70% 12%,100% 16%,80% 20%,100% 24%,72% 28%,100% 32%,78% 36%,100% 40%,68% 44%,100% 48%,76% 52%,100% 56%,70% 60%,100% 64%,80% 68%,100% 72%,74% 76%,100% 80%,78% 84%,100% 88%,70% 92%,100% 96%,0 100%); box-shadow:-3px 0 6px rgba(0,0,0,0.25); }
+  .close-btn { position:absolute; top:10px; right:14px; background:transparent; border:none; font-size:28px; color:#5c4325; cursor:pointer; line-height:1; padding:4px 8px; z-index:2; }
+  .close-btn:hover { color:#2a1a0a; }
+  .seal { width:56px; height:56px; margin:0 auto 12px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #d4b26e, #8b5e2e 60%, #5a3a18); border:2px solid #3a240f; box-shadow: inset 0 2px 4px rgba(255,230,180,0.4), 0 3px 8px rgba(0,0,0,0.4); position:relative; }
+  .seal:after { content:'✦'; position:absolute; inset:0; display:grid; place-items:center; color:#2d1a0a; font-size:24px; opacity:0.7; }
+  .panel-content h2 { font-family:'Cinzel', serif; font-weight:700; font-size:28px; margin:6px 0 4px; text-align:center; color:#1e140a; text-shadow:0 1px 0 rgba(255,255,255,0.3); }
+  .era { text-align:center; font-style:italic; color:#6b4e2e; margin-bottom:18px; font-size:14px; border-bottom:1px solid rgba(107,78,46,0.3); padding-bottom:12px; }
+  .panel-content p { line-height:1.65; font-size:16px; margin:0 0 14px; text-align:justify; }
+  .panel-content h4 { font-family:'Cinzel'; margin:22px 0 8px; font-size:14px; letter-spacing:1px; color:#5a3f21; text-transform:uppercase; }
+  .artifacts { list-style:none; padding:0; margin:0 0 24px; }
+  .artifacts li { padding:7px 0 7px 22px; position:relative; border-bottom:1px dashed rgba(90,63,33,0.2); font-size:15px; }
+  .artifacts li:before { content:'◈'; position:absolute; left:0; color:#8b6b3d; font-size:12px; top:9px; }
+  .excavate { width:100%; margin-top:10px; background: linear-gradient(180deg,#7a5c2e,#3d2a14); border:1px solid #5e4320; color:#f5e6c6; font-family:'Cinzel'; font-weight:700; letter-spacing:1.5px; padding:12px; border-radius:6px; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,140,0.2); transition:all .2s; font-size:13px; }
+  .excavate:hover { filter:brightness(1.1); }
+  .excavate:active { transform:translateY(1px); }
+
+  @media (max-width: 700px) {
+    .brass-plate h1 { font-size:18px; letter-spacing:2px; }
+    .brass-plate { padding:10px 18px; }
+    .brass-btn { left:10px; top:10px; padding:8px 10px; font-size:10px; }
+    .top-bar { padding:10px; }
+    .parchment-panel { width:100%; right:-100%; }
+    .parchment-panel.open { right:0; }
+    .panel-content { inset:12px 12px 12px 0; padding:26px 20px 30px; }
+    .panel-content h2 { font-size:24px; }
+    .bottom-controls { bottom:12px; padding:6px; }
+    .obelisk-marker { width:22px; height:32px; }
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<header class="top-bar">
+  <div class="brass-plate">
+    <h1>ATLAS ANTIQUA</h1>
+    <span>Real Earth Edition</span>
+  </div>
+</header>
+<button id="modeToggle" class="brass-btn">Realistic Mode</button>
+
+<aside id="museumPanel" class="parchment-panel">
+  <div class="panel-content">
+    <button class="close-btn" id="closePanel">×</button>
+    <div class="seal"></div>
+    <h2 id="siteTitle">Select a Ruin</h2>
+    <div class="era" id="siteEra">—</div>
+    <div id="siteDesc">
+      <p>Click a brass obelisk on the terrain to fly to the site. The map uses real satellite imagery and 3D elevation — exaggerated for drama.</p>
+      <p>Each pin opens a museum dossier written as if recovered from a 19th-century expedition.</p>
+    </div>
+    <h4>Recovered Artifacts</h4>
+    <ul id="siteArtifacts" class="artifacts"><li>Choose a site to begin</li></ul>
+    <button id="excavateBtn" class="excavate">EXCAVATE TERRAIN</button>
+  </div>
+</aside>
+
+<div class="bottom-controls">
+  <button id="rotateBtn" class="brass-btn small">⟳ Rotate</button>
+  <button id="resetBtn" class="brass-btn small">⌖ Reset View</button>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<div id="instructions" class="instructions" style="position:absolute;inset:0;z-index:50;background:rgba(5,3,1,0.78);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;transition:opacity .4s;">
+  <div class="parchment-card" style="background:var(--parchment);padding:34px 30px;max-width:360px;margin:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6),inset 0 0 40px rgba(100,70,40,0.2);border:1px solid #a88a5f;position:relative;">
+    <div style="position:absolute;left:0;right:0;height:18px;background:var(--parchment);top:-8px;clip-path:polygon(0 100%,5% 0,10% 100%,15% 0,20% 100%,25% 0,30% 100%,35% 0,40% 100%,45% 0,50% 100%,55% 0,60% 100%,65% 0,70% 100%,75% 0,80% 100%,85% 0,90% 100%,95% 0,100% 100%);"></div>
+    <h3 style="font-family:'Cinzel';font-size:22px;margin:0 0 10px;">Cartographer's Notes</h3>
+    <p style="margin:0 0 18px;line-height:1.5;color:#4a351f;">Drag to look around, scroll to zoom, click pins to explore ruins. Terrain is real — from the Andes to the Himalayas.</p>
+    <button id="dismissInstructions" class="brass-btn" style="position:static;">Begin Expedition</button>
+  </div>
+</div>
+
+<script>
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+    sources: {
+      satellite: {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        attribution: 'Esri, Maxar, Earthstar Geographics',
+        maxzoom: 19
+      },
+      terrain: {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        tileSize: 256,
+        encoding: 'terrarium',
+        maxzoom: 15
+      }
+    },
+    layers: [
+      { id: 'satellite', type: 'raster', source: 'satellite' }
+    ]
+  },
+  center: [20, 20],
+  zoom: 2.2,
+  pitch: 60,
+  bearing: -20,
+  antialias: true,
+  maxPitch: 85
+});
+
+map.on('load', () => {
+  map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+  map.addLayer({
+    id: 'sky',
+    type: 'sky',
+    paint: {
+      'sky-type': 'atmosphere',
+      'sky-atmosphere-sun': [0, 0],
+      'sky-atmosphere-sun-intensity': 12
+    }
+  });
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
+  addMarkers();
+});
+
+const sites = [
+  { name: 'Göbekli Tepe', coords: [38.922, 37.223], era: 'c. 9600–8200 BCE — Pre-Pottery Neolithic', desc: `<p>On a windswept hill in Anatolia, hunter-gatherers raised the world's first temple — 7,000 years before the pyramids. Massive T-shaped pillars form perfect circles, carved with vultures, foxes, and scorpions.</p><p>No houses, no pottery, only ritual. The builders deliberately buried the entire complex around 8000 BCE, preserving it like a time capsule until a shepherd found it in 1994.</p>`, artifacts: ['Pillar 43 – Vulture Stone', 'T-shaped megaliths', 'Carved boar totem'] },
+  { name: 'Giza Pyramid Complex', coords: [31.1342, 29.9792], era: 'c. 2580–2510 BCE — Old Kingdom Egypt', desc: `<p>The last Wonder of the Ancient World still aligns to true north within a fraction of a degree. Khufu's pyramid was clad in polished white limestone, flashing like a star at dawn.</p><p>Beneath it lies a nation-project, not slaves — workers' villages, bakeries, and copper tool marks remain in the relieving chambers above the King's Chamber.</p>`, artifacts: ["Pyramidion capstone fragment", "Worker's copper chisel", "Dream Stela of Thutmose IV"] },
+  { name: 'Petra', coords: [35.4444, 30.3285], era: 'c. 312 BCE – 106 CE — Nabataean Kingdom', desc: `<p>Hidden behind the narrow Siq canyon, Petra appears suddenly — a Hellenistic treasury carved straight from rose sandstone. The Nabataeans controlled frankincense routes.</p><p>Master hydrologists in the desert, they built dams and ceramic pipes that still carry flash floods. Earthquakes emptied it, leaving facades to Bedouin legend.</p>`, artifacts: ['Al-Khazneh urn crown', 'Nabataean water channel', 'Dushara god block'] },
+  { name: 'Mohenjo-daro', coords: [68.136, 27.325], era: 'c. 2500–1900 BCE — Indus Valley', desc: `<p>One of the first planned cities: grid streets, covered sewers, and 700 wells. Houses were two stories of standardized baked brick with indoor bathrooms 4,000 years ago.</p><p>No palaces have been found, only the Great Bath — bitumen-lined for ritual purity. Its script remains undeciphered.</p>`, artifacts: ['Priest-King bust', 'Dancing Girl bronze', 'Unicorn seal'] },
+  { name: 'Stonehenge', coords: [-1.8262, 51.1789], era: 'c. 3000–1600 BCE — Neolithic Britain', desc: `<p>Bluestones dragged 140 miles from Wales stand inside sarsens quarried 20 miles away. At summer solstice, sunrise aligns perfectly over the Heel Stone.</p><p>Built over 1,400 years, it began as a cremation cemetery. Nearby Durrington Walls shows feasting debris from a nation gathering to build.</p>`, artifacts: ['Bluestone axe carving', 'Amesbury Archer gold', 'Antler picks'] },
+  { name: 'Machu Picchu', coords: [-72.545, -13.1631], era: 'c. 1450 CE — Inca Empire', desc: `<p>Perched 2,430m above the Urubamba, the citadel was never found by conquistadors. Its dry-stone walls fit without mortar, designed to dance in earthquakes.</p><p>A royal estate for Pachacuti, its Intihuatana stone still marks equinoxes. Terraces grew maize at impossible altitude through perfect drainage.</p>`, artifacts: ['Intihuatana sundial', 'Temple of Three Windows', 'Andean bronze tumi'] },
+  { name: 'Angkor Wat', coords: [103.867, 13.4125], era: 'c. 1113–1150 CE — Khmer Empire', desc: `<p>The world's largest religious monument is a stone model of Mount Meru. Its bas-reliefs stretch half a mile, with 1,796 unique apsara dancers.</p><p>Built by Suryavarman II for Vishnu, it became Buddhist later. LiDAR reveals a hidden metropolis of 750,000 beneath the jungle.</p>`, artifacts: ['Churning of Ocean bas-relief', 'Four-faced Bayon', 'Apsara sandstone'] },
+  { name: 'Great Zimbabwe', coords: [30.9333, -20.2728], era: 'c. 1100–1450 CE — Kingdom of Zimbabwe', desc: `<p>Without mortar, Shona masons stacked granite into walls 11 meters high. The Great Enclosure spans 250 meters; the Conical Tower is solid stone.</p><p>A gold-trading empire linked to China, colonial myths credited foreigners. Archaeology restored it to African builders — 'Zimbabwe' means 'houses of stone'.</p>`, artifacts: ['Zimbabwe Bird soapstone', 'Chinese celadon shards', 'Gold foil beads'] },
+  { name: 'Tikal', coords: [-89.623, 17.221], era: 'c. 200–900 CE — Classic Maya', desc: `<p>Rising from the Petén jungle, Temple IV stands 70m tall. Twin-pyramid complexes marked 20-year katun cycles.</p><p>At its peak 60,000 Maya lived here. Stelae record king Jasaw Chan K'awiil defeating Calakmul. Reservoirs still hold water after a millennium.</p>`, artifacts: ['Stela 31', 'Jade funerary mask', 'Obsidian eccentric flint'] },
+  { name: 'Çatalhöyük', coords: [32.828, 37.667], era: 'c. 7100–5700 BCE — Neolithic Anatolia', desc: `<p>A proto-city with no streets — people entered through roof ladders, walking across a honeycomb of houses. Walls were replastered 450 times, painted with bulls and volcanoes.</p><p>The dead were buried under beds, skulls later retrieved and replastered. Farming began here without kings.</p>`, artifacts: ['Seated Woman figurine', 'Aurochs wall plaster', 'Obsidian mirror'] },
+  { name: 'Knossos', coords: [25.163, 35.298], era: 'c. 1900–1350 BCE — Minoan Crete', desc: `<p>The labyrinth of myth was a real palace of 1,300 rooms, light-wells, and flushing toilets. Minoans painted leaping bulls, not war.</p><p>Arthur Evans restored its red columns. Linear A remains unread, but the alabaster throne still waits after Santorini's eruption ended the age.</p>`, artifacts: ['Bull-Leaping fresco', 'Snake Goddess', 'Phaistos Disc'] },
+  { name: 'Nan Madol', coords: [158.332, 6.841], era: 'c. 1200–1600 CE — Saudeleur Dynasty', desc: `<p>The Venice of the Pacific: 92 artificial islets on a coral reef, built from 250,000 tons of basalt 'logs' stacked like Lincoln logs. Canals were streets.</p><p>Built to isolate priests of the Saudeleur, no local quarry explains the stone. Oral history says the stones flew.</p>`, artifacts: ["Basalt column logs", "Royal burial vault", "Petroglyph canoe"] }
+];
+
+const tooltip = document.getElementById('tooltip');
+function showTip(text, e){ tooltip.textContent = text; tooltip.style.opacity = '1'; moveTip(e); }
+function moveTip(e){ tooltip.style.left = (e.clientX + 12) + 'px'; tooltip.style.top = (e.clientY - 30) + 'px'; }
+function hideTip(){ tooltip.style.opacity = '0'; }
+
+function addMarkers() {
+  sites.forEach(site => {
+    const el = document.createElement('div');
+    el.className = 'obelisk-marker';
+    el.innerHTML = '<div class="obelisk"></div>';
+    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(site.coords).addTo(map);
+    el.addEventListener('mouseenter', e => showTip(site.name, e));
+    el.addEventListener('mousemove', moveTip);
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('click', () => flyToSite(site));
+  });
+}
+
+const panel = document.getElementById('museumPanel');
+function flyToSite(site){
+  hideTip();
+  map.flyTo({ center: site.coords, zoom: 15, pitch: 70, bearing: map.getBearing() + 25, duration: 3000, essential: true });
+  setTimeout(() => openPanel(site), 2800);
+}
+
+function openPanel(site){
+  document.getElementById('siteTitle').textContent = site.name;
+  document.getElementById('siteEra').textContent = site.era;
+  document.getElementById('siteDesc').innerHTML = site.desc;
+  const ul = document.getElementById('siteArtifacts');
+  ul.innerHTML = '';
+  site.artifacts.forEach(a => { const li = document.createElement('li'); li.textContent = a; ul.appendChild(li); });
+  panel.classList.add('open');
+}
+document.getElementById('closePanel').onclick = () => panel.classList.remove('open');
+
+document.getElementById('modeToggle').onclick = function() {
+  document.body.classList.toggle('realistic');
+  this.textContent = document.body.classList.contains('realistic') ? 'Parchment Mode' : 'Realistic Mode';
+};
+
+document.getElementById('rotateBtn').onclick = () => map.easeTo({ bearing: map.getBearing() + 45, duration: 1200, pitch: 65 });
+document.getElementById('resetBtn').onclick = () => map.flyTo({ center: [20,20], zoom: 2.2, pitch: 60, bearing: -20, duration: 2000 });
+
+let excavating = false;
+document.getElementById('excavateBtn').onclick = function() {
+  if(excavating) return;
+  excavating = true;
+  this.textContent = 'EXCAVATING...';
+  map.setTerrain({ source: 'terrain', exaggeration: 3.0 });
+  setTimeout(() => {
+    map.setTerrain({ source: 'terrain', exaggeration: 1.5 });
+    this.textContent = 'EXCAVATE TERRAIN';
+    excavating = false;
+  }, 4000);
+};
+
+const instructions = document.getElementById('instructions');
+document.getElementById('dismissInstructions').onclick = () => {
+  instructions.classList.add('hidden');
+  setTimeout(()=> instructions.style.display='none', 400);
+};
+setTimeout(() => { if(!sessionStorage.getItem('seen')) { sessionStorage.setItem('seen','1'); } else { instructions.classList.add('hidden'); instructions.style.display='none'; } }, 100);
+</script>
+</body>
+</html>

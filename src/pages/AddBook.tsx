@@ -102,7 +102,7 @@ export default function AddBook() {
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ backgroundColor: "hsl(var(--background))" }}
     >
       <div
         className="mx-auto measure"
@@ -249,10 +249,10 @@ export default function AddBook() {
                   style={{
                     width: "96px",
                     height: "128px",
-                    border: "1px solid var(--border)",
+                    border: "1px solid hsl(var(--border))",
                     flexShrink: 0,
                     overflow: "hidden",
-                    backgroundColor: "var(--muted)",
+                    backgroundColor: "hsl(var(--muted))",
                   }}
                 >
                   {uploading ? (

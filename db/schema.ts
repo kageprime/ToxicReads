@@ -4,7 +4,6 @@ import {
   integer,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 
 // ── Local Users (username/password auth) ──────────────────────
 
@@ -13,8 +12,12 @@ export const localUsers = sqliteTable("localUsers", {
   username: text("username").notNull().unique(),
   passwordHash: text("passwordHash").notNull(),
   name: text("name"),
+  location: text("location"),
   role: text("role", { enum: ["user", "admin"] })
     .default("user")
+    .notNull(),
+  status: text("status", { enum: ["active", "banned"] })
+    .default("active")
     .notNull(),
   tokenVersion: integer("tokenVersion").notNull().default(0),
   createdAt: integer("createdAt", { mode: "timestamp" })
@@ -39,6 +42,7 @@ export const books = sqliteTable("books", {
   price: text("price").notNull(),
   coverImage: text("coverImage").notNull(),
   category: text("category").notNull(),
+  condition: text("condition").default("New").notNull(),
   sellerId: integer("sellerId"),
   sellerType: text("sellerType", { enum: ["admin", "user"] })
     .default("user")
@@ -97,3 +101,76 @@ export const readingProgress = sqliteTable(
 
 export type ReadingProgress = typeof readingProgress.$inferSelect;
 export type InsertReadingProgress = typeof readingProgress.$inferInsert;
+
+// ── Reviews ───────────────────────────────────────────────────
+
+export const reviews = sqliteTable(
+  "reviews",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    bookId: integer("bookId").notNull(),
+    userId: integer("userId").notNull(),
+    rating: integer("rating").notNull(),
+    text: text("text"),
+    createdAt: integer("createdAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  table => ({
+    uniqueUserBook: uniqueIndex("uq_reviews_user_book").on(
+      table.userId,
+      table.bookId
+    ),
+  })
+);
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof reviews.$inferInsert;
+
+// ── Wishlist ──────────────────────────────────────────────────
+
+export const wishlist = sqliteTable(
+  "wishlist",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("userId").notNull(),
+    bookId: integer("bookId").notNull(),
+    createdAt: integer("createdAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  table => ({
+    uniqueUserBook: uniqueIndex("uq_wishlist_user_book").on(
+      table.userId,
+      table.bookId
+    ),
+  })
+);
+
+export type WishlistItem = typeof wishlist.$inferSelect;
+export type InsertWishlistItem = typeof wishlist.$inferInsert;
+
+// ── Notifications ─────────────────────────────────────────────
+
+export const notifications = sqliteTable("notifications", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("userId").notNull(),
+  type: text("type", {
+    enum: [
+      "book_approved",
+      "book_rejected",
+      "book_purchased",
+      "new_review",
+      "system",
+    ],
+  }).notNull(),
+  message: text("message").notNull(),
+  link: text("link"),
+  read: integer("read", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

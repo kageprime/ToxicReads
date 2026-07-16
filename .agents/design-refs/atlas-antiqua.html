@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ATLAS ANTIQUA — Museum of Lost Worlds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+:root{
+  --parchment:#d9c7a1;
+  --parchment-dark:#c8b188;
+  --ink:#2a1d0f;
+  --sepia:#8b5e3c;
+  --gold:#b68c3e;
+  --glow:#ff9c3c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#171006;font-family:'IM Fell English',serif;color:var(--ink);touch-action:none}
+canvas#map{position:fixed;inset:0;width:100%;height:100%}
+
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:10;box-shadow:inset 0 0 220px rgba(0,0,0,.85), inset 0 0 90px rgba(46,27,12,.7)}
+#grain{position:fixed;inset:0;pointer-events:none;z-index:15;opacity:.18;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");background-size:300px}
+
+.parchment{
+  background:radial-gradient(circle at 20% 15%, #f0e0c0 0%, var(--parchment) 35%, var(--parchment-dark) 100%);
+  border:1.5px solid #7a512f;
+  box-shadow:0 8px 24px rgba(0,0,0,.45), inset 0 0 45px rgba(139,94,60,.28), inset 0 0 2px rgba(0,0,0,.3);
+  color:var(--ink);
+  clip-path:polygon(0% 3%,2% 0%,5% 2%,9% 0%,13% 2%,17% 0%,21% 1%,25% 0%,29% 2%,34% 0%,38% 2%,42% 0%,46% 1%,50% 0%,55% 2%,59% 0%,63% 1%,67% 0%,71% 2%,75% 0%,80% 1%,84% 0%,88% 2%,92% 0%,96% 2%,100% 1%,100% 97%,98% 100%,94% 98%,90% 100%,86% 98%,82% 100%,78% 98%,74% 100%,70% 97%,66% 100%,61% 98%,57% 100%,53% 97%,48% 100%,43% 98%,38% 100%,33% 97%,28% 100%,23% 98%,18% 100%,13% 97%,8% 100%,4% 98%,0% 100%);
+}
+.parchment::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.12;background-image:repeating-linear-gradient(0deg, rgba(0,0,0,.03) 0 2px, transparent 2px 4px)}
+
+#header{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:14px;padding:10px 24px;
+}
+#header svg{width:44px;height:44px;flex-shrink:0;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+#header h1{font-family:'Cinzel',serif;font-weight:700;font-size:20px;letter-spacing:.04em;line-height:1.1;text-shadow:0 1px 0 #f5e6c6}
+#header h1 span{font-family:'IM Fell English',serif;font-weight:400;font-size:14px;opacity:.8;margin-left:6px;letter-spacing:.02em}
+
+#legend{position:fixed;left:18px;bottom:18px;z-index:20;padding:12px 16px;min-width:170px}
+#legend h3{font-family:'Cinzel',serif;font-size:14px;margin-bottom:6px;letter-spacing:.06em}
+#legend div{display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0}
+.dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px #5a3f22, inset 0 1px 2px rgba(255,255,255,.3)}
+.dot.ruin{background:radial-gradient(circle,#ffb26b,#c96a1a)}
+.dot.artifact{background:radial-gradient(circle,#e9c97a,#8f6b2a)}
+.dot.buried{background:radial-gradient(circle,#a47a52,#5b3e25)}
+
+#controls{position:fixed;right:18px;bottom:18px;z-index:20;display:flex;flex-direction:column;gap:10px}
+.brass{
+  width:46px;height:46px;border-radius:50%;border:2px solid #4a2f14;
+  background:radial-gradient(circle at 30% 25%, #f4d79a 0%, #d1a75a 35%, #8f672f 70%, #5d3f1a 100%);
+  color:#28180a;font-family:'Cinzel',serif;font-weight:700;font-size:22px;line-height:1;
+  box-shadow:inset 0 2px 3px rgba(255,235,180,.6), inset 0 -4px 6px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.5);
+  cursor:pointer;transition:transform .1s;display:grid;place-items:center;
+}
+.brass:active{transform:scale(.94)}
+.brass.wide{width:auto;height:auto;border-radius:24px;padding:10px 18px;font-size:15px;letter-spacing:.04em}
+
+#tooltip{
+  position:fixed;z-index:30;padding:8px 12px;font-size:14px;max-width:210px;pointer-events:none;opacity:0;transition:opacity .18s, transform .18s;transform:translateY(4px);
+}
+#tooltip.show{opacity:1;transform:translateY(0)}
+#tooltip strong{font-family:'Cinzel',serif;display:block;font-size:15px}
+#tooltip em{opacity:.8;font-style:italic}
+
+#panel{
+  position:fixed;top:0;right:0;height:100%;width:min(440px,94vw);z-index:50;
+  transform:translateX(110%);transition:transform .55s cubic-bezier(.2,.8,.2,1);
+  padding:0;overflow:hidden;display:flex;flex-direction:column;
+}
+#panel.open{transform:translateX(0)}
+#closePanel{
+  position:absolute;top:12px;right:12px;width:36px;height:36px;border:none;background:transparent;font-size:28px;line-height:1;color:var(--sepia);cursor:pointer;font-family:'IM Fell English';z-index:2
+}
+#panelContent{padding:26px 24px 40px;overflow-y:auto;height:100%}
+.p-era{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#6d4b2b;margin-bottom:4px}
+.p-head h2{font-family:'Cinzel',serif;font-size:28px;line-height:1.1;margin:0 0 4px}
+.p-date{font-style:italic;opacity:.85;margin-bottom:16px}
+.p-body p{margin:0 0 12px;line-height:1.55;font-size:16px}
+.p-body h3{font-family:'Cinzel',serif;margin:20px 0 8px;font-size:16px;letter-spacing:.04em}
+.p-body ul{margin:0 0 16px 18px}
+.p-body li{margin:4px 0}
+.artifact-viewer{
+  margin:18px 0;background:rgba(0,0,0,.06);border:1px solid #a37b4f66;border-radius:6px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.artifact-viewer canvas{width:100%;height:180px;display:block;border-radius:4px;background:radial-gradient(circle at center, #e9d7b2, #c9b289)}
+.artifact-viewer span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+
+#excavateBtn{margin-top:10px}
+
+@media (max-width:720px){
+  #header{top:10px;padding:8px 14px;gap:10px;max-width:92vw}
+  #header svg{width:34px;height:34px}
+  #header h1{font-size:15px}
+  #header h1 span{display:none}
+  #legend{left:10px;bottom:10px;padding:10px 12px;min-width:0}
+  #legend h3{font-size:12px}
+  #legend div{font-size:12px}
+  #controls{right:10px;bottom:10px;gap:8px}
+  .brass{width:42px;height:42px;font-size:20px}
+  #panel{width:100%}
+  #panelContent{padding:22px 18px 32px}
+  .p-head h2{font-size:24px}
+}
+</style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<div id="header" class="parchment">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <defs><radialGradient id="bg" cx="50%" cy="35%"><stop offset="0%" stop-color="#f7e4b7"/><stop offset="60%" stop-color="#c79a47"/><stop offset="100%" stop-color="#6b4a1f"/></radialGradient></defs>
+    <circle cx="50" cy="50" r="48" fill="url(#bg)" stroke="#3d2712" stroke-width="2"/>
+    <circle cx="50" cy="50" r="44" fill="none" stroke="#3d2712" stroke-width="1" opacity=".4"/>
+    <g stroke="#2a1a0a" stroke-width="2" stroke-linecap="round">
+      <path d="M50 12 L54 50 L50 88 L46 50 Z" fill="#a66c26"/>
+      <path d="M12 50 L50 46 L88 50 L50 54 Z" fill="#7a4e1d"/>
+    </g>
+    <text x="50" y="18" text-anchor="middle" font-family="Cinzel" font-size="14" fill="#1d1207">N</text>
+    <text x="50" y="90" text-anchor="middle" font-family="Cinzel" font-size="12" fill="#1d1207">S</text>
+    <circle cx="50" cy="50" r="3" fill="#2a1a0a"/>
+  </svg>
+  <h1>ATLAS ANTIQUA <span>— Museum of Lost Worlds</span></h1>
+</div>
+
+<div id="legend" class="parchment">
+  <h3>Legend</h3>
+  <div><i class="dot ruin"></i> Ancient Ruins</div>
+  <div><i class="dot artifact"></i> Notable Artifacts</div>
+  <div><i class="dot buried"></i> Buried Cities</div>
+</div>
+
+<div id="controls">
+  <button id="zoomIn" class="brass" title="Zoom In">+</button>
+  <button id="zoomOut" class="brass" title="Zoom Out">−</button>
+  <button id="fullscreen" class="brass" title="Fullscreen">⛶</button>
+</div>
+
+<div id="tooltip" class="parchment"></div>
+
+<aside id="panel" class="parchment">
+  <button id="closePanel" aria-label="Close">×</button>
+  <div id="panelContent"></div>
+</aside>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('map');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x2a1d12, 0.0018);
+
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 135, 145);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.25;
+controls.minDistance = 60;
+controls.maxDistance = 175;
+controls.maxPolarAngle = Math.PI * 0.48;
+controls.minPolarAngle = Math.PI * 0.18;
+controls.target.set(0,0,0);
+
+// Lights
+scene.add(new THREE.AmbientLight(0xffe6c2, 0.72));
+const sun = new THREE.DirectionalLight(0xffe0b0, 1.15);
+sun.position.set(80, 140, 60);
+scene.add(sun);
+const hemi = new THREE.HemisphereLight(0xe8d0a8, 0x402a14, 0.35);
+scene.add(hemi);
+
+// Height function
+function getHeight(x, y){
+  let h = Math.sin(x*0.035 + y*0.018)*4.2 + Math.cos(y*0.042)*3.1 + Math.sin(Math.hypot(x*0.018, y*0.02)*10)*2.4;
+  h += Math.max(0, 16 - Math.hypot(x+72, y+8)*0.16); // Andes
+  h += Math.max(0, 13 - Math.hypot(x-28, y-22)*0.13); // Zagros
+  h += Math.max(0, 9 - Math.hypot(x+38, y+38)*0.22); // Highlands
+  h += Math.max(0, 7 - Math.hypot(x-92, y-25)*0.18); // SE Asia
+  return h;
+}
+
+// Terrain
+const terrainGeo = new THREE.PlaneGeometry(300, 200, 128, 128);
+const pos = terrainGeo.attributes.position;
+for(let i=0;i<pos.count;i++){
+  const x = pos.getX(i);
+  const y = pos.getY(i);
+  pos.setZ(i, getHeight(x,y));
+}
+terrainGeo.computeVertexNormals();
+terrainGeo.deleteAttribute('uv2');
+
+// Parchment texture
+const texSize = 2048;
+const tcanvas = document.createElement('canvas');
+tcanvas.width = tcanvas.height = texSize;
+const ctx = tcanvas.getContext('2d');
+// base
+const grd = ctx.createLinearGradient(0,0,0,texSize);
+grd.addColorStop(0,'#e7d6b3'); grd.addColorStop(0.5,'#d9c7a1'); grd.addColorStop(1,'#c7b188');
+ctx.fillStyle = grd; ctx.fillRect(0,0,texSize,texSize);
+// paper grain
+for(let i=0;i<8000;i++){
+  ctx.fillStyle = `rgba(60,36,15,${Math.random()*0.03})`;
+  ctx.fillRect(Math.random()*texSize, Math.random()*texSize, Math.random()*2+1, Math.random()*1+1);
+}
+// coffee stains
+for(let i=0;i<7;i++){
+  const x = Math.random()*texSize, y = Math.random()*texSize, r = 120+Math.random()*280;
+  const g = ctx.createRadialGradient(x,y, r*0.1, x,y,r);
+  g.addColorStop(0,'rgba(120,76,38,0.16)'); g.addColorStop(0.6,'rgba(110,68,32,0.08)'); g.addColorStop(1,'rgba(110,68,32,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+}
+// contour ink lines
+ctx.strokeStyle='rgba(90,58,32,0.19)'; ctx.lineWidth=1.6;
+for(let i=0;i<28;i++){
+  const y = i* (texSize/27) + Math.random()*8;
+  ctx.beginPath(); ctx.moveTo(0,y);
+  for(let x=0;x<=texSize;x+=32){
+    ctx.lineTo(x, y + Math.sin(x*0.006 + i*0.8)*9 + Math.cos(x*0.003 + i)*5);
+  }
+  ctx.stroke();
+}
+// hand-drawn rivers
+ctx.strokeStyle='rgba(85,60,40,0.28)'; ctx.lineWidth=2.2; ctx.lineCap='round';
+const rivers = [[200,400,800,900,1700,800],[600,1500,1100,1200,1600,1400],[300,600,500,700,700,650]];
+rivers.forEach(r=>{
+  ctx.beginPath(); ctx.moveTo(r[0],r[1]);
+  ctx.bezierCurveTo(r[2],r[3], r[4],r[5], texSize-80, r[5]+80);
+  ctx.stroke();
+});
+// edge burn
+const vign = ctx.createRadialGradient(texSize/2,texSize/2,texSize*0.3,texSize/2,texSize/2,texSize*0.7);
+vign.addColorStop(0,'rgba(0,0,0,0)'); vign.addColorStop(1,'rgba(60,30,10,0.25)');
+ctx.fillStyle=vign; ctx.fillRect(0,0,texSize,texSize);
+
+const mapTex = new THREE.CanvasTexture(tcanvas);
+mapTex.anisotropy = 4;
+mapTex.colorSpace = THREE.SRGBColorSpace;
+
+const terrainMat = new THREE.MeshStandardMaterial({
+  map: mapTex,
+  color:0xffffff,
+  roughness:0.95,
+  metalness:0,
+});
+const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+terrain.rotation.x = -Math.PI/2;
+terrain.receiveShadow = false;
+scene.add(terrain);
+
+// sites data
+const sitesData = [
+  {id:'gobekli', name:'Göbekli Tepe', date:'c. 9600 BCE', era:'Pre-Pottery Neolithic, Turkey', x:35, z:-20,
+   history:["Rising from the windswept hills of southeastern Anatolia, Göbekli Tepe overturned everything archaeologists believed about the dawn of civilization. Decades before pottery, writing, or settled farming, hunter-gatherers carved enormous T-shaped limestone pillars — some weighing over 20 tons — and arranged them in vast circles.","The carvings of foxes, vultures, and aurochs suggest a ritual cosmos, a temple built by dozens of communities who gathered seasonally. Deliberately buried around 8000 BCE, its preservation is eerie, as if its builders intended it to be found an epoch later."],
+   artifacts:["T-Pillar 18 with fox relief","Vulture Stone (Pillar 43)","Limestone totem of predator and prey"]},
+  {id:'giza', name:'Pyramids of Giza', date:'c. 2580 BCE', era:'Old Kingdom, Egypt', x:18, z:8,
+   history:["On the Giza plateau, Pharaoh Khufu's architects raised the Great Pyramid with over two million limestone blocks, aligning its sides to the cardinal points with astonishing precision. Built as a resurrection machine, its internal chambers channeled the king's ka toward the circumpolar stars.","For 3,800 years it remained the tallest human-made structure. Surrounding it, the pyramids of Khafre and Menkaure and the enigmatic Sphinx form a necropolis that still guards Old Kingdom cosmology in stone."],
+   artifacts:["Khufu's copper chisel marks","Solar barque of cedar","Sphinx Dream Stele fragment"]},
+  {id:'petra', name:'Petra', date:'312 BCE', era:'Nabataean Kingdom, Jordan', x:25, z:12,
+   history:["Carved into rose sandstone cliffs by Nabataean engineers, Petra controlled incense routes linking Arabia to the Mediterranean. Its Siq canyon opens onto the Treasury, a Hellenistic façade hiding tombs and water cisterns fed by ingenious channels.","After earthquakes and shifting trade, the city faded into Bedouin legend until rediscovered in 1812. Wind-scoured facades still bleed mineral pigments at dawn."],
+   artifacts:["Al-Khazneh façade rosette","Nabataean painted pottery","Rock-cut water conduit"]},
+  {id:'mohenjo', name:'Mohenjo-daro', date:'c. 2500 BCE', era:'Indus Valley, Pakistan', x:70, z:5,
+   history:["Mohenjo-daro, 'Mound of the Dead Men,' was a grid-planned metropolis of the Indus Valley Civilization. Its Great Bath, built of watertight brick, implies ritual purification on a civic scale.","With standardized weights, covered drains, and no obvious palaces, the city suggests egalitarian urbanism. Its undeciphered script keeps its rulers silent."],
+   artifacts:["Priest-King steatite bust","Dancing Girl bronze","Seal with unicorn motif"]},
+  {id:'stonehenge', name:'Stonehenge', date:'c. 3000 BCE', era:'Neolithic, England', x:-38, z:-38,
+   history:["On Salisbury Plain, Neolithic builders dragged sarsen stones 20 miles and bluestones 140 miles from Wales, raising a linteled circle aligned to solstitial sunrises.","Built and rebuilt over 1,500 years, it was likely a temple of ancestors where cremated remains were interred, binding the living to celestial cycles."],
+   artifacts:["Amesbury Archer's gold hair tress","Bluestone hammerstones","Cremated bone deposits"]},
+  {id:'machu', name:'Machu Picchu', date:'1450 CE', era:'Inca Empire, Peru', x:-100, z:35,
+   history:["Perched at 2,430 meters above cloud forest, Machu Picchu was an Inca royal estate of Pachacuti. Its dry-stone walls, trapezoidal windows, and intihuatana sundial withstand earthquakes by design.","Abandoned during the Spanish conquest and hidden by vegetation, Hiram Bingham's 1911 encounter revealed a city perfectly integrated with Andean apus."],
+   artifacts:["Intihuatana granite sundial","Ceremonial ashlar wall","Silver tumi knife"]},
+  {id:'angkor', name:'Angkor Wat', date:'1150 CE', era:'Khmer Empire, Cambodia', x:92, z:22,
+   history:["Angkor Wat, built by Suryavarman II, is the world's largest religious monument, originally dedicated to Vishnu before becoming Buddhist. Its five lotus towers mirror Mount Meru.","An extensive hydraulic city fed a million people. Bas-reliefs chronicle the Churning of the Ocean of Milk, and the jungle's slow reclamation only enhanced its myth."],
+   artifacts:["Churning of Milk bas-relief","Apsara sandstone dancer","Laterite causeway Naga"]},
+  {id:'zimbabwe', name:'Great Zimbabwe', date:'1100 CE', era:'Shona Kingdom', x:30, z:50,
+   history:["Between the 11th and 15th centuries, Great Zimbabwe rose as the capital of a gold-trading Shona kingdom. Its Great Enclosure, built without mortar, curves 250 meters in dry granite.","Trade with Swahili ports brought Chinese porcelain and Persian glass inland. Colonial myth once denied African authorship, but archaeology restored its builders."],
+   artifacts:["Zimbabwe Bird soapstone","Chinese celadon shards","Gold foil rhinoceros"]},
+  {id:'tikal', name:'Tikal', date:'200 CE', era:'Classic Maya, Guatemala', x:-80, z:10,
+   history:["Deep in the Petén jungle, Tikal's Temple I pierces the canopy at 47 meters. A Classic Maya superpower, it warred with Calakmul for centuries over trade routes.","Its plazas echo with stelae of dynastic kings like Jasaw Chan K'awiil. Abandoned by 900 CE during the Maya collapse, howler monkeys now guard its causeways."],
+   artifacts:["Stela 31 of Yax Nuun Ahiin","Jade mosaic death mask","Temple I lintel"]},
+  {id:'catal', name:'Çatalhöyük', date:'7100 BCE', era:'Neolithic Anatolia, Turkey', x:32, z:-15,
+   history:["Çatalhöyük, a Neolithic town of 8,000, had no streets; residents entered homes through rooftops. Walls were plastered annually and painted with bull hunts and geometric patterns.","Burials under platforms kept ancestors within the house. Equal house sizes and rich symbolism suggest a society organized around memory rather than hierarchy."],
+   artifacts:["Seated Woman figurine","Bull-horn bucrania","Obsidian mirror"]},
+  {id:'knossos', name:'Knossos', date:'1900 BCE', era:'Minoan Crete', x:15, z:-2,
+   history:["Knossos on Crete was the labyrinthine palace of Minoan kings, with lightwells, flushing drains, and frescoes of dolphins. Sir Arthur Evans reconstructed vivid colonnades from ruins.","Associated with the myth of Minos and the Minotaur, its destruction layers around 1450 BCE coincide with Mycenaean takeover and the Thera eruption's aftermath."],
+   artifacts:["Prince of Lilies fresco","Bull-leaping rhyton","Linear B tablets"]},
+  {id:'nan', name:'Nan Madol', date:'1200 CE', era:'Saudeleur Dynasty, Micronesia', x:125, z:18,
+   history:["Built on a coral reef in Pohnpei, Nan Madol is a Venetian city of basalt logs stacked as high as 25 feet, creating artificial islets linked by canals.","Seat of the Saudeleur dynasty, its megalithic tombs defied engineering expectations for an island society without pulleys or metal. Oral tradition claims stones flew."],
+   artifacts:["Basalt prismatic columns","Saudeleur burial urn","Petroglyph of sailing canoe"]},
+];
+
+const markers = [];
+const underground = [];
+
+function createMarker(site){
+  const h = getHeight(site.x, -site.z);
+  site.h = h;
+  const group = new THREE.Group();
+  const baseMat = new THREE.MeshStandardMaterial({color:0x4a331d, roughness:0.9});
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(1.3,1.8,1.1,6), baseMat);
+  base.position.y = 0.55;
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.9,4.6,4), new THREE.MeshStandardMaterial({color:0x2c1c0f, roughness:0.7}));
+  shaft.position.y = 3.4; shaft.rotation.y = Math.PI/4;
+  const tipMat = new THREE.MeshStandardMaterial({color:0xd1a75a, metalness:0.5, roughness:0.35, emissive:0x5a320a, emissiveIntensity:0.25});
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.72,1.3,4), tipMat);
+  tip.position.y = 6.35; tip.rotation.y = Math.PI/4;
+  const glow = new THREE.PointLight(0xff9c3c, 0, 18, 2);
+  glow.position.y = 6.5;
+  group.add(base, shaft, tip, glow);
+  group.position.set(site.x, h+0.2, site.z);
+  group.userData = {site, glow, tip, baseY:h};
+  group.scale.setScalar(1.15);
+  scene.add(group);
+  markers.push(group);
+
+  // underground structure
+  const underGeo = new THREE.BoxGeometry(9,3.5,9,2,1,2);
+  const underMat = new THREE.MeshStandardMaterial({color:0x8b5e3c, emissive:0x3a1a06, emissiveIntensity:0.35, wireframe:true, transparent:true, opacity:0});
+  const under = new THREE.Mesh(underGeo, underMat);
+  under.position.set(site.x, h-9, site.z);
+  under.scale.y = 0.2;
+  scene.add(under);
+  underground.push(under);
+}
+sitesData.forEach(createMarker);
+
+// interaction
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hovered = null;
+const tooltip = document.getElementById('tooltip');
+
+function updateMouse(e){
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = (e.touches?e.touches[0].clientX:e.clientX);
+  const y = (e.touches?e.touches[0].clientY:e.clientY);
+  mouse.x = ((x - rect.left)/rect.width)*2 -1;
+  mouse.y = -((y - rect.top)/rect.height)*2 +1;
+  return {x,y};
+}
+window.addEventListener('mousemove', e=>{
+  const p = updateMouse(e);
+  checkHover(p.x,p.y);
+});
+window.addEventListener('touchmove', e=>{ const p=updateMouse(e); checkHover(p.x,p.y); },{passive:true});
+
+function checkHover(cx,cy){
+  raycaster.setFromCamera(mouse,camera);
+  const hits = raycaster.intersectObjects(markers,true);
+  let target=null;
+  if(hits.length){ let o=hits[0].object; while(o && !o.userData.site) o=o.parent; target=o; }
+  if(target!==hovered){
+    if(hovered){ hovered.userData.glow.intensity=0; hovered.userData.tip.material.emissiveIntensity=0.25; hovered.scale.setScalar(1.15); }
+    hovered=target;
+    if(hovered){ hovered.userData.glow.intensity=1.8; hovered.userData.tip.material.emissiveIntensity=0.85; hovered.scale.setScalar(1.3); tooltip.classList.add('show'); }
+    else tooltip.classList.remove('show');
+  }
+  if(hovered){
+    tooltip.innerHTML = `<strong>${hovered.userData.site.name}</strong><em>${hovered.userData.site.date}</em>`;
+    tooltip.style.left = Math.min(window.innerWidth-230, cx+14)+'px';
+    tooltip.style.top = Math.min(window.innerHeight-80, cy+14)+'px';
+  }
+}
+
+renderer.domElement.addEventListener('click', ()=>{
+  if(hovered) openSite(hovered.userData.site);
+});
+
+// panel
+const panel = document.getElementById('panel');
+const panelContent = document.getElementById('panelContent');
+document.getElementById('closePanel').onclick = ()=>{ panel.classList.remove('open'); controls.autoRotate=true; };
+
+let mini = null;
+function openSite(site){
+  controls.autoRotate = false;
+  flyTo(site);
+  panel.classList.add('open');
+  panelContent.innerHTML = `
+    <div class="p-head">
+      <div class="p-era">${site.era}</div>
+      <h2>${site.name}</h2>
+      <div class="p-date">${site.date}</div>
+    </div>
+    <div class="p-body">
+      <p>${site.history[0]}</p>
+      <p>${site.history[1]}</p>
+      <h3>Notable Artifacts</h3>
+      <ul>${site.artifacts.map(a=>`<li>${a}</li>`).join('')}</ul>
+      <div class="artifact-viewer">
+        <canvas id="artifactCanvas"></canvas>
+        <span>Wireframe study — ${site.name}</span>
+      </div>
+      <button id="excavateBtn" class="brass wide">Excavate Layer</button>
+    </div>
+  `;
+  document.getElementById('excavateBtn').onclick = toggleExcavate;
+  initArtifactViewer(site.id);
+}
+
+function initArtifactViewer(id){
+  const canvas = document.getElementById('artifactCanvas');
+  if(!canvas) return;
+  if(mini) mini.renderer.dispose();
+  const w = canvas.clientWidth, h=180;
+  const r = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  r.setSize(w,h,false); r.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+  const s = new THREE.Scene();
+  const c = new THREE.PerspectiveCamera(40, w/h, 0.1, 100); c.position.set(0,0,6);
+  let geo;
+  const map = {gobekli:new THREE.DodecahedronGeometry(1.4), giza:new THREE.ConeGeometry(1.4,1.9,4), petra:new THREE.TorusKnotGeometry(0.9,0.28,100,16), mohenjo:new THREE.BoxGeometry(1.6,1.6,1.6), stonehenge:new THREE.CylinderGeometry(1.3,1.3,0.5,12), machu:new THREE.OctahedronGeometry(1.4), angkor:new THREE.IcosahedronGeometry(1.3), zimbabwe:new THREE.ConeGeometry(1.2,1.7,6), tikal:new THREE.TorusGeometry(1.1,0.35,16,40), catal:new THREE.SphereGeometry(1.3,12,8), knossos:new THREE.TorusKnotGeometry(0.8,0.3,80,12), nan:new THREE.CylinderGeometry(0.8,0.8,1.8,6)};
+  geo = map[id] || new THREE.TetrahedronGeometry(1.3);
+  const mat = new THREE.MeshBasicMaterial({color:0x8b5e3c,wireframe:true});
+  const m = new THREE.Mesh(geo, mat); s.add(m); s.add(new THREE.AmbientLight(0xffffff,1));
+  mini = {renderer:r,scene:s,camera:c,mesh:m};
+}
+
+// fly
+let fly = null;
+function flyTo(site){
+  fly = {t:0, startT:controls.target.clone(), endT:new THREE.Vector3(site.x, site.h, site.z),
+         startP:camera.position.clone()};
+  const dir = camera.position.clone().sub(controls.target).normalize().multiplyScalar(78);
+  fly.endP = fly.endT.clone().add(dir);
+}
+function updateFly(){
+  if(!fly) return;
+  fly.t += 0.018;
+  const k = fly.t>=1?1: (1-Math.pow(1-fly.t,3));
+  controls.target.lerpVectors(fly.startT, fly.endT, k);
+  camera.position.lerpVectors(fly.startP, fly.endP, k);
+  if(k===1) fly=null;
+}
+
+// excavate
+let excavating = false, excavateT=0;
+function toggleExcavate(){
+  excavating = !excavating;
+  document.getElementById('excavateBtn').textContent = excavating ? 'Restore Surface' : 'Excavate Layer';
+}
+
+// controls UI
+document.getElementById('zoomIn').onclick = ()=> zoom(-12);
+document.getElementById('zoomOut').onclick = ()=> zoom(12);
+function zoom(d){
+  const dir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+  let dist = camera.position.distanceTo(controls.target) + d;
+  dist = THREE.MathUtils.clamp(dist, 62, 170);
+  camera.position.copy(controls.target).add(dir.multiplyScalar(dist));
+}
+document.getElementById('fullscreen').onclick = ()=>{
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+
+// keyboard
+window.addEventListener('keydown', e=>{
+  const s=4;
+  if(e.key==='Escape') panel.classList.remove('open');
+  switch(e.key.toLowerCase()){
+    case 'w': case 'arrowup': controls.target.z-=s; camera.position.z-=s; break;
+    case 's': case 'arrowdown': controls.target.z+=s; camera.position.z+=s; break;
+    case 'a': case 'arrowleft': controls.target.x-=s; camera.position.x-=s; break;
+    case 'd': case 'arrowright': controls.target.x+=s; camera.position.x+=s; break;
+    case 'q': rotateCam(0.12); break;
+    case 'e': rotateCam(-0.12); break;
+  }
+});
+function rotateCam(a){
+  const o = camera.position.clone().sub(controls.target);
+  const r = o.length(); let th = Math.atan2(o.x,o.z)+a;
+  o.x = Math.sin(th)*r; o.z = Math.cos(th)*r;
+  camera.position.copy(controls.target).add(o);
+}
+
+// resize
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// animate
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  updateFly();
+  // excavate lerp
+  excavateT += (excavating?1:0 - excavateT)*0.06;
+  terrainMat.opacity = THREE.MathUtils.lerp(1, 0.38, excavateT);
+  terrainMat.transparent = excavateT>0.01;
+  terrainMat.wireframe = excavateT>0.6;
+  underground.forEach((u,i)=>{
+    u.material.opacity = excavateT*0.85;
+    u.scale.y = 0.2 + excavateT*0.9;
+    u.position.y = markers[i].userData.baseY -9 + excavateT*3;
+    u.rotation.y += 0.002;
+  });
+  markers.forEach(m=>{
+    if(m!==hovered){
+      const pulse = 0.25 + Math.sin(performance.now()*0.0015 + m.position.x)*0.08;
+      m.userData.glow.intensity = THREE.MathUtils.lerp(m.userData.glow.intensity, excavating?1.2*pulse:0, 0.07);
+    }
+  });
+  renderer.render(scene,camera);
+  if(mini){ mini.mesh.rotation.y +=0.008; mini.mesh.rotation.x +=0.004; mini.renderer.render(mini.scene, mini.camera); }
+}
+animate();
+
+// initial hint
+setTimeout(()=>{ if(!panel.classList.contains('open')) { checkHover(window.innerWidth*0.6, window.innerHeight*0.5); }}, 1200);
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>

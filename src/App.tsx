@@ -4,6 +4,7 @@ import BookList from "./components/BookList";
 import LeftColumn from "./components/LeftColumn";
 import BookDetail from "./components/BookDetail";
 import BottomNav from "./components/BottomNav";
+import NotificationsBell from "./components/NotificationsBell";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -21,24 +22,48 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Reader from "./pages/Reader";
 import Landing from "./pages/Landing";
+import SellerDashboard from "./pages/SellerDashboard";
+import AuthorProfile from "./pages/AuthorProfile";
+import WishlistPage from "./pages/WishlistPage";
 import { PiCaretRight } from "react-icons/pi";
 
 function AppShell() {
   const location = useLocation();
   const { isMobile, setCollapsed } = useSidebar();
 
-  // Always collapse the overlay when navigating on mobile
   useEffect(() => {
     if (isMobile) setCollapsed(true);
   }, [location.pathname, isMobile, setCollapsed]);
 
+  const showTopBar = location.pathname.startsWith("/home") ||
+    location.pathname.startsWith("/book/") ||
+    location.pathname.startsWith("/my-purchases") ||
+    location.pathname.startsWith("/my-submissions") ||
+    location.pathname.startsWith("/profile") ||
+    location.pathname.startsWith("/submit-book") ||
+    location.pathname.startsWith("/seller") ||
+    location.pathname.startsWith("/wishlist") ||
+    location.pathname.startsWith("/author/");
+
   return (
     <div
       className="flex"
-      style={{ height: "100vh", backgroundColor: "var(--background)" }}
+      style={{ height: "100vh", backgroundColor: "hsl(var(--background))" }}
     >
       <LeftColumn />
       <div className="flex-1 flex flex-col min-w-0">
+        {showTopBar && (
+          <div
+            className="flex items-center justify-end px-4"
+            style={{
+              height: "44px",
+              borderBottom: "1px solid hsl(var(--border))",
+              flexShrink: 0,
+            }}
+          >
+            <NotificationsBell />
+          </div>
+        )}
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
@@ -59,7 +84,7 @@ function HomePage() {
           className="flex items-center justify-center"
           style={{ paddingTop: "40vh" }}
         >
-          <p style={{ fontSize: "18px", color: "var(--muted-foreground)" }}>
+          <p style={{ fontSize: "18px", color: "hsl(var(--muted-foreground))" }}>
             LOADING...
           </p>
         </div>
@@ -86,12 +111,12 @@ function FloatingOpen() {
       className="fixed top-1/2 -translate-y-1/2 z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
       style={{
         left: "12px",
-        backgroundColor: "var(--background)",
-        border: "1px solid var(--border)",
+        backgroundColor: "hsl(var(--background))",
+        border: "1px solid hsl(var(--border))",
       }}
       title="Open sidebar"
     >
-      <PiCaretRight size={16} style={{ color: "var(--muted-foreground)" }} />
+      <PiCaretRight size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
     </button>
   );
 }
@@ -114,6 +139,9 @@ export default function App() {
               <Route path="/my-purchases" element={<MyPurchases />} />
               <Route path="/my-submissions" element={<MySubmissions />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/seller" element={<SellerDashboard />} />
+              <Route path="/author/:author" element={<AuthorProfile />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
             </Route>
             <Route path="/read/:id" element={<Reader />} />
             <Route path="*" element={<NotFound />} />

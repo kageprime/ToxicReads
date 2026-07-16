@@ -58,11 +58,11 @@ export function useSwipe({
     };
 
     const opts = { passive: true } as AddEventListenerOptions;
-    el.addEventListener("touchstart", onTouchStart, opts);
-    el.addEventListener("touchend", onTouchEnd, opts);
+    el.addEventListener("touchstart", onTouchStart as EventListener, opts);
+    el.addEventListener("touchend", onTouchEnd as EventListener, opts);
     return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchstart", onTouchStart as EventListener);
+      el.removeEventListener("touchend", onTouchEnd as EventListener);
     };
   }, [onSwipeLeft, onSwipeRight, threshold, element, edgeOnly]);
 }

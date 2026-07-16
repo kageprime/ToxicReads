@@ -13,6 +13,8 @@ import {
   findAllBooks,
   findPendingBooks,
   findBooksBySeller,
+  searchApprovedBooks,
+  findBooksByAuthor,
   createBook,
   updateBook,
   deleteBook,
@@ -21,6 +23,7 @@ import {
   incrementBookViews,
 } from "./queries/books.js";
 import { hasUserPurchasedBook } from "./queries/purchases.js";
+import { createNotification } from "./queries/notifications.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { signReadToken, verifyReadToken } from "./lib/read-token.js";
 import { upsertProgress, getProgress } from "./queries/reading-progress.js";
@@ -202,6 +205,7 @@ export const bookRouter = createRouter({
         price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
         coverImage: z.string().max(500),
         category: z.string().min(1).max(100),
+        condition: z.string().max(50).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -295,6 +299,33 @@ export const bookRouter = createRouter({
       return { success: true };
     }),
 
+  // ── Public: search & author ─────────────────────────────────
+
+  search: publicQuery
+    .input(
+      z.object({
+        q: z.string().optional(),
+        category: z.string().optional(),
+        minPrice: z.number().optional(),
+        maxPrice: z.number().optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      return searchApprovedBooks(input);
+    }),
+
+  categories: publicQuery.query(async () => {
+    const books = await findApprovedBooks();
+    const cats = new Set(books.map(b => b.category));
+    return Array.from(cats).sort();
+  }),
+
+  byAuthor: publicQuery
+    .input(z.object({ author: z.string().min(1) }))
+    .query(async ({ input }) => {
+      return findBooksByAuthor(input.author);
+    }),
+
   // ── Admin: manage all books ─────────────────────────────────
 
   adminList: adminQuery.query(async () => findAllBooks()),
@@ -315,6 +346,7 @@ export const bookRouter = createRouter({
         price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
         coverImage: z.string().max(500),
         category: z.string().min(1).max(100),
+        condition: z.string().max(50).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -371,12 +403,32 @@ export const bookRouter = createRouter({
   approve: adminQuery
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      return approveBook(input.id);
+      const book = await findBookById(input.id);
+      const result = await approveBook(input.id);
+      if (book && book.sellerId && book.sellerType === "user") {
+        await createNotification({
+          userId: book.sellerId,
+          type: "book_approved",
+          message: `Your book "${book.title}" has been approved and is now live!`,
+          link: `/book/${book.id}`,
+        });
+      }
+      return result;
     }),
 
   reject: adminQuery
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      return rejectBook(input.id);
+      const book = await findBookById(input.id);
+      const result = await rejectBook(input.id);
+      if (book && book.sellerId && book.sellerType === "user") {
+        await createNotification({
+          userId: book.sellerId,
+          type: "book_rejected",
+          message: `Your book "${book.title}" was not approved. Please review guidelines.`,
+          link: `/my-submissions`,
+        });
+      }
+      return result;
     }),
 });

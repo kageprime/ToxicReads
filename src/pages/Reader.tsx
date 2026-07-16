@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { PiCaretLeft, PiList, PiSignOut } from "react-icons/pi";
+import { PiCaretLeft, PiList, PiSignOut, PiSun, PiMoon, PiX } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
@@ -249,7 +249,7 @@ export default function Reader() {
       entries => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            const idx = parseInt(entry.getAttribute("data-para") || "0");
+            const idx = parseInt(entry.target.getAttribute("data-para") || "0");
             let chapterIdx = 0;
             for (let i = outline.length - 1; i >= 0; i--) {
               if (outline[i].index <= idx) {

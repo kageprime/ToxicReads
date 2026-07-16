@@ -91,15 +91,15 @@ export default function PaymentModal({
       <div
         className="w-full max-w-sm mx-4"
         style={{
-          backgroundColor: "var(--background)",
-          border: "1px solid var(--border)",
+          backgroundColor: "hsl(var(--background))",
+          border: "1px solid hsl(var(--border))",
           animation: "modalIn 0.25s ease-out both",
         }}
         onClick={e => e.stopPropagation()}
       >
         <div
           className="flex items-center justify-between px-5 pt-4 pb-2"
-          style={{ borderBottom: "1px solid var(--border)" }}
+          style={{ borderBottom: "1px solid hsl(var(--border))" }}
         >
           <h2
             style={{
@@ -107,7 +107,7 @@ export default function PaymentModal({
               fontWeight: 400,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
             }}
           >
             Complete Payment
@@ -116,7 +116,7 @@ export default function PaymentModal({
             onClick={onClose}
             className="p-1 hover:opacity-70 transition-opacity"
           >
-            <PiX size={16} style={{ color: "var(--muted-foreground)" }} />
+            <PiX size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
           </button>
         </div>
 
@@ -124,7 +124,7 @@ export default function PaymentModal({
           <p
             style={{
               fontSize: "17px",
-              color: "var(--muted-foreground)",
+              color: "hsl(var(--muted-foreground))",
               fontFamily: "var(--font-mono)",
               marginBottom: "2px",
             }}
@@ -135,7 +135,7 @@ export default function PaymentModal({
             style={{
               fontSize: "22px",
               fontFamily: "var(--font-mono)",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
             }}
           >
             ₦{price}
@@ -176,7 +176,7 @@ export default function PaymentModal({
               <label
                 style={{
                   fontSize: "16px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   display: "block",
                   marginBottom: "3px",
                   fontFamily: "var(--font-mono)",
@@ -192,9 +192,9 @@ export default function PaymentModal({
                   width: "100%",
                   fontSize: "18px",
                   padding: "8px 10px",
-                  border: "1px solid var(--border)",
+                  border: "1px solid hsl(var(--border))",
                   outline: "none",
-                  color: "var(--foreground)",
+                  color: "hsl(var(--foreground))",
                   fontFamily: "var(--font-mono)",
                   background: "transparent",
                 }}
@@ -204,7 +204,7 @@ export default function PaymentModal({
               <label
                 style={{
                   fontSize: "16px",
-                  color: "var(--muted-foreground)",
+                  color: "hsl(var(--muted-foreground))",
                   display: "block",
                   marginBottom: "3px",
                   fontFamily: "var(--font-mono)",
@@ -222,9 +222,9 @@ export default function PaymentModal({
                   width: "100%",
                   fontSize: "18px",
                   padding: "8px 10px",
-                  border: "1px solid var(--border)",
+                  border: "1px solid hsl(var(--border))",
                   outline: "none",
-                  color: "var(--foreground)",
+                  color: "hsl(var(--foreground))",
                   fontFamily: "var(--font-mono)",
                   background: "transparent",
                 }}
@@ -236,7 +236,7 @@ export default function PaymentModal({
             <p
               style={{
                 fontSize: "17px",
-                color: "var(--color-p-red-fg)",
+                color: "rgb(var(--color-p-red-fg))",
                 fontFamily: "var(--font-mono)",
               }}
             >
@@ -252,8 +252,8 @@ export default function PaymentModal({
               padding: "12px",
               fontSize: "18px",
               fontFamily: "var(--font-mono)",
-              color: "var(--background)",
-              background: processing ? "#999" : "var(--foreground)",
+              color: "hsl(var(--background))",
+              background: processing ? "#999" : "hsl(var(--foreground))",
               border: "none",
               cursor: processing ? "wait" : "pointer",
               letterSpacing: "0.05em",
@@ -266,7 +266,7 @@ export default function PaymentModal({
           <p
             style={{
               fontSize: "15px",
-              color: "var(--muted-foreground)",
+              color: "hsl(var(--muted-foreground))",
               fontFamily: "var(--font-mono)",
               textAlign: "center",
               marginTop: "8px",

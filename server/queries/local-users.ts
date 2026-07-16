@@ -71,11 +71,13 @@ export async function updateLocalUser(
     username?: string;
     password?: string;
     name?: string;
+    location?: string;
   }
 ): Promise<LocalUser> {
   const updateData: Partial<typeof localUsers.$inferInsert> = {};
   if (data.username !== undefined) updateData.username = data.username;
   if (data.name !== undefined) updateData.name = data.name;
+  if (data.location !== undefined) updateData.location = data.location;
   if (data.password !== undefined) {
     updateData.passwordHash = await bcrypt.hash(data.password, 12);
     await incrementTokenVersion(id);
@@ -86,6 +88,29 @@ export async function updateLocalUser(
   const user = await findLocalUserById(id);
   if (!user) throw new Error("User not found after update");
   return user;
+}
+
+export async function listLocalUsers(): Promise<LocalUser[]> {
+  return getDb().select().from(localUsers).orderBy(localUsers.id);
+}
+
+export async function updateLocalUserStatus(
+  id: number,
+  status: "active" | "banned"
+): Promise<LocalUser> {
+  await getDb()
+    .update(localUsers)
+    .set({ status })
+    .where(eq(localUsers.id, id));
+  // Increment token version so banned sessions are invalidated immediately
+  await incrementTokenVersion(id);
+  const user = await findLocalUserById(id);
+  if (!user) throw new Error("User not found after status update");
+  return user;
+}
+
+export async function deleteLocalUser(id: number): Promise<void> {
+  await getDb().delete(localUsers).where(eq(localUsers.id, id));
 }
 
 export async function seedAdminIfNoneExists(): Promise<void> {

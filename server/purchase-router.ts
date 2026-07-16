@@ -7,6 +7,7 @@ import {
   hasUserPurchasedBook,
 } from "./queries/purchases.js";
 import { findApprovedBookById } from "./queries/books.js";
+import { createNotification } from "./queries/notifications.js";
 
 export const purchaseRouter = createRouter({
   // ── Authenticated: buy a book ───────────────────────────────
@@ -47,6 +48,16 @@ export const purchaseRouter = createRouter({
         bookId: input.bookId,
         purchasePrice: book.price,
       });
+
+      // Notify seller
+      if (book.sellerId && book.sellerType === "user") {
+        await createNotification({
+          userId: book.sellerId,
+          type: "book_purchased",
+          message: `Someone purchased your book "${book.title}"`,
+          link: `/book/${book.id}`,
+        });
+      }
 
       return purchase;
     }),

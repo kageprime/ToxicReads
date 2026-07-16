@@ -31,15 +31,15 @@ export default function MySubmissions() {
   }
 
   const statusColors: Record<string, string> = {
-    pending: "var(--color-p-yellow-fg)",
-    approved: "var(--color-p-green-fg)",
-    rejected: "var(--color-p-red-fg)",
+    pending: "rgb(var(--color-p-yellow-fg))",
+    approved: "rgb(var(--color-p-green-fg))",
+    rejected: "rgb(var(--color-p-red-fg))",
   };
 
   return (
     <div
       className="min-h-screen"
-      style={{ backgroundColor: "var(--background)" }}
+      style={{ backgroundColor: "hsl(var(--background))" }}
     >
       <div
         className="mx-auto"
@@ -51,7 +51,7 @@ export default function MySubmissions() {
               fontSize: "34px",
               fontWeight: 400,
               fontFamily: "var(--font-serif)",
-              color: "var(--foreground)",
+              color: "hsl(var(--foreground))",
               letterSpacing: "-0.01em",
             }}
           >
@@ -64,8 +64,8 @@ export default function MySubmissions() {
               fontSize: "16px",
               fontFamily: "var(--font-mono)",
               letterSpacing: "0.05em",
-              color: "var(--background)",
-              background: "var(--foreground)",
+              color: "hsl(var(--background))",
+              background: "hsl(var(--foreground))",
               border: "none",
               padding: "8px 16px",
               cursor: "pointer",
@@ -88,13 +88,13 @@ export default function MySubmissions() {
           >
             <PiWarningCircle
               size={12}
-              style={{ color: "var(--color-p-yellow-fg)", marginTop: "3px", flexShrink: 0 }}
+              style={{ color: "rgb(var(--color-p-yellow-fg))", marginTop: "3px", flexShrink: 0 }}
             />
             <p
               style={{
                 fontSize: "15px",
                 fontFamily: "var(--font-mono)",
-                color: "var(--foreground)",
+                color: "hsl(var(--foreground))",
                 lineHeight: 1.6,
               }}
             >
@@ -113,7 +113,7 @@ export default function MySubmissions() {
           <p
             style={{
               fontSize: "18px",
-              color: "var(--muted-foreground)",
+              color: "hsl(var(--muted-foreground))",
               fontFamily: "var(--font-mono)",
             }}
           >
@@ -127,7 +127,7 @@ export default function MySubmissions() {
                 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors hover:bg-accent"
                 style={{
                   padding: "20px 16px",
-                  borderBottom: "1px solid var(--border)",
+                  borderBottom: "1px solid hsl(var(--border))",
                 }}
               >
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -138,7 +138,7 @@ export default function MySubmissions() {
                       width: "50px",
                       height: "66px",
                       objectFit: "cover",
-                      border: "1px solid var(--border)",
+                      border: "1px solid hsl(var(--border))",
                       flexShrink: 0,
                       cursor: "pointer",
                     }}
@@ -150,7 +150,7 @@ export default function MySubmissions() {
                         style={{
                           fontSize: "20px",
                           fontWeight: 400,
-                          color: "var(--foreground)",
+                          color: "hsl(var(--foreground))",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
@@ -164,8 +164,8 @@ export default function MySubmissions() {
                           fontSize: "15px",
                           fontFamily: "var(--font-mono)",
                           color:
-                            statusColors[book.status] || "var(--muted-foreground)",
-                          border: `1px solid ${statusColors[book.status] || "var(--border)"}`,
+                            statusColors[book.status] || "hsl(var(--muted-foreground))",
+                          border: `1px solid ${statusColors[book.status] || "hsl(var(--border))"}`,
                           padding: "2px 6px",
                         }}
                       >
@@ -175,7 +175,7 @@ export default function MySubmissions() {
                     <p
                       style={{
                         fontSize: "18px",
-                        color: "var(--muted-foreground)",
+                        color: "hsl(var(--muted-foreground))",
                         marginBottom: "2px",
                       }}
                     >
@@ -185,7 +185,7 @@ export default function MySubmissions() {
                       style={{
                         fontSize: "17px",
                         fontFamily: "var(--font-mono)",
-                        color: "var(--muted-foreground)",
+                        color: "hsl(var(--muted-foreground))",
                       }}
                     >
                       ₦{book.price} ·{" "}
@@ -200,7 +200,7 @@ export default function MySubmissions() {
                         fontSize: "20px",
                         fontWeight: 400,
                         fontFamily: "var(--font-serif)",
-                        color: "var(--foreground)",
+                        color: "hsl(var(--foreground))",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -213,8 +213,8 @@ export default function MySubmissions() {
                       style={{
                         fontSize: "15px",
                         fontFamily: "var(--font-mono)",
-                        color: statusColors[book.status] || "var(--muted-foreground)",
-                        border: `1px solid ${statusColors[book.status] || "var(--border)"}`,
+                        color: statusColors[book.status] || "hsl(var(--muted-foreground))",
+                        border: `1px solid ${statusColors[book.status] || "hsl(var(--border))"}`,
                         padding: "2px 6px",
                       }}
                     >
@@ -224,7 +224,7 @@ export default function MySubmissions() {
                   <p
                     style={{
                       fontSize: "18px",
-                      color: "var(--muted-foreground)",
+                      color: "hsl(var(--muted-foreground))",
                       marginBottom: "2px",
                     }}
                   >
@@ -234,7 +234,7 @@ export default function MySubmissions() {
                     style={{
                       fontSize: "17px",
                       fontFamily: "var(--font-mono)",
-                      color: "var(--muted-foreground)",
+                      color: "hsl(var(--muted-foreground))",
                     }}
                   >
                     ₦{book.price} ·{" "}
@@ -252,7 +252,7 @@ export default function MySubmissions() {
                     style={{
                       fontSize: "15px",
                       fontFamily: "var(--font-mono)",
-                      color: "var(--color-p-red-fg)",
+                      color: "rgb(var(--color-p-red-fg))",
                       background: "none",
                       border: "1px solid var(--color-p-red-fg)",
                       padding: "6px 12px",
@@ -271,7 +271,7 @@ export default function MySubmissions() {
             <p
               style={{
                 fontSize: "19px",
-                color: "var(--muted-foreground)",
+                color: "hsl(var(--muted-foreground))",
                 marginBottom: "16px",
               }}
             >
@@ -283,9 +283,9 @@ export default function MySubmissions() {
               style={{
                 fontSize: "17px",
                 fontFamily: "var(--font-mono)",
-                color: "var(--foreground)",
+                color: "hsl(var(--foreground))",
                 background: "none",
-                border: "1px solid var(--border)",
+                border: "1px solid hsl(var(--border))",
                 padding: "8px 16px",
                 cursor: "pointer",
                 letterSpacing: "0.05em",

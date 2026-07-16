@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, like, or, sql, gte, lte } from "drizzle-orm";
 import { getDb } from "./connection.js";
 import { books } from "../../db/schema.js";
 import type { InsertBook } from "../../db/schema.js";
@@ -10,6 +10,55 @@ export async function findApprovedBooks() {
     .select()
     .from(books)
     .where(eq(books.status, "approved"))
+    .orderBy(desc(books.createdAt));
+}
+
+export async function searchApprovedBooks(params: {
+  q?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}) {
+  const conditions = [eq(books.status, "approved")];
+
+  if (params.q) {
+    const searchCondition = or(
+      like(books.title, `%${params.q}%`),
+      like(books.author, `%${params.q}%`),
+      like(books.description, `%${params.q}%`)
+    );
+    if (searchCondition) conditions.push(searchCondition);
+  }
+
+  if (params.category) {
+    conditions.push(eq(books.category, params.category));
+  }
+
+  if (params.minPrice !== undefined) {
+    conditions.push(gte(sql`CAST(${books.price} AS REAL)`, params.minPrice));
+  }
+
+  if (params.maxPrice !== undefined) {
+    conditions.push(lte(sql`CAST(${books.price} AS REAL)`, params.maxPrice));
+  }
+
+  return getDb()
+    .select()
+    .from(books)
+    .where(and(...conditions))
+    .orderBy(desc(books.createdAt));
+}
+
+export async function findBooksByAuthor(author: string) {
+  return getDb()
+    .select()
+    .from(books)
+    .where(
+      and(
+        eq(books.status, "approved"),
+        like(books.author, `%${author}%`)
+      )
+    )
     .orderBy(desc(books.createdAt));
 }
 

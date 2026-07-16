@@ -20,6 +20,13 @@ const requireAuth = t.middleware(async opts => {
     });
   }
 
+  if (ctx.user.status === "banned") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Your account has been suspended. Contact support.",
+    });
+  }
+
   return next({ ctx: { ...ctx, user: ctx.user } });
 });
 

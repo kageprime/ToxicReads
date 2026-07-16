@@ -50,6 +50,10 @@
     --input: 0 0% 88%;
     --ring: 0 0% 20%;
     --radius: 0.5rem;
+
+    /* font stacks referenced by inline styles */
+    --font-serif: "Newsreader", Georgia, serif;
+    --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
   }
 
   [data-theme="dark"] {
@@ -93,6 +97,10 @@
     --border: 48 5% 18%;
     --input: 48 5% 20%;
     --ring: 48 10% 70%;
+
+    /* font stacks referenced by inline styles */
+    --font-serif: "Newsreader", Georgia, serif;
+    --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
   }
 
   body {
@@ -184,6 +192,11 @@
   }
 }
 
+/* ── Custom easing utility (avoids ambiguous Tailwind arbitrary class) ── */
+.ease-spring {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* ── Subtle structure: hairline divider, ambient grain ── */
 
 .rule {
@@ -227,7 +240,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
 }
 
 .field-input {
@@ -236,7 +249,7 @@
   font-size: 17px;
   line-height: 1.45;
   padding: 11px 13px;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
   background: transparent;
   border: 1px solid hsl(var(--border));
   border-radius: 3px;
@@ -246,7 +259,7 @@
     box-shadow 0.15s ease;
 }
 .field-input::placeholder {
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
   opacity: 0.55;
 }
 .field-input:focus {
@@ -268,7 +281,7 @@
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
   background: transparent;
   border: 1px solid hsl(var(--border));
   border-radius: 3px;
@@ -278,7 +291,7 @@
     border-color 0.15s ease;
 }
 .field-action:hover {
-  background: var(--accent);
+  background: hsl(var(--accent));
   border-color: hsl(var(--foreground));
 }
 
@@ -305,15 +318,15 @@
   justify-content: space-between;
   gap: 16px;
   padding: 7px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid hsl(var(--border));
   font-size: 14px;
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
 }
 .spec-row:last-child {
   border-bottom: none;
 }
 .spec-row > span:first-child {
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 /* Sidebar item staggered entrance */

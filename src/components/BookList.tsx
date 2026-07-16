@@ -4,17 +4,26 @@ import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../../contracts/blog";
 import ShaderCanvas from "@/components/ShaderCanvas";
 import BookCard from "@/components/BookCard";
+import { PiMagnifyingGlass, PiPlus, PiSliders } from "react-icons/pi";
 
 interface BookListProps {
   books: BookDisplay[];
 }
+
+const priceOptions = [
+  { value: "all", label: "All prices" },
+  { value: "under5000", label: "Under ₦5,000" },
+  { value: "5000to10000", label: "₦5,000 – ₦10,000" },
+  { value: "10000to20000", label: "₦10,000 – ₦20,000" },
+  { value: "over20000", label: "Over ₦20,000" },
+];
 
 export default function BookList({ books }: BookListProps) {
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [priceRange, setPriceRange] = useState<string>("all");
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
 
   const categories = [
     "all",
@@ -42,218 +51,141 @@ export default function BookList({ books }: BookListProps) {
   });
 
   return (
-    <div className="p-8 md:p-10 pb-28">
-      {/* ── Hero Banner (animated shader + content) ── */}
-      <div
-        className="mb-8"
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          height: "240px",
-          border: "1px solid var(--border)",
-        }}
-      >
-        <ShaderCanvas />
-        <div
-          className="flex flex-col justify-center"
-          style={{
-            mixBlendMode: "difference",
-            position: "relative",
-            zIndex: 1,
-            height: "100%",
-            padding: "24px",
-            boxSizing: "border-box",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "30px",
-              fontWeight: 400,
-              fontFamily: "var(--font-serif)",
-              letterSpacing: "0.02em",
-              textTransform: "uppercase",
-              color: "#FFFFFF",
-              marginBottom: "8px",
-            }}
-          >
-            ToxicReads
-          </h2>
-          <p
-            style={{
-              fontSize: "17px",
-              lineHeight: 1.8,
-              color: "#FFFFFF",
-              marginBottom: "12px",
-              maxWidth: "520px",
-            }}
-          >
-            A community-driven marketplace for African sci-fi, horror &amp; thrillers. Admins curate the collection, and users can submit their own books for sale after vetting.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {["Sci-Fi", "Horror", "Thriller"].map(genre => (
-              <span
-                key={genre}
-                style={{
-                  fontSize: "16px",
-                  color: "#FFFFFF",
-                  border: "1px solid rgba(255,255,255,0.4)",
-                  padding: "3px 10px",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  letterSpacing: "0.03em",
-                }}
-              >
-                {genre.toUpperCase()}
-              </span>
-            ))}
+    <div className="px-4 sm:px-6 md:px-10 pt-4 md:pt-8 pb-28">
+      {/* Mobile header — clean, compact, no hero banner */}
+      <div className="md:hidden mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-serif text-2xl text-baobab tracking-tight">Browse books</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {books.length} {books.length === 1 ? "book" : "books"} available
+            </p>
           </div>
-          {isAuthenticated && (
-            <div className="mt-3 flex gap-4">
-              <button
-                onClick={() => navigate("/my-purchases")}
-                style={{
-                  fontSize: "16px",
-                  color: "#FFFFFF",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  padding: 0,
-                  textDecoration: "underline",
-                  textUnderlineOffset: "2px",
-                }}
-              >
-                MY PURCHASES
-              </button>
-              <button
-                onClick={() => navigate("/submit-book")}
-                style={{
-                  fontSize: "16px",
-                  color: "#FFFFFF",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-                  padding: 0,
-                  textDecoration: "underline",
-                  textUnderlineOffset: "2px",
-                }}
-              >
-                SELL A BOOK
-              </button>
-            </div>
+          {isAdmin && (
+            <button
+              onClick={() => navigate("/add-book")}
+              className="flex items-center justify-center w-10 h-10 rounded-full border border-border hover:bg-accent transition-colors"
+              aria-label="Add book"
+            >
+              <PiPlus size={20} />
+            </button>
           )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h2
+      {/* Desktop hero banner — kept for larger screens, but cleaner */}
+      <div className="hidden md:block mb-8">
+        <div
+          className="relative overflow-hidden"
           style={{
-            fontSize: "18px",
-            fontWeight: 400,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            color: "var(--muted-foreground)",
-            marginBottom: "8px",
-            lineHeight: 1.4,
+            height: "220px",
+            border: "1px solid hsl(var(--border))",
           }}
         >
-          BROWSE GENRES
-        </h2>
+          <ShaderCanvas />
+          <div
+            className="absolute inset-0 flex flex-col justify-center px-8"
+            style={{ mixBlendMode: "difference" }}
+          >
+            <h2
+              className="font-serif text-white text-3xl tracking-tight mb-2"
+              style={{ textTransform: "uppercase" }}
+            >
+              ToxicReads
+            </h2>
+            <p className="text-white/90 text-base max-w-lg leading-relaxed mb-4">
+              A community-driven marketplace for African sci-fi, horror &amp; thrillers. Curated by admins, open for submissions.
+            </p>
+            <div className="flex items-center gap-3">
+              {["Sci-Fi", "Horror", "Thriller"].map(genre => (
+                <span
+                  key={genre}
+                  className="text-white text-xs uppercase tracking-wider px-2.5 py-1 border border-white/40"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop section header */}
+      <div className="hidden md:flex items-center justify-between mb-5">
+        <div>
+          <h2 className="font-serif text-xl text-baobab tracking-tight">Browse</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {books.length} {books.length === 1 ? "book" : "books"} available
+          </p>
+        </div>
         {isAdmin && (
           <button
             onClick={() => navigate("/add-book")}
-            style={{
-              fontSize: "16px",
-              color: "var(--muted-foreground)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              marginBottom: "8px",
-            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-accent text-sm font-medium transition-colors"
           >
-            + ADD BOOK
+            <PiPlus size={16} /> Add book
           </button>
         )}
       </div>
 
-      <p
-        style={{
-          fontSize: "17px",
-          color: "var(--muted-foreground)",
-          marginBottom: "20px",
-          fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-        }}
-      >
-        {books.length} books available
-      </p>
-
-      <div className="flex flex-wrap gap-1 mb-6">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            style={{
-              fontSize: "15px",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-              letterSpacing: "0.05em",
-              padding: "3px 8px",
-              border:
-                filter === cat
-                  ? "1px solid var(--foreground)"
-                  : "1px solid var(--border)",
-              background:
-                filter === cat ? "var(--foreground)" : "transparent",
-              color:
-                filter === cat ? "var(--background)" : "var(--muted-foreground)",
-              cursor: "pointer",
-              textTransform: "uppercase",
-            }}
+      {/* Search + price filter */}
+      <div className="flex gap-3 mb-5">
+        <div className="relative flex-1 min-w-0">
+          <PiMagnifyingGlass
+            size={18}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search title or author..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
+          />
+        </div>
+        <div className="relative shrink-0">
+          <select
+            value={priceRange}
+            onChange={e => setPriceRange(e.target.value)}
+            className="appearance-none h-full pl-4 pr-10 py-2.5 rounded-full border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer"
           >
-            {cat === "all" ? "ALL" : cat.toUpperCase()}
-          </button>
-        ))}
+            {priceOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <PiSliders
+            size={16}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-6 items-center">
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search title or author..."
-          style={{
-            flex: 1,
-            minWidth: "180px",
-            fontSize: "17px",
-            padding: "6px 10px",
-            border: "1px solid var(--border)",
-            outline: "none",
-            color: "var(--foreground)",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-            background: "transparent",
-          }}
-        />
-        <select
-          value={priceRange}
-          onChange={e => setPriceRange(e.target.value)}
-          style={{
-            fontSize: "16px",
-            padding: "6px 8px",
-            border: "1px solid var(--border)",
-            outline: "none",
-            color: "var(--muted-foreground)",
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-            background: "transparent",
-          }}
-        >
-          <option value="all">All Prices</option>
-          <option value="under5000">Under ₦5,000</option>
-          <option value="5000to10000">₦5,000 - ₦10,000</option>
-          <option value="10000to20000">₦10,000 - ₦20,000</option>
-          <option value="over20000">Over ₦20,000</option>
-        </select>
+      {/* Genre filter — horizontal scroll chips on mobile, inline wrap on desktop */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+          {categories.map(cat => {
+            const active = filter === cat;
+            const label = cat === "all" ? "All" : cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-spring ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-soft"
+                    : "border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 lg:gap-x-6 lg:gap-y-9">
+      {/* Book grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
         {filteredBooks.map((book, idx) => (
           <BookCard
             key={book.id}
@@ -270,24 +202,12 @@ export default function BookList({ books }: BookListProps) {
 
       {filteredBooks.length === 0 && (
         <div className="text-center py-16">
-          <p
-            style={{
-              fontSize: "18px",
-              color: "var(--muted-foreground)",
-              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-            }}
-          >
-            No books found
+          <p className="text-lg text-muted-foreground">No books found</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Try adjusting your search or filters.
           </p>
         </div>
       )}
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
