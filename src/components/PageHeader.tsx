@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { PiSignOut, PiCaretLeft, PiTrash } from "react-icons/pi";
+import { useSidebar } from "@/contexts/SidebarContext";
+import { PiSignOut, PiCaretLeft, PiTrash, PiList } from "react-icons/pi";
 
 interface PageHeaderProps {
   title?: string;
@@ -20,7 +21,17 @@ export default function PageHeader({
   showDelete = false,
 }: PageHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAdmin, logout } = useAuth();
+  const { setCollapsed, isMobile } = useSidebar();
+
+  const goLogo = () => {
+    if (location.pathname === "/home") {
+      navigate("/");
+    } else {
+      navigate("/home");
+    }
+  };
 
   return (
     <header
@@ -32,6 +43,15 @@ export default function PageHeader({
       }}
     >
       <div className="flex items-center gap-2">
+        {isMobile && (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="p-1.5 rounded hover:bg-accent transition-colors"
+            aria-label="Open sidebar"
+          >
+            <PiList size={18} style={{ color: "hsl(var(--foreground))" }} />
+          </button>
+        )}
         {showBack && (
           <button
             onClick={() => navigate(-1)}
@@ -42,10 +62,18 @@ export default function PageHeader({
           </button>
         )}
         <button
-          onClick={() => navigate("/home")}
-          className="font-sans text-sm font-normal tracking-wider uppercase text-charcoal hover:opacity-70 transition-opacity"
+          type="button"
+          onClick={goLogo}
+          className="flex items-center gap-2 min-w-0 group hover:opacity-80 transition-opacity focus:outline-none"
         >
-          TOXICREADS
+          <img
+            src="/images/hero-bg.png"
+            alt="ToxicReads"
+            className="w-6 h-6 rounded-md object-cover border border-border flex-shrink-0"
+          />
+          <span className="font-serif text-[18px] leading-none tracking-tight text-foreground">
+            ToxicReads
+          </span>
         </button>
         {title && (
           <span
