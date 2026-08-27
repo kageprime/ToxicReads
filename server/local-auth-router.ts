@@ -2,7 +2,7 @@ import * as cookie from "cookie";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { Session } from "../contracts/constants.js";
-import { getSessionCookieOptions } from "./lib/cookies.js";
+import { setSessionCookie } from "./lib/cookies.js";
 import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { env } from "./lib/env.js";
@@ -94,17 +94,7 @@ export const localAuthRouter = createRouter({
         tokenVersion: user.tokenVersion ?? 0,
       });
 
-      const opts = getSessionCookieOptions(ctx.req.headers);
-      ctx.resHeaders.append(
-        "set-cookie",
-        cookie.serialize(Session.cookieName, token, {
-          httpOnly: opts.httpOnly,
-          path: opts.path,
-          sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
-          secure: opts.secure,
-          maxAge: Session.maxAgeMs / 1000,
-        })
-      );
+      setSessionCookie(ctx.resHeaders, token, ctx.req.headers);
 
       return {
         id: user.id,
@@ -152,6 +142,14 @@ export const localAuthRouter = createRouter({
         password: input.password,
         name: input.name,
       });
+
+      // Sign the user in immediately after registration (industry standard).
+      const token = await signLocalSessionToken({
+        username: user.username,
+        userId: user.id,
+        tokenVersion: user.tokenVersion ?? 0,
+      });
+      setSessionCookie(ctx.resHeaders, token, ctx.req.headers);
 
       return {
         id: user.id,
@@ -229,17 +227,7 @@ export const localAuthRouter = createRouter({
         tokenVersion: updated.tokenVersion ?? 0,
       });
 
-      const opts = getSessionCookieOptions(ctx.req.headers);
-      ctx.resHeaders.append(
-        "set-cookie",
-        cookie.serialize(Session.cookieName, newToken, {
-          httpOnly: opts.httpOnly,
-          path: opts.path,
-          sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
-          secure: opts.secure,
-          maxAge: Session.maxAgeMs / 1000,
-        })
-      );
+      setSessionCookie(ctx.resHeaders, newToken, ctx.req.headers);
 
       return {
         id: updated.id,
@@ -252,17 +240,7 @@ export const localAuthRouter = createRouter({
     }),
 
   logout: publicQuery.mutation(async ({ ctx }) => {
-    const opts = getSessionCookieOptions(ctx.req.headers);
-    ctx.resHeaders.append(
-      "set-cookie",
-      cookie.serialize(Session.cookieName, "", {
-        httpOnly: opts.httpOnly,
-        path: opts.path,
-        sameSite: opts.sameSite?.toLowerCase() as "lax" | "none",
-        secure: opts.secure,
-        maxAge: 0,
-      })
-    );
+    setSessionCookie(ctx.resHeaders, "", ctx.req.headers, { maxAge: 0 });
     return { success: true };
   }),
 

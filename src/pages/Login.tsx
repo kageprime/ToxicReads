@@ -7,13 +7,15 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Login() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: () => {
-      window.location.href = "/home";
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      navigate("/home");
     },
     onError: err => {
       setError(err.message);

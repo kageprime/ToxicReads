@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { trpc } from "@/providers/trpc";
+import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../contracts/blog";
 import { toBookDisplay } from "../contracts/blog";
 import Login from "./pages/Login";
@@ -121,7 +122,39 @@ function FloatingOpen() {
   );
 }
 
+function AuthSplash() {
+  return (
+    <div
+      className="flex items-center justify-center"
+      style={{
+        height: "100vh",
+        backgroundColor: "hsl(var(--background))",
+      }}
+    >
+      <div className="flex flex-col items-center gap-4">
+        <span className="font-serif text-[26px] tracking-tight text-foreground">
+          ToxicReads
+        </span>
+        <span
+          className="inline-block w-5 h-5 border-2 border-border border-t-foreground rounded-full animate-spin"
+          aria-label="Loading"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  const { isAuthLoading } = useAuth();
+
+  // Block first paint only while the initial auth.me is in flight. React Query's
+  // `isLoading` is true solely on the first fetch (no cached data), so background
+  // refetches never re-trigger the splash and the sidebar never flashes the
+  // wrong Login/Logout button.
+  if (isAuthLoading) {
+    return <AuthSplash />;
+  }
+
   return (
     <ThemeProvider>
       <LanguageProvider>

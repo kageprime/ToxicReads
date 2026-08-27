@@ -5,8 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { Field } from "@/components/Field";
 
-const CONDITIONS = ["New", "Like New", "Good", "Fair"];
-
 export default function SubmitBook() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -23,7 +21,6 @@ export default function SubmitBook() {
     price: "",
     coverImage: "",
     category: categoryList[0] || "Sci-Fi",
-    condition: "New",
   });
 
   const [coverError, setCoverError] = useState(false);
@@ -58,7 +55,6 @@ export default function SubmitBook() {
       price: form.price,
       coverImage: form.coverImage,
       category: form.category,
-      condition: form.condition,
     });
   };
 
@@ -285,19 +281,6 @@ export default function SubmitBook() {
                   onChange={e => setForm({ ...form, category: e.target.value })}
                 >
                   {categoryList.map((c: string) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Condition">
-                <select
-                  className="field-input"
-                  value={form.condition}
-                  onChange={e => setForm({ ...form, condition: e.target.value })}
-                >
-                  {CONDITIONS.map(c => (
                     <option key={c} value={c}>
                       {c}
                     </option>

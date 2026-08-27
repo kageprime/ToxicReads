@@ -13,7 +13,7 @@ const navItems = [
 export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAuthLoading } = useAuth();
   const { isMobile, collapsed, setCollapsed } = useSidebar();
 
   // Only on mobile, not on landing, reader, admin pages
@@ -61,6 +61,7 @@ export default function BottomNav() {
           key={item.path}
           onClick={() => {
             if (
+              !isAuthLoading &&
               !isAuthenticated &&
               (item.path === "/my-purchases" || item.path === "/profile")
             ) {

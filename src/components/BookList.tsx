@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../../contracts/blog";
 import ShaderCanvas from "@/components/ShaderCanvas";
@@ -19,11 +19,23 @@ const priceOptions = [
 ];
 
 export default function BookList({ books }: BookListProps) {
-  const [filter, setFilter] = useState<string>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = searchParams.get("category") || "all";
   const [search, setSearch] = useState("");
   const [priceRange, setPriceRange] = useState<string>("all");
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+
+  const selectCategory = (cat: string) => {
+    setSearchParams(
+      prev => {
+        if (cat === "all") prev.delete("category");
+        else prev.set("category", cat);
+        return prev;
+      },
+      { replace: true }
+    );
+  };
 
   const categories = [
     "all",
@@ -170,7 +182,7 @@ export default function BookList({ books }: BookListProps) {
             return (
               <button
                 key={cat}
-                onClick={() => setFilter(cat)}
+                onClick={() => selectCategory(cat)}
                 className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-spring ${
                   active
                     ? "bg-primary text-primary-foreground shadow-soft"
