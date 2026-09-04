@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 
 export default function MyPurchases() {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ export default function MyPurchases() {
                       flexShrink: 0,
                       cursor: "pointer",
                     }}
-                    onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                    onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                   />
                   <div className="flex-1 min-w-0 sm:hidden">
                     <p
@@ -91,7 +92,7 @@ export default function MyPurchases() {
                         whiteSpace: "nowrap",
                         cursor: "pointer",
                       }}
-                      onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                      onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                     >
                       {purchase.book?.title}
                     </p>
@@ -130,7 +131,7 @@ export default function MyPurchases() {
                       whiteSpace: "nowrap",
                       cursor: "pointer",
                     }}
-                    onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                    onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                   >
                     {purchase.book?.title}
                   </p>

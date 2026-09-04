@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { PiBookOpen, PiEye, PiCurrencyNgn, PiUpload, PiArrowRight } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 
 export default function SellerDashboard() {
   const navigate = useNavigate();
@@ -232,7 +233,7 @@ export default function SellerDashboard() {
                       flexShrink: 0,
                       cursor: "pointer",
                     }}
-                    onClick={() => navigate(`/book/${book.id}`)}
+                    onClick={() => navigate(bookUrl(book))}
                   />
                   <div className="flex-1 min-w-0">
                     <p
@@ -244,7 +245,7 @@ export default function SellerDashboard() {
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
-                      onClick={() => navigate(`/book/${book.id}`)}
+                      onClick={() => navigate(bookUrl(book))}
                     >
                       {book.title}
                     </p>

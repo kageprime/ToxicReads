@@ -1,18 +1,57 @@
+import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { PiCaretLeft } from "react-icons/pi";
 import { trpc } from "@/providers/trpc";
 import BookCard from "@/components/BookCard";
 
+function prettyName(slug: string): string {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export default function AuthorProfile() {
-  const { author } = useParams<{ author: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
 
-  const { data: books, isLoading } = trpc.book.byAuthor.useQuery(
-    { author: author || "" },
-    { enabled: !!author }
+  const slugQuery = trpc.book.byAuthorSlug.useQuery(
+    { authorSlug: slug ?? "" },
+    { enabled: !!slug }
   );
 
-  const sellerName = author || "Unknown";
+  // Legacy fallback: old URLs used the raw name (/author/Felix%20Obekpa).
+  const needsFallback =
+    !!slug && slugQuery.isSuccess && (slugQuery.data?.length ?? 0) === 0;
+  let legacyName = slug ?? "";
+  try {
+    legacyName = decodeURIComponent(slug ?? "");
+  } catch {}
+  const fallbackQuery = trpc.book.byAuthor.useQuery(
+    { author: legacyName },
+    { enabled: needsFallback && legacyName !== slug }
+  );
+
+  // Old name URL → canonical slug URL.
+  const canonical = fallbackQuery.data?.[0]?.authorSlug;
+  useEffect(() => {
+    if (needsFallback && canonical && canonical !== slug) {
+      navigate(`/author/${canonical}`, { replace: true });
+    }
+  }, [needsFallback, canonical, slug, navigate]);
+
+  const books =
+    slugQuery.data && slugQuery.data.length > 0
+      ? slugQuery.data
+      : (fallbackQuery.data ?? slugQuery.data);
+  const isLoading =
+    slugQuery.isLoading || (needsFallback && fallbackQuery.isLoading);
+
+  const sellerName = books?.[0]?.author || prettyName(slug ?? "Unknown");
+  const genres = books
+    ? Array.from(new Set(books.map(b => b.category))).join(" · ")
+    : "";
 
   if (isLoading) {
     return (
@@ -59,6 +98,7 @@ export default function AuthorProfile() {
             {books && (
               <p style={{ fontSize: "17px", color: "hsl(var(--muted-foreground))" }}>
                 {books.length} book{books.length !== 1 ? "s" : ""}
+                {genres ? ` · ${genres}` : ""}
               </p>
             )}
           </div>
@@ -75,6 +115,8 @@ export default function AuthorProfile() {
                 price={book.price}
                 coverImage={book.coverImage}
                 category={book.category}
+                slug={book.slug}
+                authorSlug={book.authorSlug}
                 index={i}
               />
             ))}

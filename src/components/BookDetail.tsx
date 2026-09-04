@@ -3,19 +3,36 @@ import { useEffect, useState } from "react";
 import { PiCaretLeft, PiHeart, PiHeartStraight, PiStar, PiStarFill } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl, authorUrl } from "../../contracts/blog";
 import PaymentModal from "./PaymentModal";
 import BookCard from "./BookCard";
 
 export default function BookDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { slug: slugParam } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  const bookId = Number(id);
-  const { data: book, isLoading } = trpc.book.byId.useQuery(
-    { id: bookId },
-    { enabled: !isNaN(bookId) }
+  // Accept both canonical slugs and legacy numeric IDs (/book/9).
+  const isNumeric = !!slugParam && /^\d+$/.test(slugParam);
+  const idQuery = trpc.book.byId.useQuery(
+    { id: isNumeric ? Number(slugParam) : 0 },
+    { enabled: isNumeric }
   );
+  const slugQuery = trpc.book.bySlug.useQuery(
+    { slug: slugParam ?? "" },
+    { enabled: !isNumeric && !!slugParam }
+  );
+  const book = (isNumeric ? idQuery.data : slugQuery.data) ?? undefined;
+  const isLoading = isNumeric ? idQuery.isLoading : slugQuery.isLoading;
+
+  // Legacy numeric URL → canonical slug URL.
+  useEffect(() => {
+    if (isNumeric && idQuery.data?.slug) {
+      navigate(`/book/${idQuery.data.slug}`, { replace: true });
+    }
+  }, [isNumeric, idQuery.data, navigate]);
+
+  const bookId = book?.id ?? (isNumeric ? Number(slugParam) : NaN);
 
   const { data: hasPurchased } = trpc.book.hasPurchased.useQuery(
     { id: bookId },
@@ -113,6 +130,9 @@ export default function BookDetail() {
         <div className="text-center">
           <p style={{ fontSize: "20px", color: "hsl(var(--muted-foreground))" }}>
             Book not found
+          </p>
+          <p style={{ fontSize: "15px", color: "hsl(var(--muted-foreground))", marginTop: "8px" }}>
+            It may have been removed, or the link is incorrect.
           </p>
           <button
             onClick={() => navigate("/home")}
@@ -245,7 +265,7 @@ export default function BookDetail() {
               by{" "}
               <span
                 style={{ cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "3px" }}
-                onClick={() => navigate(`/author/${encodeURIComponent(book.author)}`)}
+                onClick={() => navigate(authorUrl(book))}
               >
                 {book.author}
               </span>
@@ -478,7 +498,7 @@ export default function BookDetail() {
           <div style={{ display: "flex", gap: 12 }}>
             <button
               onClick={() => {
-                const url = window.location.origin + "/book/" + book.id;
+                const url = window.location.origin + bookUrl(book);
                 window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url), "fb-share", "width=600,height=400");
               }}
               className="hover:bg-accent transition"
@@ -488,7 +508,7 @@ export default function BookDetail() {
             </button>
             <button
               onClick={() => {
-                const url = window.location.origin + "/book/" + book.id;
+                const url = window.location.origin + bookUrl(book);
                 const text = "Check out this book: " + book.title + " - ";
                 window.open("https://wa.me/?text=" + encodeURIComponent(text + url), "wa-share", "width=600,height=400");
               }}
@@ -499,7 +519,7 @@ export default function BookDetail() {
             </button>
             <button
               onClick={async () => {
-                const url = window.location.origin + "/book/" + book.id;
+                const url = window.location.origin + bookUrl(book);
                 const text = "Check out this book: " + book.title;
                 if (navigator.share) {
                   try { await navigator.share({ title: book.title, text, url }); } catch {}
@@ -531,6 +551,8 @@ export default function BookDetail() {
                   price={similarBook.price}
                   coverImage={similarBook.coverImage}
                   category={similarBook.category}
+                  slug={similarBook.slug}
+                  authorSlug={similarBook.authorSlug}
                   index={i}
                 />
               ))}

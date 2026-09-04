@@ -12,6 +12,7 @@ import {
 } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 
 type Tab = "pending" | "books" | "purchases" | "users";
 
@@ -433,7 +434,7 @@ export default function AdminDashboard() {
                           cursor: "pointer",
                           border: "1px solid hsl(var(--border))",
                         }}
-                        onClick={() => navigate(`/book/${book.id}`)}
+                        onClick={() => navigate(bookUrl(book))}
                       />
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
@@ -833,7 +834,7 @@ export default function AdminDashboard() {
                                 objectFit: "cover",
                                 cursor: "pointer",
                               }}
-                              onClick={() => navigate(`/book/${book.id}`)}
+                              onClick={() => navigate(bookUrl(book))}
                             />
                           </div>
                           <div className="flex-1 min-w-0 md:hidden">
@@ -847,7 +848,7 @@ export default function AdminDashboard() {
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
                               }}
-                              onClick={() => navigate(`/book/${book.id}`)}
+                              onClick={() => navigate(bookUrl(book))}
                             >
                               {book.title}
                             </p>
@@ -871,7 +872,7 @@ export default function AdminDashboard() {
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
                             }}
-                            onClick={() => navigate(`/book/${book.id}`)}
+                            onClick={() => navigate(bookUrl(book))}
                           >
                             {book.title}
                           </p>
@@ -1090,7 +1091,7 @@ export default function AdminDashboard() {
                             objectFit: "cover",
                             cursor: "pointer",
                           }}
-                          onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                          onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                         />
                       </div>
                       <div className="flex-1 min-w-0 md:hidden">
@@ -1103,7 +1104,7 @@ export default function AdminDashboard() {
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                           }}
-                          onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                          onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                         >
                           {purchase.book?.title}
                         </p>
@@ -1147,7 +1148,7 @@ export default function AdminDashboard() {
                           objectFit: "cover",
                           cursor: "pointer",
                         }}
-                        onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                        onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                       />
                     </div>
                     <div className="hidden md:block flex-1 min-w-0">
@@ -1160,7 +1161,7 @@ export default function AdminDashboard() {
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
                         }}
-                        onClick={() => navigate(`/book/${purchase.book?.id}`)}
+                        onClick={() => navigate(purchase.book ? bookUrl(purchase.book) : "/home")}
                       >
                         {purchase.book?.title}
                       </p>

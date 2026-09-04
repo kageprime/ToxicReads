@@ -42,6 +42,8 @@ export const books = sqliteTable("books", {
   price: text("price").notNull(),
   coverImage: text("coverImage").notNull(),
   category: text("category").notNull(),
+  slug: text("slug").unique(),
+  authorSlug: text("authorSlug"),
   condition: text("condition").default("New").notNull(),
   sellerId: integer("sellerId"),
   sellerType: text("sellerType", { enum: ["admin", "user"] })

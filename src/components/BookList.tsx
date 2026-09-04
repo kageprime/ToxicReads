@@ -207,6 +207,8 @@ export default function BookList({ books }: BookListProps) {
             price={book.price}
             coverImage={book.coverImage}
             category={book.category}
+            slug={book.slug}
+            authorSlug={book.authorSlug}
             index={idx}
           />
         ))}

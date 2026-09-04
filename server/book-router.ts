@@ -10,6 +10,9 @@ import {
   findApprovedBooks,
   findBookById,
   findApprovedBookById,
+  findApprovedBookBySlug,
+  findBooksByAuthorSlug,
+  generateUniqueBookSlug,
   findAllBooks,
   findPendingBooks,
   findBooksBySeller,
@@ -22,6 +25,7 @@ import {
   rejectBook,
   incrementBookViews,
 } from "./queries/books.js";
+import { slugify } from "./lib/slugify.js";
 import { hasUserPurchasedBook } from "./queries/purchases.js";
 import { createNotification } from "./queries/notifications.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
@@ -52,6 +56,14 @@ export const bookRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       return findApprovedBookById(input.id);
+    }),
+
+  // Canonical lookup: /book/:slug (numeric /book/:id still works via byId
+  // and the frontend redirects it to the slug URL).
+  bySlug: publicQuery
+    .input(z.object({ slug: z.string().min(1).max(100) }))
+    .query(async ({ input }) => {
+      return findApprovedBookBySlug(input.slug);
     }),
 
   // ── Authenticated: read purchased book (first chunk + session token) ─
@@ -209,12 +221,15 @@ export const bookRouter = createRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const slug = await generateUniqueBookSlug(input.title);
       const book = await createBook({
         ...input,
         title: stripHtml(input.title),
         author: stripHtml(input.author),
         description: stripHtml(input.description),
         content: stripHtml(input.content),
+        slug,
+        authorSlug: slugify(input.author),
         sellerId: ctx.user.id,
         sellerType: "user",
         status: "pending",
@@ -326,6 +341,13 @@ export const bookRouter = createRouter({
       return findBooksByAuthor(input.author);
     }),
 
+  // Canonical author lookup: /author/:slug (exact match, no LIKE).
+  byAuthorSlug: publicQuery
+    .input(z.object({ authorSlug: z.string().min(1).max(100) }))
+    .query(async ({ input }) => {
+      return findBooksByAuthorSlug(input.authorSlug);
+    }),
+
   // ── Admin: manage all books ─────────────────────────────────
 
   adminList: adminQuery.query(async () => findAllBooks()),
@@ -347,15 +369,19 @@ export const bookRouter = createRouter({
         coverImage: z.string().max(500),
         category: z.string().min(1).max(100),
         condition: z.string().max(50).optional(),
+        slug: z.string().min(1).max(100).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const slug = await generateUniqueBookSlug(input.slug ?? input.title);
       const book = await createBook({
         ...input,
         title: stripHtml(input.title),
         author: stripHtml(input.author),
         description: stripHtml(input.description),
         content: stripHtml(input.content),
+        slug,
+        authorSlug: slugify(input.author),
         sellerId: ctx.user.id,
         sellerType: "admin",
         status: "approved",
@@ -377,6 +403,8 @@ export const bookRouter = createRouter({
           .optional(),
         coverImage: z.string().max(500).optional(),
         category: z.string().max(100).optional(),
+        // Explicit slug override only — title edits never rewrite the slug.
+        slug: z.string().min(1).max(100).optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -389,7 +417,13 @@ export const bookRouter = createRouter({
           description: stripHtml(raw.description),
         }),
         ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
+        ...(raw.author !== undefined && { authorSlug: slugify(raw.author) }),
       };
+      if (raw.slug !== undefined) {
+        data.slug = await generateUniqueBookSlug(raw.slug, id);
+      } else {
+        delete data.slug;
+      }
       return updateBook(id, data);
     }),
 
@@ -410,7 +444,7 @@ export const bookRouter = createRouter({
           userId: book.sellerId,
           type: "book_approved",
           message: `Your book "${book.title}" has been approved and is now live!`,
-          link: `/book/${book.id}`,
+          link: `/book/${result?.slug ?? book.id}`,
         });
       }
       return result;

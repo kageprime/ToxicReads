@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSwipe } from "@/hooks/useSwipe";
@@ -224,7 +225,7 @@ export default function LeftColumn() {
                 <button
                   key={purchase.id}
                   onClick={() => {
-                    navigate(`/book/${purchase.book?.id}`);
+                    navigate(purchase.book ? bookUrl(purchase.book) : "/home");
                     if (isMobile) setCollapsed(true);
                   }}
                   className="sidebar-item group flex items-center gap-3 w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent transition-colors focus:outline-none"

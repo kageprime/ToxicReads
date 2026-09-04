@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { PiWarningCircle } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 
 export default function MySubmissions() {
   const navigate = useNavigate();
@@ -142,7 +143,7 @@ export default function MySubmissions() {
                       flexShrink: 0,
                       cursor: "pointer",
                     }}
-                    onClick={() => navigate(`/book/${book.id}`)}
+                    onClick={() => navigate(bookUrl(book))}
                   />
                   <div className="flex-1 min-w-0 sm:hidden">
                     <div className="flex items-center gap-2 mb-1">

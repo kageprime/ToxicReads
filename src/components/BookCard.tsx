@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
+import { bookUrl, authorUrl } from "../../contracts/blog";
 import SafeImage from "./SafeImage";
 import { PiArrowUpRight, PiHeart, PiHeartStraight } from "react-icons/pi";
 
@@ -13,6 +14,8 @@ interface BookCardProps {
   index?: number;
   wishlisted?: boolean;
   onToggleWishlist?: (id: number) => void;
+  slug?: string | null;
+  authorSlug?: string | null;
 }
 
 export default function BookCard({
@@ -25,6 +28,8 @@ export default function BookCard({
   index = 0,
   wishlisted,
   onToggleWishlist,
+  slug,
+  authorSlug,
 }: BookCardProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -42,7 +47,7 @@ export default function BookCard({
     <article
       className="sidebar-item group cursor-pointer active:scale-[0.98] transition-transform duration-200 ease-spring"
       style={{ animationDelay: `${Math.min(index * 45, 450)}ms` }}
-      onClick={() => navigate(`/book/${id}`)}
+      onClick={() => navigate(bookUrl({ slug, id }))}
     >
       <div className="relative overflow-hidden mb-3 border border-border aspect-[3/4] transition-colors duration-300 hover:border-foreground/30">
         <SafeImage
@@ -68,7 +73,17 @@ export default function BookCard({
       <h3 className="font-serif text-foreground text-base md:text-[19px] leading-tight truncate tracking-tight">
         {title}
       </h3>
-      <p className="text-muted-foreground text-sm truncate mt-0.5">{author}</p>
+      <p className="text-muted-foreground text-sm truncate mt-0.5">
+        <span
+          className="cursor-pointer hover:text-foreground hover:underline underline-offset-2 transition-colors"
+          onClick={e => {
+            e.stopPropagation();
+            navigate(authorUrl({ authorSlug, author }));
+          }}
+        >
+          {author}
+        </span>
+      </p>
       <div className="flex items-center justify-between mt-1.5">
         {category && (
           <span className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.1em] text-muted-foreground truncate max-w-[60%]">

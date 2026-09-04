@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { PiHeartStraight, PiTrash } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
+import { bookUrl } from "../../contracts/blog";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -70,12 +71,12 @@ export default function WishlistPage() {
                     flexShrink: 0,
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/book/${item.book?.id}`)}
+                  onClick={() => navigate(item.book ? bookUrl(item.book) : "/home")}
                 />
                 <div
                   className="flex-1 min-w-0"
                   style={{ cursor: "pointer" }}
-                  onClick={() => navigate(`/book/${item.book?.id}`)}
+                  onClick={() => navigate(item.book ? bookUrl(item.book) : "/home")}
                 >
                   <p
                     style={{

@@ -165,7 +165,7 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<HomePage />} />
-              <Route path="/book/:id" element={<BookPage />} />
+              <Route path="/book/:slug" element={<BookPage />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/add-book" element={<AddBook />} />
               <Route path="/submit-book" element={<SubmitBook />} />
@@ -173,7 +173,7 @@ export default function App() {
               <Route path="/my-submissions" element={<MySubmissions />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/seller" element={<SellerDashboard />} />
-              <Route path="/author/:author" element={<AuthorProfile />} />
+              <Route path="/author/:slug" element={<AuthorProfile />} />
               <Route path="/wishlist" element={<WishlistPage />} />
             </Route>
             <Route path="/read/:id" element={<Reader />} />

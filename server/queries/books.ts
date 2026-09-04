@@ -2,6 +2,7 @@ import { eq, and, desc, like, or, sql, gte, lte } from "drizzle-orm";
 import { getDb } from "./connection.js";
 import { books } from "../../db/schema.js";
 import type { InsertBook } from "../../db/schema.js";
+import { slugify } from "../lib/slugify.js";
 
 // ── Public: approved books only ───────────────────────────────
 
@@ -78,6 +79,56 @@ export async function findApprovedBookById(id: number) {
     .where(and(eq(books.id, id), eq(books.status, "approved")))
     .limit(1);
   return rows.at(0) ?? null;
+}
+
+// ── Slug lookups (canonical public URLs: /book/:slug) ──────────
+
+export async function findBookBySlug(slug: string) {
+  const rows = await getDb()
+    .select()
+    .from(books)
+    .where(eq(books.slug, slug))
+    .limit(1);
+  return rows.at(0) ?? null;
+}
+
+export async function findApprovedBookBySlug(slug: string) {
+  const rows = await getDb()
+    .select()
+    .from(books)
+    .where(and(eq(books.slug, slug), eq(books.status, "approved")))
+    .limit(1);
+  return rows.at(0) ?? null;
+}
+
+export async function findBooksByAuthorSlug(authorSlug: string) {
+  return getDb()
+    .select()
+    .from(books)
+    .where(
+      and(eq(books.authorSlug, authorSlug), eq(books.status, "approved"))
+    )
+    .orderBy(desc(books.createdAt));
+}
+
+/** Generate a unique book slug. Slugs are immutable after publish. */
+export async function generateUniqueBookSlug(
+  title: string,
+  excludeId?: number
+): Promise<string> {
+  const base = slugify(title);
+  const rows = await getDb()
+    .select({ id: books.id, slug: books.slug })
+    .from(books);
+  const taken = new Set(
+    rows
+      .filter(r => r.id !== excludeId && !!r.slug)
+      .map(r => r.slug as string)
+  );
+  if (!taken.has(base)) return base;
+  let i = 2;
+  while (taken.has(`${base}-${i}`)) i++;
+  return `${base}-${i}`;
 }
 
 // ── Admin: all books with filters ─────────────────────────────
