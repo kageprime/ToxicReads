@@ -1,0 +1,46 @@
+export const StackNav = {
+  Splash: 'Splash',
+  OnBoarding: 'OnBoarding',
+  TabNavigation: 'TabNavigation',
+  BookPreviewScreen: 'BookPreviewScreen',
+  PreviewScreen: 'PreviewScreen',
+  ReviewScreen : 'ReviewScreen',
+  SearchScreen: 'SearchScreen',
+  PaymentDetailsScreen: 'PaymentDetailsScreen',
+  PaymentMethodScreen: 'PaymentMethodScreen',
+  PaymentSuccessfulScreen: 'PaymentSuccessfulScreen',
+  NotificationScreen: 'NotificationScreen',
+  MessageScreen: 'MessageScreen',
+  Chat: 'Chat',
+  EditProfileScreen: 'EditProfileScreen',
+  Voucher: 'Voucher',
+  WhishlistBook: 'WhishlistBook',
+  ChoosePayment: 'ChoosePayment',
+  AddNewCard: 'AddNewCard',
+  ChangePassword: 'ChangePassword',
+  ForgotPassword: 'ForgotPassword',
+  Security: 'Security',
+  Language: 'Language',
+  LegalAndPolicies: 'LegalAndPolicies',
+  HelpAndSupport: 'HelpAndSupport',
+  Notification: 'Notification',
+};
+export const AuthNav = {
+  SignInScreen: 'SignInScreen',
+  SignInEmailScreen: 'SignInEmailScreen',
+  CreateAccountScreen: 'CreateAccountScreen',
+  SignUpScreen: 'SignUpScreen',
+  CreatePasswordScreen: 'CreatePasswordScreen',
+  ForgotPasswordScreen: 'ForgotPasswordScreen',
+  OtpScreen : 'OtpScreen',
+  SelectLanguageScreen  :'SelectLanguageScreen',
+};
+
+export const TabNav = {
+  HomeTab: 'HomeTab',
+  ExploreTab: 'ExploreTab',
+  MyBookTab: 'MyBookTab',
+  DownloadTab: 'DownloadTab',
+  ProfileTab: 'ProfileTab',
+};
+
