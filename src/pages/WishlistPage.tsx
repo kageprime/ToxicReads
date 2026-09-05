@@ -115,6 +115,8 @@ export default function WishlistPage() {
         ) : (
           <EmptyState
             icon={<PiHeartStraight size={24} />}
+            image="/images/rising.jpeg"
+            imageAlt="Cover of The Rising"
             title="Your wishlist is empty"
             body="Tap the heart on any book to keep it here for later."
             actionLabel="Browse books"

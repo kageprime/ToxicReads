@@ -6,21 +6,34 @@ interface EmptyStateProps {
   body: string;
   actionLabel?: string;
   onAction?: () => void;
+  /** Optional cover art shown above the icon tile. */
+  image?: string;
+  imageAlt?: string;
 }
 
-/** Composed empty state: icon, headline, explanation, one action. */
+/** Composed empty state: art, headline, explanation, one action. */
 export default function EmptyState({
   icon,
   title,
   body,
   actionLabel,
   onAction,
+  image,
+  imageAlt,
 }: EmptyStateProps) {
   return (
     <div className="mx-auto flex max-w-sm flex-col items-center px-6 py-16 text-center">
-      <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-soft">
-        {icon}
-      </span>
+      {image ? (
+        <img
+          src={image}
+          alt={imageAlt ?? ""}
+          className="h-32 w-24 rotate-[-3deg] rounded-md border border-border object-cover shadow-soft-lg"
+        />
+      ) : (
+        <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-soft">
+          {icon}
+        </span>
+      )}
       <h3 className="text-balance mt-5 font-serif text-2xl tracking-tight text-baobab">
         {title}
       </h3>

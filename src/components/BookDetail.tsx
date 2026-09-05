@@ -13,6 +13,7 @@ import { trpc } from "@/providers/trpc";
 import { bookUrl, authorUrl } from "../../contracts/blog";
 import { toast } from "sonner";
 import PaymentModal from "./PaymentModal";
+import PreviewModal from "./PreviewModal";
 import BookCard from "./BookCard";
 import { BookDetailSkeleton } from "./Skeleton";
 import EmptyState from "./EmptyState";
@@ -104,8 +105,15 @@ export default function BookDetail() {
   }, [bookId]);
 
   const [showPayment, setShowPayment] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
+
+  const { data: previewData, isLoading: previewLoading } =
+    trpc.book.preview.useQuery(
+      { slug: book?.slug ?? "" },
+      { enabled: showPreview && !!book?.slug }
+    );
 
   if (isLoading) {
     return <BookDetailSkeleton />;
@@ -279,19 +287,35 @@ export default function BookDetail() {
                 </div>
               </div>
             ) : isAuthenticated ? (
-              <button
-                onClick={() => setShowPayment(true)}
-                className="mb-4 w-full bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
-              >
-                Buy now
-              </button>
+              <>
+                <button
+                  onClick={() => setShowPayment(true)}
+                  className="mb-3 w-full bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
+                >
+                  Buy now
+                </button>
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-foreground transition hover:bg-accent active:scale-[0.98]"
+                >
+                  Read a free sample
+                </button>
+              </>
             ) : (
-              <button
-                onClick={() => navigate("/login")}
-                className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-muted-foreground transition hover:bg-accent"
-              >
-                {isFree ? "Log in to read" : "Log in to buy"}
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="mb-3 w-full border border-border bg-transparent p-3 text-lg text-muted-foreground transition hover:bg-accent"
+                >
+                  {isFree ? "Log in to read" : "Log in to buy"}
+                </button>
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-foreground transition hover:bg-accent active:scale-[0.98]"
+                >
+                  Read a free sample
+                </button>
+              </>
             )}
 
             <div className="border-t border-border pt-4">
@@ -460,6 +484,7 @@ export default function BookDetail() {
                   category={similarBook.category}
                   slug={similarBook.slug}
                   authorSlug={similarBook.authorSlug}
+                  createdAt={similarBook.createdAt}
                   index={i}
                 />
               ))}
@@ -475,6 +500,34 @@ export default function BookDetail() {
           title={book.title}
           onClose={() => setShowPayment(false)}
         />
+      )}
+
+      {showPreview && book && previewData && (
+        <PreviewModal
+          title={previewData.title}
+          author={previewData.author}
+          price={previewData.price}
+          coverImage={previewData.coverImage}
+          preview={previewData.preview}
+          totalChars={previewData.totalChars}
+          onClose={() => setShowPreview(false)}
+          onBuy={() => {
+            setShowPreview(false);
+            if (isAuthenticated) setShowPayment(true);
+            else navigate("/login");
+          }}
+        />
+      )}
+
+      {showPreview && book && !previewData && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowPreview(false)}
+        >
+          <p className="text-lg text-white">
+            {previewLoading ? "Loading sample…" : "Sample unavailable."}
+          </p>
+        </div>
       )}
     </div>
   );

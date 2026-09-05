@@ -7,6 +7,16 @@ import ShaderCanvas from "@/components/ShaderCanvas";
 import BookCard from "@/components/BookCard";
 import EmptyState from "@/components/EmptyState";
 import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import {
   PiMagnifyingGlass,
   PiPlus,
   PiSliders,
@@ -78,6 +88,9 @@ export default function BookList({ books }: BookListProps) {
 
   const hasActiveFilters =
     filter !== "all" || search !== "" || priceRange !== "all";
+
+  const activeFilterCount =
+    (filter !== "all" ? 1 : 0) + (priceRange !== "all" ? 1 : 0);
 
   // Fresh covers for the 3D shelf. Falls back to house covers pre-seed.
   const fan: { id: number; title: string; author: string; cover: string; link: string }[] =
@@ -240,9 +253,9 @@ export default function BookList({ books }: BookListProps) {
         </div>
       </div>
 
-      {/* Search + price filter */}
-      <div className="flex gap-3 mb-5">
-        <div className="relative flex-1 min-w-0">
+      {/* Search + filters (bottom-sheet pattern) */}
+      <div className="mb-5 flex gap-3">
+        <div className="relative min-w-0 flex-1">
           <PiMagnifyingGlass
             size={18}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
@@ -264,47 +277,135 @@ export default function BookList({ books }: BookListProps) {
             </button>
           )}
         </div>
-        <div className="relative shrink-0">
-          <select
-            value={priceRange}
-            onChange={e => setPriceRange(e.target.value)}
-            className="appearance-none h-full pl-4 pr-10 py-2.5 rounded-full border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 cursor-pointer"
-          >
-            {priceOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <PiSliders
-            size={16}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-          />
-        </div>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <button className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent active:scale-[0.96]">
+              <PiSliders size={16} />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="tnum grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 font-mono text-[11px] text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <div className="mx-auto w-full max-w-lg">
+              <DrawerHeader>
+                <DrawerTitle>Filters</DrawerTitle>
+                <DrawerDescription>
+                  Narrow the shelf by genre and price.
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="space-y-6 overflow-y-auto px-4 pb-2">
+                <section aria-label="Categories">
+                  <p className="field-label mb-2.5">Genre</p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map(cat => {
+                      const active = filter === cat;
+                      const label = cat === "all" ? "All" : cat;
+                      return (
+                        <button
+                          key={cat}
+                          onClick={() => selectCategory(cat)}
+                          aria-pressed={active}
+                          className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.96] ${
+                            active
+                              ? "bg-primary text-primary-foreground shadow-soft"
+                              : "border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+                <section aria-label="Price">
+                  <p className="field-label mb-2.5">Price</p>
+                  <div className="divide-y divide-border rounded-xl border border-border">
+                    {priceOptions.map(opt => {
+                      const active = priceRange === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => setPriceRange(opt.value)}
+                          aria-pressed={active}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-accent"
+                        >
+                          <span
+                            className={`grid h-4 w-4 place-items-center rounded-full border transition-colors ${
+                              active ? "border-foreground" : "border-muted-foreground"
+                            }`}
+                          >
+                            {active && (
+                              <span className="h-2 w-2 rounded-full bg-foreground" />
+                            )}
+                          </span>
+                          <span
+                            className={
+                              active
+                                ? "font-medium text-foreground"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {opt.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              </div>
+              <DrawerFooter>
+                <div className="flex gap-2">
+                  <button
+                    onClick={resetFilters}
+                    className="flex-1 rounded-full border border-border py-3 text-sm font-medium transition-colors hover:bg-accent active:scale-[0.98]"
+                  >
+                    Reset
+                  </button>
+                  <DrawerClose asChild>
+                    <button className="flex-[2] rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98]">
+                      Show {filteredBooks.length}{" "}
+                      {filteredBooks.length === 1 ? "book" : "books"}
+                    </button>
+                  </DrawerClose>
+                </div>
+              </DrawerFooter>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
 
-      {/* Genre filter — horizontal scroll chips on mobile, inline wrap on desktop */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
-          {categories.map(cat => {
-            const active = filter === cat;
-            const label = cat === "all" ? "All" : cat;
-            return (
-              <button
-                key={cat}
-                onClick={() => selectCategory(cat)}
-                className={`shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-spring ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-soft"
-                    : "border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
+      {/* Active filter pills */}
+      {hasActiveFilters && (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          {filter !== "all" && (
+            <button
+              onClick={() => selectCategory("all")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+            >
+              {filter} <PiX size={12} />
+            </button>
+          )}
+          {priceRange !== "all" && (
+            <button
+              onClick={() => setPriceRange("all")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+            >
+              {priceOptions.find(o => o.value === priceRange)?.label}{" "}
+              <PiX size={12} />
+            </button>
+          )}
+          <button
+            onClick={resetFilters}
+            className="text-xs font-medium text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+          >
+            Clear all
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Book grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
@@ -319,6 +420,7 @@ export default function BookList({ books }: BookListProps) {
             category={book.category}
             slug={book.slug}
             authorSlug={book.authorSlug}
+            createdAt={book.createdAt}
             index={idx}
           />
         ))}
@@ -327,6 +429,8 @@ export default function BookList({ books }: BookListProps) {
       {filteredBooks.length === 0 && (
         <EmptyState
           icon={<PiBookOpen size={24} />}
+          image="/images/terrazites-hero.jpeg"
+          imageAlt="Cover of The Terrazites of Akarfia"
           title={books.length === 0 ? "The shelves are empty" : "No matches"}
           body={
             books.length === 0

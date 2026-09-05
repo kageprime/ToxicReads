@@ -23,6 +23,16 @@ import {
 
 export const localAuthRouter = createRouter({
   me: publicQuery.query(async ({ ctx }) => {
+    if (ctx.user && ctx.user.status !== "banned") {
+      return {
+        id: ctx.user.id,
+        username: ctx.user.username,
+        name: ctx.user.name,
+        role: ctx.user.role,
+        status: ctx.user.status,
+        location: ctx.user.location ?? null,
+      };
+    }
     const cookies = cookie.parse(ctx.req.headers.get("cookie") || "");
     const token = cookies[Session.cookieName];
     if (!token) return null;
@@ -103,6 +113,9 @@ export const localAuthRouter = createRouter({
         role: user.role,
         status: user.status,
         location: user.location ?? null,
+        // Returned (not just cookied) so native apps can store it as a
+        // Bearer token. Web clients ignore it and use the cookie.
+        token,
       };
     }),
 
@@ -158,6 +171,8 @@ export const localAuthRouter = createRouter({
         role: user.role,
         status: user.status,
         location: user.location ?? null,
+        // See login: also returned for native Bearer-token clients.
+        token,
       };
     }),
 

@@ -16,7 +16,10 @@ interface BookCardProps {
   onToggleWishlist?: (id: number) => void;
   slug?: string | null;
   authorSlug?: string | null;
+  createdAt?: Date | string | number | null;
 }
+
+const NEW_BADGE_MS = 14 * 24 * 60 * 60 * 1000;
 
 export default function BookCard({
   id,
@@ -30,9 +33,13 @@ export default function BookCard({
   onToggleWishlist,
   slug,
   authorSlug,
+  createdAt,
 }: BookCardProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isNew =
+    !!createdAt &&
+    Date.now() - new Date(createdAt).getTime() < NEW_BADGE_MS;
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -49,25 +56,33 @@ export default function BookCard({
       style={{ animationDelay: `${Math.min(index * 45, 450)}ms` }}
       onClick={() => navigate(bookUrl({ slug, id }))}
     >
-      <div className="relative mb-3 aspect-[3/4] overflow-hidden border border-border bg-card shadow-soft transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-soft-lg">
-        <SafeImage
-          src={coverImage}
-          alt={`Cover of ${title} by ${author}`}
-          className="h-full w-full object-cover"
-        />
-        <button
-          onClick={handleWishlist}
-          className="absolute left-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/95 transition-all duration-300 ease-spring hover:bg-accent active:scale-90"
-          title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          aria-pressed={!!wishlisted}
-        >
-          {wishlisted ? (
-            <PiHeartStraight size={15} className="text-red-500" />
-          ) : (
-            <PiHeart size={15} className="text-foreground" />
+      {/* Cushioned cover well (tinted backdrop + inset cover) */}
+      <div className="relative mb-3 rounded-[4px] bg-secondary p-3 pb-4 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-soft-lg">
+        <div className="relative overflow-hidden rounded-[2px] shadow-soft">
+          <SafeImage
+            src={coverImage}
+            alt={`Cover of ${title} by ${author}`}
+            className="aspect-[3/4] w-full object-cover"
+          />
+          {isNew && (
+            <span className="absolute left-2 top-2 rounded-[4px] bg-[#c0a040] px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[#141005]">
+              New
+            </span>
           )}
-        </button>
+          <button
+            onClick={handleWishlist}
+            className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/95 transition-all duration-300 ease-spring hover:bg-accent active:scale-90"
+            title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={!!wishlisted}
+          >
+            {wishlisted ? (
+              <PiHeartStraight size={15} className="text-red-500" />
+            ) : (
+              <PiHeart size={15} className="text-foreground" />
+            )}
+          </button>
+        </div>
       </div>
       <h3 className="line-clamp-2 min-h-[2.6em] font-serif text-base leading-snug tracking-tight text-foreground md:text-[19px]">
         {title}

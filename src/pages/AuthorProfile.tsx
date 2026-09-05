@@ -300,6 +300,7 @@ export default function AuthorProfile() {
                 category={book.category}
                 slug={book.slug}
                 authorSlug={book.authorSlug}
+                createdAt={book.createdAt}
                 index={i}
               />
             ))}

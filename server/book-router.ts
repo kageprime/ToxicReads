@@ -32,6 +32,7 @@ import {
 import { ensureAuthorByName } from "./queries/authors.js";
 import { hasUserPurchasedBook } from "./queries/purchases.js";
 import { createNotification } from "./queries/notifications.js";
+import { getBookRatingAverage } from "./queries/reviews.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { signReadToken, verifyReadToken } from "./lib/read-token.js";
 import { upsertProgress, getProgress } from "./queries/reading-progress.js";
@@ -68,6 +69,55 @@ export const bookRouter = createRouter({
     .input(z.object({ slug: z.string().min(1).max(100) }))
     .query(async ({ input }) => {
       return findApprovedBookBySlug(input.slug);
+    }),
+
+  // Public: batch rating averages (lets list UIs show honest stars).
+  ratings: publicQuery
+    .input(z.object({ ids: z.array(z.number()).max(50) }))
+    .query(async ({ input }) => {
+      return Promise.all(
+        input.ids.map(async id => ({
+          bookId: id,
+          ...(await getBookRatingAverage(id)),
+        }))
+      );
+    }),
+
+  // Public: free preview (first pages) — no purchase needed.
+  preview: publicQuery
+    .input(z.object({ slug: z.string().min(1).max(100) }))
+    .query(async ({ ctx, input }) => {
+      const ip =
+        ctx.req.headers.get("x-forwarded-for") ||
+        ctx.req.headers.get("cf-connecting-ip") ||
+        "unknown";
+      if (!checkRateLimit(`preview:${ip}`, 30, 3600000)) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Preview limit reached. Try again later.",
+        });
+      }
+      const book = await findApprovedBookBySlug(input.slug);
+      if (!book) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
+      }
+      const PREVIEW_CHARS = 3000;
+      const content = book.content || "";
+      const cut =
+        content.length > PREVIEW_CHARS
+          ? content.slice(0, content.lastIndexOf(" ", PREVIEW_CHARS))
+          : content;
+      return {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        price: book.price,
+        coverImage: book.coverImage,
+        category: book.category,
+        preview: cut,
+        previewChars: cut.length,
+        totalChars: content.length,
+      };
     }),
 
   // ── Authenticated: read purchased book (first chunk + session token) ─

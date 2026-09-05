@@ -17,8 +17,14 @@ export async function createContext(
   const ctx: TrpcContext = { req: opts.req, resHeaders: opts.resHeaders };
 
   try {
+    // Web: httpOnly cookie. Mobile (React Native): Bearer token, since
+    // native fetch has no shared cookie jar. Same JWT, same revocation.
+    const authHeader = opts.req.headers.get("authorization") || "";
+    const bearer = authHeader.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length).trim()
+      : "";
     const cookies = cookie.parse(opts.req.headers.get("cookie") || "");
-    const token = cookies[Session.cookieName];
+    const token = bearer || cookies[Session.cookieName];
     if (token) {
       const claim = await verifyLocalSessionToken(token);
       if (claim) {
