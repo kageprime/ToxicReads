@@ -397,7 +397,7 @@ export default function SubmitBook() {
             <button
               type="submit"
               disabled={submitBook.isPending}
-              className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:bg-[#333333] active:scale-[0.985] transition disabled:opacity-70"
+              className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:opacity-90 active:scale-[0.985] transition disabled:opacity-70"
             >
               {submitBook.isPending ? "Submitting..." : "Submit for Review"}
             </button>

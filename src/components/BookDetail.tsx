@@ -1,11 +1,21 @@
 import { useParams, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { PiCaretLeft, PiHeart, PiHeartStraight, PiStar, PiStarFill } from "react-icons/pi";
+import {
+  PiCaretLeft,
+  PiHeart,
+  PiHeartStraight,
+  PiStar,
+  PiStarFill,
+  PiBookOpen,
+} from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl, authorUrl } from "../../contracts/blog";
+import { toast } from "sonner";
 import PaymentModal from "./PaymentModal";
 import BookCard from "./BookCard";
+import { BookDetailSkeleton } from "./Skeleton";
+import EmptyState from "./EmptyState";
 
 export default function BookDetail() {
   const { slug: slugParam } = useParams<{ slug: string }>();
@@ -60,23 +70,18 @@ export default function BookDetail() {
 
   const utils = trpc.useUtils();
 
-  const buyMutation = trpc.purchase.buy.useMutation({
-    onSuccess: () => {
-      utils.purchase.myPurchases.invalidate();
-      utils.book.hasPurchased.invalidate();
-      setBought(true);
-    },
-    onError: (err: { message: string }) => {
-      setBuyError(err.message);
-    },
-  });
-
   const addWishlist = trpc.wishlistItems.add.useMutation({
-    onSuccess: () => utils.wishlistItems.check.invalidate(),
+    onSuccess: () => {
+      utils.wishlistItems.check.invalidate();
+      toast.success("Saved to wishlist");
+    },
   });
 
   const removeWishlist = trpc.wishlistItems.remove.useMutation({
-    onSuccess: () => utils.wishlistItems.check.invalidate(),
+    onSuccess: () => {
+      utils.wishlistItems.check.invalidate();
+      toast.success("Removed from wishlist");
+    },
   });
 
   const createReview = trpc.reviews.create.useMutation({
@@ -85,6 +90,7 @@ export default function BookDetail() {
       utils.reviews.myReview.invalidate();
       setReviewText("");
       setReviewRating(5);
+      toast.success("Review published");
     },
   });
 
@@ -94,68 +100,33 @@ export default function BookDetail() {
     if (!isNaN(bookId)) {
       incrementView.mutate({ id: bookId });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookId]);
 
-  const [bought, setBought] = useState(false);
-  const [buyError, setBuyError] = useState("");
   const [showPayment, setShowPayment] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
 
-  const handlePay = async (): Promise<void> => {
-    if (!book) return;
-    await buyMutation.mutateAsync({ bookId: book.id });
-    setShowPayment(false);
-  };
-
   if (isLoading) {
-    return (
-      <div
-        className="flex items-center justify-center"
-        style={{ height: "100vh", backgroundColor: "hsl(var(--background))" }}
-      >
-        <p style={{ fontSize: "18px", color: "hsl(var(--muted-foreground))", fontFamily: "'SF Pro Text', sans-serif" }}>
-          LOADING...
-        </p>
-      </div>
-    );
+    return <BookDetailSkeleton />;
   }
 
   if (!book) {
     return (
-      <div
-        className="flex items-center justify-center"
-        style={{ height: "100vh", backgroundColor: "hsl(var(--background))" }}
-      >
-        <div className="text-center">
-          <p style={{ fontSize: "20px", color: "hsl(var(--muted-foreground))" }}>
-            Book not found
-          </p>
-          <p style={{ fontSize: "15px", color: "hsl(var(--muted-foreground))", marginTop: "8px" }}>
-            It may have been removed, or the link is incorrect.
-          </p>
-          <button
-            onClick={() => navigate("/home")}
-            style={{
-              marginTop: "16px",
-              fontSize: "18px",
-              color: "hsl(var(--foreground))",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textDecoration: "underline",
-              textUnderlineOffset: "3px",
-            }}
-          >
-            Back
-          </button>
-        </div>
+      <div className="flex min-h-full items-center justify-center bg-background px-4 py-24">
+        <EmptyState
+          icon={<PiBookOpen size={24} />}
+          title="Book not found"
+          body="It may have been removed, or the link is incorrect. Browse the library to find something else."
+          actionLabel="Back to library"
+          onAction={() => navigate("/home")}
+        />
       </div>
     );
   }
 
   const isFree = book.price === "0" || book.price === "0.00";
-  const isOwner = hasPurchased || bought || isFree;
+  const isOwner = hasPurchased || isFree;
   const canRead = (isOwner || isFree) && !!book.content;
 
   const similar =
@@ -167,7 +138,10 @@ export default function BookDetail() {
   const reviewStats = reviewData?.stats || { avg: 0, count: 0 };
 
   const handleToggleWishlist = () => {
-    if (!isAuthenticated) { navigate("/login"); return; }
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
     if (wishlisted) {
       removeWishlist.mutate({ bookId });
     } else {
@@ -176,121 +150,118 @@ export default function BookDetail() {
   };
 
   const handleSubmitReview = () => {
-    if (!isAuthenticated) { navigate("/login"); return; }
-    createReview.mutate({ bookId, rating: reviewRating, text: reviewText || undefined });
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    createReview.mutate({
+      bookId,
+      rating: reviewRating,
+      text: reviewText || undefined,
+    });
+  };
+
+  const shareUrl = () => window.location.origin + bookUrl(book);
+
+  const copyLink = async () => {
+    const url = shareUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied");
+    } catch {
+      toast.error("Could not copy the link");
+    }
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--background))" }}>
-      <div
-        className="mx-auto"
-        style={{
-          maxWidth: "880px",
-          padding: "40px 32px 96px",
-          animation: "pageIn 0.4s ease-out both",
-        }}
-      >
-        {/* Back Button */}
+    <div className="min-h-full bg-background">
+      <div className="mx-auto max-w-[880px] animate-fade-up px-4 pb-24 pt-6 sm:px-8 md:pt-10">
+        {/* Back */}
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-1 mb-6 hover:opacity-70 transition-opacity"
+          className="mb-6 flex items-center gap-1 text-muted-foreground transition-opacity hover:opacity-70"
         >
-          <PiCaretLeft size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
-          <span style={{ fontSize: "17px", color: "hsl(var(--muted-foreground))" }}>
-            Back
-          </span>
+          <PiCaretLeft size={14} />
+          <span className="text-[17px]">Back</span>
         </button>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Cover Image */}
-          <div style={{ border: "1px solid hsl(var(--border))", flexShrink: 0, width: "100%", maxWidth: "320px", position: "relative" }}>
+        <div className="flex flex-col gap-8 md:flex-row">
+          {/* Cover */}
+          <div className="relative w-full max-w-[320px] shrink-0 self-start overflow-hidden border border-border bg-card shadow-soft">
             <img
               src={book.coverImage}
-              alt={book.title}
-              className="w-full h-auto block"
-              style={{ aspectRatio: "3/4", objectFit: "cover" }}
+              alt={`Cover of ${book.title} by ${book.author}`}
+              className="block aspect-[3/4] w-full object-cover"
               loading="eager"
             />
             <button
               onClick={handleToggleWishlist}
-              className="absolute top-2 left-2 flex items-center justify-center w-9 h-9 rounded-full bg-background/90 border border-border hover:bg-accent transition-colors"
+              className="absolute left-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/90 transition-colors hover:bg-accent"
               title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              aria-pressed={!!wishlisted}
             >
               {wishlisted ? (
-                <PiHeartStraight size={18} style={{ color: "rgb(var(--color-p-red-fg))" }} />
+                <PiHeartStraight size={18} className="text-p-red-fg" />
               ) : (
-                <PiHeart size={18} style={{ color: "hsl(var(--foreground))" }} />
+                <PiHeart size={18} className="text-foreground" />
               )}
             </button>
           </div>
 
           {/* Info */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <span
-                className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
-                style={{ fontSize: "11px", border: "1px solid hsl(var(--border))", padding: "3px 8px" }}
-              >
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="border border-border px-2 py-[3px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                 {book.category}
               </span>
               {book.content && (
-                <span
-                  className="font-mono uppercase tracking-[0.14em] text-muted-foreground"
-                  style={{ fontSize: "11px", border: "1px solid hsl(var(--border))", padding: "3px 8px" }}
-                >
+                <span className="border border-border px-2 py-[3px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                   Includes reading
                 </span>
               )}
             </div>
 
-            <h1
-              style={{
-                fontSize: "30px",
-                fontWeight: 400,
-                lineHeight: 1.25,
-                fontFamily: "'NewsReader', Georgia, serif",
-                color: "hsl(var(--foreground))",
-                marginBottom: "6px",
-              }}
-            >
+            <h1 className="text-balance mb-1.5 font-serif text-3xl leading-[1.2] tracking-tight text-baobab md:text-4xl">
               {book.title}
             </h1>
-            <p
-              style={{
-                fontSize: "20px",
-                color: "hsl(var(--muted-foreground))",
-                marginBottom: "4px",
-              }}
-            >
+            <p className="mb-1 text-xl text-muted-foreground">
               by{" "}
-              <span
-                style={{ cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "3px" }}
+              <button
                 onClick={() => navigate(authorUrl(book))}
+                className="underline underline-offset-[3px] transition-opacity hover:opacity-70"
               >
                 {book.author}
-              </span>
+              </button>
             </p>
 
             {/* Rating */}
             {reviewStats.count > 0 && (
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-0.5">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex items-center gap-0.5" aria-label={`Rated ${reviewStats.avg} out of 5`}>
                   {[1, 2, 3, 4, 5].map(s => (
-                    <span key={s} style={{ color: s <= Math.round(reviewStats.avg) ? "rgb(var(--color-p-yellow-fg))" : "hsl(var(--muted-foreground))" }}>
+                    <span
+                      key={s}
+                      className={
+                        s <= Math.round(reviewStats.avg)
+                          ? "text-p-yellow-fg"
+                          : "text-muted-foreground"
+                      }
+                    >
                       <PiStarFill size={14} />
                     </span>
                   ))}
                 </div>
-                <span style={{ fontSize: "14px", color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
+                <span className="tnum font-mono text-sm text-muted-foreground">
                   {reviewStats.avg} ({reviewStats.count})
                 </span>
               </div>
             )}
 
-            <p className="font-mono text-foreground" style={{ fontSize: "20px", marginBottom: "4px" }}>
+            <p className="tnum mb-1 font-mono text-xl text-foreground">
               {isFree ? "Free" : `₦${book.price}`}
             </p>
-            <p className="font-mono text-muted-foreground" style={{ fontSize: "14px", marginBottom: "24px" }}>
+            <p className="tnum mb-6 font-mono text-sm text-muted-foreground">
               {book.views} view{book.views !== 1 ? "s" : ""}
             </p>
 
@@ -299,184 +270,117 @@ export default function BookDetail() {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/read/${book.id}`)}
-                  className="hover:opacity-90 active:scale-[0.98] transition"
-                  style={{
-                    flex: 1,
-                    padding: "12px",
-                    fontSize: "18px",
-                    color: "hsl(var(--background))",
-                    background: "hsl(var(--foreground))",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
+                  className="flex-1 bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
                 >
                   Read
                 </button>
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    fontSize: "18px",
-                    color: "rgb(var(--color-p-green-fg))",
-                    border: "1px solid var(--color-p-green-fg)",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
+                <div className="flex items-center border border-p-green-fg bg-p-green px-4 py-3 text-lg text-p-green-fg">
                   Purchased
                 </div>
               </div>
-            ) : bought ? (
-              <div
-                style={{
-                  padding: "12px",
-                  fontSize: "18px",
-                  color: "rgb(var(--color-p-green-fg))",
-                  border: "1px solid var(--color-p-green-fg)",
-                  textAlign: "center",
-                  marginBottom: "16px",
-                }}
-              >
-                Purchased
-              </div>
             ) : isAuthenticated ? (
               <button
-                onClick={() => { setBuyError(""); setShowPayment(true); }}
-                className="hover:opacity-90 active:scale-[0.98] transition"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  fontSize: "18px",
-                  color: "hsl(var(--background))",
-                  background: "hsl(var(--foreground))",
-                  border: "none",
-                  cursor: "pointer",
-                  marginBottom: "16px",
-                }}
+                onClick={() => setShowPayment(true)}
+                className="mb-4 w-full bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
               >
                 Buy now
               </button>
             ) : (
               <button
                 onClick={() => navigate("/login")}
-                className="hover:bg-accent transition"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  fontSize: "18px",
-                  color: "hsl(var(--muted-foreground))",
-                  background: "transparent",
-                  border: "1px solid hsl(var(--border))",
-                  cursor: "pointer",
-                  marginBottom: "16px",
-                }}
+                className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-muted-foreground transition hover:bg-accent"
               >
                 {isFree ? "Log in to read" : "Log in to buy"}
               </button>
             )}
 
-            {(buyMutation.error?.message || buyError) && (
-              <p style={{ fontSize: "17px", color: "rgb(var(--color-p-red-fg))", marginBottom: "12px" }}>
-                {buyError || buyMutation.error?.message}
-              </p>
-            )}
-
-            <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: "16px" }}>
-              <h3 className="font-mono uppercase tracking-[0.14em] text-muted-foreground" style={{ fontSize: "12px", marginBottom: "8px" }}>
+            <div className="border-t border-border pt-4">
+              <h3 className="mb-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
                 Description
               </h3>
-              <p style={{ fontSize: "19px", lineHeight: 1.8, color: "hsl(var(--foreground))" }}>
+              <p className="text-pretty text-[19px] leading-[1.8] text-foreground">
                 {book.description}
               </p>
             </div>
           </div>
         </div>
 
-        {/* ── Reviews Section ── */}
-        <div style={{ borderTop: "1px solid hsl(var(--border))", marginTop: "48px", paddingTop: "24px" }}>
-          <h3 className="font-mono uppercase tracking-[0.14em] text-muted-foreground" style={{ fontSize: "12px", marginBottom: "16px" }}>
-            Reviews {reviewStats.count > 0 ? `(${reviewStats.count})` : ""}
+        {/* Reviews */}
+        <section
+          aria-label="Reviews"
+          className="mt-12 border-t border-border pt-6"
+        >
+          <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+            Reviews{reviewStats.count > 0 ? ` (${reviewStats.count})` : ""}
           </h3>
 
-          {/* Review Form */}
           {isAuthenticated && !myReview && (
-            <div style={{ marginBottom: "24px", border: "1px solid hsl(var(--border))", padding: "16px" }}>
-              <div className="flex items-center gap-1 mb-2">
+            <div className="mb-6 border border-border bg-card p-4">
+              <div className="mb-2 flex items-center gap-1" role="radiogroup" aria-label="Your rating">
                 {[1, 2, 3, 4, 5].map(s => (
                   <button
                     key={s}
                     onClick={() => setReviewRating(s)}
-                    className="hover:opacity-80 transition-opacity"
-                    style={{ background: "none", border: "none", cursor: "pointer", padding: "2px" }}
+                    role="radio"
+                    aria-checked={s === reviewRating}
+                    aria-label={`${s} star${s > 1 ? "s" : ""}`}
+                    className="cursor-pointer border-none bg-none p-0.5 transition-opacity hover:opacity-80"
                   >
                     {s <= reviewRating ? (
-                      <PiStarFill size={18} style={{ color: "rgb(var(--color-p-yellow-fg))" }} />
+                      <PiStarFill size={18} className="text-p-yellow-fg" />
                     ) : (
-                      <PiStar size={18} style={{ color: "hsl(var(--muted-foreground))" }} />
+                      <PiStar size={18} className="text-muted-foreground" />
                     )}
                   </button>
                 ))}
               </div>
               <textarea
-                className="field-input"
+                className="field-input mb-2"
                 rows={2}
                 value={reviewText}
                 onChange={e => setReviewText(e.target.value)}
-                placeholder="Write your review (optional)"
-                style={{ marginBottom: "8px" }}
+                placeholder="Share what you thought (optional)"
+                aria-label="Review text"
               />
               <button
                 onClick={handleSubmitReview}
                 disabled={createReview.isPending}
-                className="hover:opacity-90 active:scale-[0.98] transition font-mono uppercase tracking-[0.1em] text-[12px]"
-                style={{
-                  padding: "8px 16px",
-                  color: "hsl(var(--background))",
-                  background: "hsl(var(--foreground))",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className="bg-foreground px-4 py-2 font-mono text-xs uppercase tracking-[0.1em] text-background transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
               >
-                {createReview.isPending ? "Submitting..." : "Submit Review"}
+                {createReview.isPending ? "Submitting…" : "Submit review"}
               </button>
               {createReview.error && (
-                <p style={{ fontSize: "14px", color: "rgb(var(--color-p-red-fg))", marginTop: "8px" }}>
+                <p role="alert" className="mt-2 text-sm text-p-red-fg">
                   {createReview.error.message}
                 </p>
               )}
             </div>
           )}
 
-          {/* Existing Reviews */}
           {reviews.length > 0 ? (
             <div className="space-y-4">
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  style={{
-                    padding: "12px 0",
-                    borderBottom: "1px solid hsl(var(--border))",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="flex items-center gap-0.5">
+              {reviews.map(review => (
+                <div key={review.id} className="border-b border-border py-3">
+                  <div className="mb-1 flex items-center gap-2">
+                    <div className="flex items-center gap-0.5" aria-label={`Rated ${review.rating} out of 5`}>
                       {[1, 2, 3, 4, 5].map(s => (
                         <PiStarFill
                           key={s}
                           size={12}
-                          style={{
-                            color: s <= review.rating
-                              ? "rgb(var(--color-p-yellow-fg))"
-                              : "hsl(var(--border))",
-                          }}
+                          className={
+                            s <= review.rating
+                              ? "text-p-yellow-fg"
+                              : "text-border"
+                          }
                         />
                       ))}
                     </div>
-                    <span style={{ fontSize: "14px", color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
+                    <span className="tnum font-mono text-sm text-muted-foreground">
                       {new Date(review.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   {review.text && (
-                    <p style={{ fontSize: "17px", color: "hsl(var(--foreground))", lineHeight: 1.6 }}>
+                    <p className="text-pretty text-[17px] leading-[1.6] text-foreground">
                       {review.text}
                     </p>
                   )}
@@ -484,64 +388,67 @@ export default function BookDetail() {
               ))}
             </div>
           ) : (
-            <p style={{ fontSize: "16px", color: "hsl(var(--muted-foreground))" }}>
-              No reviews yet. {isAuthenticated ? "Be the first to review!" : ""}
+            <p className="text-base text-muted-foreground">
+              No reviews yet.{" "}
+              {isAuthenticated ? "Be the first to share your thoughts." : ""}
             </p>
           )}
-        </div>
+        </section>
 
         {/* Share */}
-        <div style={{ borderTop: "1px solid hsl(var(--border))", marginTop: "32px", paddingTop: "24px" }}>
-          <h3 className="font-mono uppercase tracking-[0.14em] text-muted-foreground" style={{ fontSize: "12px", marginBottom: "16px" }}>
+        <section
+          aria-label="Share this book"
+          className="mt-8 border-t border-border pt-6"
+        >
+          <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
             Share this book
           </h3>
-          <div style={{ display: "flex", gap: 12 }}>
+          <div className="flex gap-3">
             <button
               onClick={() => {
-                const url = window.location.origin + bookUrl(book);
-                window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url), "fb-share", "width=600,height=400");
+                window.open(
+                  "https://www.facebook.com/sharer/sharer.php?u=" +
+                    encodeURIComponent(shareUrl()),
+                  "fb-share",
+                  "width=600,height=400"
+                );
               }}
-              className="hover:bg-accent transition"
-              style={{ flex: 1, padding: "10px", fontSize: "16px", color: "hsl(var(--foreground))", background: "transparent", border: "1px solid hsl(var(--border))", cursor: "pointer", letterSpacing: "0.1em" }}
+              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
             >
-              FACEBOOK
+              Facebook
             </button>
             <button
               onClick={() => {
-                const url = window.location.origin + bookUrl(book);
                 const text = "Check out this book: " + book.title + " - ";
-                window.open("https://wa.me/?text=" + encodeURIComponent(text + url), "wa-share", "width=600,height=400");
+                window.open(
+                  "https://wa.me/?text=" + encodeURIComponent(text + shareUrl()),
+                  "wa-share",
+                  "width=600,height=400"
+                );
               }}
-              className="hover:bg-accent transition"
-              style={{ flex: 1, padding: "10px", fontSize: "16px", color: "hsl(var(--foreground))", background: "transparent", border: "1px solid hsl(var(--border))", cursor: "pointer", letterSpacing: "0.1em" }}
+              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
             >
-              WHATSAPP
+              WhatsApp
             </button>
             <button
-              onClick={async () => {
-                const url = window.location.origin + bookUrl(book);
-                const text = "Check out this book: " + book.title;
-                if (navigator.share) {
-                  try { await navigator.share({ title: book.title, text, url }); } catch {}
-                } else {
-                  try { await navigator.clipboard.writeText(url); alert("Link copied!"); } catch {}
-                }
-              }}
-              className="hover:bg-accent transition"
-              style={{ flex: 1, padding: "10px", fontSize: "16px", color: "hsl(var(--foreground))", background: "transparent", border: "1px solid hsl(var(--border))", cursor: "pointer", letterSpacing: "0.1em" }}
+              onClick={copyLink}
+              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
             >
-              INSTAGRAM
+              Copy link
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Similar Books */}
+        {/* Similar books */}
         {similar.length > 0 && (
-          <div style={{ borderTop: "1px solid hsl(var(--border))", marginTop: "48px", paddingTop: "24px" }}>
-            <h3 className="font-mono uppercase tracking-[0.14em] text-muted-foreground" style={{ fontSize: "12px", marginBottom: "16px" }}>
+          <section
+            aria-label="Similar books"
+            className="mt-12 border-t border-border pt-6"
+          >
+            <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
               Similar books
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {similar.map((similarBook, i) => (
                 <BookCard
                   key={similarBook.id}
@@ -557,22 +464,15 @@ export default function BookDetail() {
                 />
               ))}
             </div>
-          </div>
+          </section>
         )}
       </div>
 
-      <style>{`
-        @keyframes pageIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
       {showPayment && book && (
         <PaymentModal
+          bookId={book.id}
           price={book.price}
           title={book.title}
-          onPay={handlePay}
           onClose={() => setShowPayment(false)}
         />
       )}

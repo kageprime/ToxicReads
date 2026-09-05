@@ -4,6 +4,9 @@ import { PiWarningCircle } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import { RowsSkeleton } from "@/components/Skeleton";
+import EmptyState from "@/components/EmptyState";
+import { PiUpload } from "react-icons/pi";
 
 export default function MySubmissions() {
   const navigate = useNavigate();
@@ -111,15 +114,7 @@ export default function MySubmissions() {
         </div>
 
         {isLoading ? (
-          <p
-            style={{
-              fontSize: "18px",
-              color: "hsl(var(--muted-foreground))",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            LOADING...
-          </p>
+          <RowsSkeleton count={4} />
         ) : submissions && submissions.length > 0 ? (
           <div className="space-y-4">
             {submissions.map(book => (
@@ -268,33 +263,13 @@ export default function MySubmissions() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p
-              style={{
-                fontSize: "19px",
-                color: "hsl(var(--muted-foreground))",
-                marginBottom: "16px",
-              }}
-            >
-              No submissions yet
-            </p>
-            <button
-              onClick={() => navigate("/submit-book")}
-              className="transition-transform active:scale-[0.98] hover:opacity-80"
-              style={{
-                fontSize: "17px",
-                fontFamily: "var(--font-mono)",
-                color: "hsl(var(--foreground))",
-                background: "none",
-                border: "1px solid hsl(var(--border))",
-                padding: "8px 16px",
-                cursor: "pointer",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Submit a Book
-            </button>
-          </div>
+          <EmptyState
+            icon={<PiUpload size={24} />}
+            title="No submissions yet"
+            body="Send us your manuscript. Our editors review within a day."
+            actionLabel="Submit a book"
+            onAction={() => navigate("/submit-book")}
+          />
         )}
       </div>
     </div>

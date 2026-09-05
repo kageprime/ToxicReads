@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import NotificationsBell from "@/components/NotificationsBell";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useSwipe } from "@/hooks/useSwipe";
@@ -110,7 +111,7 @@ export default function LeftColumn() {
           type="button"
           onClick={goLogo}
           aria-label={location.pathname === "/home" ? "Go to landing page" : "Browse books"}
-          className="group flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity focus:outline-none"
+          className="group flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity"
         >
           <span className="relative flex-shrink-0">
             <img
@@ -124,11 +125,12 @@ export default function LeftColumn() {
           </span>
         </button>
         <div className="flex items-center gap-0.5">
+          <NotificationsBell />
           <button
             type="button"
             onClick={toggleTheme}
             aria-label={theme === "light" ? "Dark mode" : "Light mode"}
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors focus:outline-none"
+            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors"
           >
             {theme === "light" ? (
               <PiMoon size={16} className="text-muted-foreground" />
@@ -138,7 +140,7 @@ export default function LeftColumn() {
           </button>
           <button
             onClick={() => setCollapsed(true)}
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors focus:outline-none"
+            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent transition-colors"
             aria-label="Collapse menu"
           >
             <PiCaretLeft
@@ -174,38 +176,25 @@ export default function LeftColumn() {
                 <button
                   key={item.path}
                   onClick={() => go(item.path)}
-                  className="sidebar-item group relative flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200 focus:outline-none"
-                  style={{
-                    animationDelay: `${i * 40}ms`,
-                    backgroundColor: active ? "hsl(var(--accent))" : "transparent",
-                  }}
-                  onMouseEnter={e => {
-                    if (!active) e.currentTarget.style.backgroundColor = "hsl(var(--accent))";
-                  }}
-                  onMouseLeave={e => {
-                    if (!active) e.currentTarget.style.backgroundColor = "transparent";
-                  }}
+                  aria-current={active ? "page" : undefined}
+                  className={`sidebar-item group relative flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors duration-200 hover:bg-accent ${
+                    active ? "bg-accent" : ""
+                  }`}
+                  style={{ animationDelay: `${i * 40}ms` }}
                 >
                   {active && (
-                    <span
-                      className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2.5px] rounded-full bg-foreground"
-                      style={{ left: "-1px" }}
-                    />
+                    <span className="absolute left-[-1px] top-1/2 -translate-y-1/2 h-5 w-[2.5px] rounded-full bg-foreground" />
                   )}
                   <Icon
                     size={19}
-                    className="transition-transform duration-200 group-hover:translate-x-0.5 flex-shrink-0"
-                    style={{
-                      color: active
-                        ? "hsl(var(--foreground))"
-                        : "hsl(var(--muted-foreground))",
-                    }}
+                    className={`transition-transform duration-200 group-hover:translate-x-0.5 flex-shrink-0 ${
+                      active ? "text-foreground" : "text-muted-foreground"
+                    }`}
                   />
                   <span
-                    className="font-mono uppercase text-[12px] tracking-[0.1em] transition-colors"
-                    style={{
-                      color: active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
-                    }}
+                    className={`font-mono uppercase text-[12px] tracking-[0.1em] transition-colors ${
+                      active ? "text-foreground" : "text-muted-foreground"
+                    }`}
                   >
                     {item.label}
                   </span>
@@ -228,7 +217,7 @@ export default function LeftColumn() {
                     navigate(purchase.book ? bookUrl(purchase.book) : "/home");
                     if (isMobile) setCollapsed(true);
                   }}
-                  className="sidebar-item group flex items-center gap-3 w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent transition-colors focus:outline-none"
+                  className="sidebar-item group flex items-center gap-3 w-full text-left px-2 py-1.5 rounded-lg hover:bg-accent transition-colors"
                   style={{ animationDelay: `${80 + i * 40}ms` }}
                 >
                   <div
@@ -268,7 +257,7 @@ export default function LeftColumn() {
           ) : isAuthenticated ? (
             <button
               onClick={logout}
-              className="sidebar-item group relative flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left hover:bg-accent transition-colors duration-200 focus:outline-none"
+              className="sidebar-item group relative flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left hover:bg-accent transition-colors duration-200"
             >
               <PiSignOut
                 size={19}

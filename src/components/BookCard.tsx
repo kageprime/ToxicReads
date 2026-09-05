@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { bookUrl, authorUrl } from "../../contracts/blog";
 import SafeImage from "./SafeImage";
-import { PiArrowUpRight, PiHeart, PiHeartStraight } from "react-icons/pi";
+import { PiHeart, PiHeartStraight } from "react-icons/pi";
 
 interface BookCardProps {
   id: number;
@@ -45,20 +45,22 @@ export default function BookCard({
 
   return (
     <article
-      className="sidebar-item group cursor-pointer active:scale-[0.98] transition-transform duration-200 ease-spring"
+      className="sidebar-item group cursor-pointer transition-transform duration-200 ease-spring active:scale-[0.98]"
       style={{ animationDelay: `${Math.min(index * 45, 450)}ms` }}
       onClick={() => navigate(bookUrl({ slug, id }))}
     >
-      <div className="relative overflow-hidden mb-3 border border-border aspect-[3/4] transition-colors duration-300 hover:border-foreground/30">
+      <div className="relative mb-3 aspect-[3/4] overflow-hidden border border-border bg-card shadow-soft transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-soft-lg">
         <SafeImage
           src={coverImage}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 ease-spring group-hover:scale-[1.04]"
+          alt={`Cover of ${title} by ${author}`}
+          className="h-full w-full object-cover"
         />
         <button
           onClick={handleWishlist}
-          className="absolute top-2 left-2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 border border-border hover:bg-accent transition-all duration-300 ease-spring"
+          className="absolute left-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background/95 transition-all duration-300 ease-spring hover:bg-accent active:scale-90"
           title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          aria-pressed={!!wishlisted}
         >
           {wishlisted ? (
             <PiHeartStraight size={15} className="text-red-500" />
@@ -66,31 +68,28 @@ export default function BookCard({
             <PiHeart size={15} className="text-foreground" />
           )}
         </button>
-        <span className="absolute top-2 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-background/95 border border-border opacity-0 translate-y-[-4px] group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-spring">
-          <PiArrowUpRight size={15} className="text-foreground" />
-        </span>
       </div>
-      <h3 className="font-serif text-foreground text-base md:text-[19px] leading-tight truncate tracking-tight">
+      <h3 className="line-clamp-2 min-h-[2.6em] font-serif text-base leading-snug tracking-tight text-foreground md:text-[19px]">
         {title}
       </h3>
-      <p className="text-muted-foreground text-sm truncate mt-0.5">
-        <span
-          className="cursor-pointer hover:text-foreground hover:underline underline-offset-2 transition-colors"
+      <p className="mt-0.5 truncate text-sm text-muted-foreground">
+        <button
+          className="transition-colors hover:text-foreground hover:underline hover:underline-offset-2"
           onClick={e => {
             e.stopPropagation();
             navigate(authorUrl({ authorSlug, author }));
           }}
         >
           {author}
-        </span>
+        </button>
       </p>
-      <div className="flex items-center justify-between mt-1.5">
+      <div className="mt-1.5 flex items-center justify-between">
         {category && (
-          <span className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.1em] text-muted-foreground truncate max-w-[60%]">
+          <span className="max-w-[60%] truncate font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground md:text-[11px]">
             {category}
           </span>
         )}
-        <span className="font-mono text-[13px] md:text-[14px] text-foreground">
+        <span className="tnum font-mono text-[13px] text-foreground md:text-[14px]">
           ₦{price}
         </span>
       </div>

@@ -5,11 +5,12 @@ import LeftColumn from "./components/LeftColumn";
 import BookDetail from "./components/BookDetail";
 import BottomNav from "./components/BottomNav";
 import NotificationsBell from "./components/NotificationsBell";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
+import { BookGridSkeleton } from "@/components/Skeleton";
 import type { BookDisplay } from "../contracts/blog";
 import { toBookDisplay } from "../contracts/blog";
 import Login from "./pages/Login";
@@ -22,29 +23,39 @@ import MySubmissions from "./pages/MySubmissions";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Reader from "./pages/Reader";
+import PaymentCallback from "./pages/PaymentCallback";
 import Landing from "./pages/Landing";
 import SellerDashboard from "./pages/SellerDashboard";
 import AuthorProfile from "./pages/AuthorProfile";
 import WishlistPage from "./pages/WishlistPage";
 import { PiCaretRight } from "react-icons/pi";
+import { Toaster } from "sonner";
+
+function AppToaster() {
+  const { theme } = useTheme();
+  return (
+    <Toaster
+      theme={theme}
+      position="bottom-center"
+      toastOptions={{
+        style: {
+          background: "hsl(var(--popover))",
+          color: "hsl(var(--popover-foreground))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: "var(--radius)",
+        },
+      }}
+    />
+  );
+}
 
 function AppShell() {
   const location = useLocation();
-  const { isMobile, setCollapsed } = useSidebar();
+  const { isMobile, collapsed, setCollapsed } = useSidebar();
 
   useEffect(() => {
     if (isMobile) setCollapsed(true);
   }, [location.pathname, isMobile, setCollapsed]);
-
-  const showTopBar = location.pathname.startsWith("/home") ||
-    location.pathname.startsWith("/book/") ||
-    location.pathname.startsWith("/my-purchases") ||
-    location.pathname.startsWith("/my-submissions") ||
-    location.pathname.startsWith("/profile") ||
-    location.pathname.startsWith("/submit-book") ||
-    location.pathname.startsWith("/seller") ||
-    location.pathname.startsWith("/wishlist") ||
-    location.pathname.startsWith("/author/");
 
   return (
     <div
@@ -53,22 +64,22 @@ function AppShell() {
     >
       <LeftColumn />
       <div className="flex-1 flex flex-col min-w-0">
-        {showTopBar && (
-          <div
-            className="flex items-center justify-end px-4"
-            style={{
-              height: "44px",
-              borderBottom: "1px solid hsl(var(--border))",
-              flexShrink: 0,
-            }}
-          >
-            <NotificationsBell />
-          </div>
-        )}
-        <main className="flex-1 overflow-y-auto">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
+        <main id="main-content" className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </div>
+      {/* Mobile overlay bell: zero layout space, one-tap access */}
+      {isMobile && collapsed && (
+        <div
+          className="fixed z-40 rounded-full border border-border bg-background/90 backdrop-blur md:hidden"
+          style={{ right: "12px", top: "max(12px, env(safe-area-inset-top))" }}
+        >
+          <NotificationsBell />
+        </div>
+      )}
       <FloatingOpen />
     </div>
   );
@@ -78,16 +89,21 @@ function HomePage() {
   const { data: dbBooks, isLoading } = trpc.book.list.useQuery();
   const books: BookDisplay[] = dbBooks ? dbBooks.map(toBookDisplay) : [];
 
+  // The library reads best after dark: pin the theme while mounted.
+  useEffect(() => {
+    const root = document.documentElement;
+    const prev = root.getAttribute("data-theme") ?? "dark";
+    root.setAttribute("data-theme", "dark");
+    return () => {
+      root.setAttribute("data-theme", prev);
+    };
+  }, []);
+
   return (
     <div className="min-h-full">
       {isLoading ? (
-        <div
-          className="flex items-center justify-center"
-          style={{ paddingTop: "40vh" }}
-        >
-          <p style={{ fontSize: "18px", color: "hsl(var(--muted-foreground))" }}>
-            LOADING...
-          </p>
+        <div className="px-4 pt-4 sm:px-6 md:px-10 md:pt-8">
+          <BookGridSkeleton count={10} />
         </div>
       ) : (
         <BookList books={books} />
@@ -177,9 +193,11 @@ export default function App() {
               <Route path="/wishlist" element={<WishlistPage />} />
             </Route>
             <Route path="/read/:id" element={<Reader />} />
+            <Route path="/payment/callback" element={<PaymentCallback />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNav />
+          <AppToaster />
         </SidebarProvider>
       </LanguageProvider>
     </ThemeProvider>

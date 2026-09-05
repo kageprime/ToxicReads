@@ -12,7 +12,11 @@ import {
   findApprovedBookById,
   findApprovedBookBySlug,
   findBooksByAuthorSlug,
+  findFeaturedBooks,
+  findAllFeaturedBooks,
   generateUniqueBookSlug,
+  setBookFeatured,
+  moveFeaturedBook,
   findAllBooks,
   findPendingBooks,
   findBooksBySeller,
@@ -25,7 +29,7 @@ import {
   rejectBook,
   incrementBookViews,
 } from "./queries/books.js";
-import { slugify } from "./lib/slugify.js";
+import { ensureAuthorByName } from "./queries/authors.js";
 import { hasUserPurchasedBook } from "./queries/purchases.js";
 import { createNotification } from "./queries/notifications.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
@@ -222,6 +226,7 @@ export const bookRouter = createRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const slug = await generateUniqueBookSlug(input.title);
+      const author = await ensureAuthorByName(input.author);
       const book = await createBook({
         ...input,
         title: stripHtml(input.title),
@@ -229,7 +234,8 @@ export const bookRouter = createRouter({
         description: stripHtml(input.description),
         content: stripHtml(input.content),
         slug,
-        authorSlug: slugify(input.author),
+        authorSlug: author.slug,
+        authorId: author.id,
         sellerId: ctx.user.id,
         sellerType: "user",
         status: "pending",
@@ -348,11 +354,27 @@ export const bookRouter = createRouter({
       return findBooksByAuthorSlug(input.authorSlug);
     }),
 
+  // Public: admin-curated landing carousel (approved + featured only).
+  featured: publicQuery.query(async () => findFeaturedBooks()),
+
   // ── Admin: manage all books ─────────────────────────────────
 
   adminList: adminQuery.query(async () => findAllBooks()),
 
   pendingList: adminQuery.query(async () => findPendingBooks()),
+
+  // Admin: manage the landing carousel.
+  featuredList: adminQuery.query(async () => findAllFeaturedBooks()),
+
+  setFeatured: adminQuery
+    .input(z.object({ id: z.number(), featured: z.boolean() }))
+    .mutation(async ({ input }) => setBookFeatured(input.id, input.featured)),
+
+  moveFeatured: adminQuery
+    .input(z.object({ id: z.number(), direction: z.enum(["up", "down"]) }))
+    .mutation(async ({ input }) =>
+      moveFeaturedBook(input.id, input.direction)
+    ),
 
   adminById: adminQuery
     .input(z.object({ id: z.number() }))
@@ -374,6 +396,7 @@ export const bookRouter = createRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const slug = await generateUniqueBookSlug(input.slug ?? input.title);
+      const author = await ensureAuthorByName(input.author);
       const book = await createBook({
         ...input,
         title: stripHtml(input.title),
@@ -381,7 +404,8 @@ export const bookRouter = createRouter({
         description: stripHtml(input.description),
         content: stripHtml(input.content),
         slug,
-        authorSlug: slugify(input.author),
+        authorSlug: author.slug,
+        authorId: author.id,
         sellerId: ctx.user.id,
         sellerType: "admin",
         status: "approved",
@@ -417,12 +441,20 @@ export const bookRouter = createRouter({
           description: stripHtml(raw.description),
         }),
         ...(raw.content !== undefined && { content: stripHtml(raw.content) }),
-        ...(raw.author !== undefined && { authorSlug: slugify(raw.author) }),
       };
       if (raw.slug !== undefined) {
         data.slug = await generateUniqueBookSlug(raw.slug, id);
       } else {
         delete data.slug;
+      }
+      if (raw.author !== undefined) {
+        const author = await ensureAuthorByName(raw.author);
+        const link = data as {
+          authorSlug?: string | null;
+          authorId?: number | null;
+        };
+        link.authorSlug = author.slug;
+        link.authorId = author.id;
       }
       return updateBook(id, data);
     }),

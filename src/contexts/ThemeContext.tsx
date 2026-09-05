@@ -18,12 +18,20 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleTheme: () => {},
 });
 
-const STORAGE_KEY = "neural-atelier-theme";
+const STORAGE_KEY = "toxicreads-theme";
+const LEGACY_KEY = "neural-atelier-theme";
 
 function getInitialTheme(): Theme {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+    const stored = (localStorage.getItem(STORAGE_KEY) ??
+      localStorage.getItem(LEGACY_KEY)) as Theme | null;
     if (stored === "light" || stored === "dark") return stored;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-color-scheme: light)").matches
+    ) {
+      return "light";
+    }
   } catch {
     // localStorage not available
   }
@@ -34,18 +42,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    root.style.colorScheme = theme;
     try {
       localStorage.setItem(STORAGE_KEY, theme);
+      localStorage.removeItem(LEGACY_KEY);
     } catch {
       // ignore
     }
   }, [theme]);
-
-  // Apply initial theme on mount (SSR safe)
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, []);
 
   const toggleTheme = () => {
     setTheme(prev => (prev === "light" ? "dark" : "light"));

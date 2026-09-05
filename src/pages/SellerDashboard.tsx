@@ -4,6 +4,9 @@ import { PiBookOpen, PiEye, PiCurrencyNgn, PiUpload, PiArrowRight } from "react-
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import { RowsSkeleton, Skel } from "@/components/Skeleton";
+import AuthorSelfEdit from "@/components/AuthorSelfEdit";
+import { toast } from "sonner";
 
 export default function SellerDashboard() {
   const navigate = useNavigate();
@@ -19,6 +22,20 @@ export default function SellerDashboard() {
 
   const { data: sales } = trpc.sellerInfo.sales.useQuery(undefined, {
     enabled: isAuthenticated,
+  });
+
+  const utils = trpc.useUtils();
+  const { data: profiles } = trpc.author.myProfiles.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+  const claimMutation = trpc.author.claim.useMutation({
+    onSuccess: () => {
+      utils.author.myProfiles.invalidate();
+      toast.success("Author profile claimed — it is yours to manage");
+    },
+    onError: (err: { message: string }) => {
+      toast.error(err.message);
+    },
   });
 
   useEffect(() => {
@@ -158,9 +175,14 @@ export default function SellerDashboard() {
         </div>
 
         {isLoading ? (
-          <p style={{ fontSize: "18px", color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
-            LOADING...
-          </p>
+          <div aria-label="Loading dashboard" role="status">
+            <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {[0, 1, 2, 3].map(i => (
+                <Skel key={i} className="h-[104px] !rounded-none" />
+              ))}
+            </div>
+            <RowsSkeleton count={3} />
+          </div>
         ) : (
           <>
             {/* Stats Grid */}
@@ -198,6 +220,107 @@ export default function SellerDashboard() {
                   </p>
                 </div>
               ))}
+            </div>
+
+            {/* Author profile */}
+            <h2
+              style={{
+                fontSize: "22px",
+                fontWeight: 400,
+                fontFamily: "var(--font-serif)",
+                color: "hsl(var(--foreground))",
+                marginBottom: "8px",
+              }}
+            >
+              Author profile
+            </h2>
+            <p
+              style={{
+                fontSize: "15px",
+                color: "hsl(var(--muted-foreground))",
+                marginBottom: "16px",
+              }}
+            >
+              Readers see this on your public author page. Claim a pen name
+              from your books to manage it yourself.
+            </p>
+            <div style={{ marginBottom: "32px" }}>
+              {profiles?.owned.map(a => (
+                <AuthorSelfEdit
+                  key={a.id}
+                  author={a}
+                  onSaved={() => utils.author.myProfiles.invalidate()}
+                />
+              ))}
+              {profiles?.suggested.map(a => (
+                <div
+                  key={a.id}
+                  className="flex items-center gap-3 border border-border bg-card"
+                  style={{ padding: "12px", marginBottom: "12px" }}
+                >
+                  <div
+                    className="flex items-center justify-center"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "9999px",
+                      border: "1px solid hsl(var(--border))",
+                      fontFamily: "var(--font-serif)",
+                      fontSize: "18px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {a.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      style={{
+                        fontSize: "17px",
+                        color: "hsl(var(--foreground))",
+                      }}
+                    >
+                      {a.name}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "14px",
+                        color: "hsl(var(--muted-foreground))",
+                      }}
+                    >
+                      Used in your books · unclaimed
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => claimMutation.mutate({ id: a.id })}
+                    disabled={claimMutation.isPending}
+                    className="transition-transform active:scale-[0.98]"
+                    style={{
+                      fontSize: "15px",
+                      fontFamily: "var(--font-mono)",
+                      color: "hsl(var(--background))",
+                      background: "hsl(var(--foreground))",
+                      border: "none",
+                      padding: "8px 16px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Claim
+                  </button>
+                </div>
+              ))}
+              {(!profiles ||
+                (profiles.owned.length === 0 &&
+                  profiles.suggested.length === 0)) && (
+                <p
+                  style={{
+                    fontSize: "15px",
+                    color: "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  No pen names yet — they appear here when your submitted
+                  books carry an author name.
+                </p>
+              )}
             </div>
 
             {/* My Books */}

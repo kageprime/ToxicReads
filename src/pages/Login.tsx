@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { PiCaretLeft } from "react-icons/pi";
+import { PiWarningCircle } from "react-icons/pi";
 import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
+import AuthShell from "@/components/AuthShell";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,10 +23,11 @@ export default function Login() {
     },
   });
 
-  if (isAuthenticated) {
-    navigate("/home");
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) navigate("/home");
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,82 +40,68 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="flex items-center h-14 px-4 border-b border-border">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <PiCaretLeft size={16} />
-          Back
-        </button>
-      </header>
-
-      <div className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8 shadow-none">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground text-center mb-2">
-            Sign in
-          </p>
-          <h1 className="font-serif text-3xl text-foreground tracking-tight text-center">
-            Welcome back
-          </h1>
-          <p className="text-sm text-muted-foreground text-center mt-1.5">
-            Log in to keep reading.
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
-            <div>
-              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                autoComplete="username"
-                className="field-input"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-[0.05em] text-muted-foreground mb-1.5">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password"
-                className="field-input"
-              />
-            </div>
-
-            {error && <p className="text-sm text-p-red-fg">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="w-full py-3 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-[#333333] active:scale-[0.98] transition disabled:opacity-70"
-            >
-              {loginMutation.isPending ? "Logging in..." : "Log in"}
-            </button>
-          </form>
-
-          <p className="text-sm text-muted-foreground text-center mt-5">
-            Default account — admin / 123456
-          </p>
-
-          <p className="text-sm text-muted-foreground text-center mt-3">
-            New here?{" "}
-            <button
-              onClick={() => navigate("/register")}
-              className="text-foreground font-medium hover:underline underline-offset-4"
-            >
-              Create an account
-            </button>
-          </p>
+    <AuthShell
+      backHref="/"
+      eyebrow="Sign in"
+      title="Welcome back"
+      sub="Log in to keep reading."
+      switchText="New here?"
+      switchLabel="Create an account"
+      switchHref="/register"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="login-username"
+            className="mb-1.5 block text-sm font-medium text-foreground"
+          >
+            Username
+          </label>
+          <input
+            id="login-username"
+            type="text"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            autoComplete="username"
+            className="field-input"
+          />
         </div>
-      </div>
-    </div>
+
+        <div>
+          <label
+            htmlFor="login-password"
+            className="mb-1.5 block text-sm font-medium text-foreground"
+          >
+            Password
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="current-password"
+            className="field-input"
+          />
+        </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="flex items-start gap-2 border border-p-red-fg bg-p-red px-3 py-2.5 text-sm text-p-red-fg"
+          >
+            <PiWarningCircle size={16} className="mt-0.5 shrink-0" />
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loginMutation.isPending}
+          className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-70"
+        >
+          {loginMutation.isPending ? "Logging in…" : "Log in"}
+        </button>
+      </form>
+    </AuthShell>
   );
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import {
   PiWarningCircle,
   PiPencilSimple,
@@ -9,12 +9,19 @@ import {
   PiUser,
   PiUserMinus,
   PiTrash,
+  PiStar,
+  PiStarFill,
+  PiCaretUp,
+  PiCaretDown,
 } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import { RowsSkeleton } from "@/components/Skeleton";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
-type Tab = "pending" | "books" | "purchases" | "users";
+type Tab = "pending" | "books" | "featured" | "authors" | "purchases" | "users";
 
 interface BookFormData {
   title: string;
@@ -28,8 +35,19 @@ interface BookFormData {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAdmin, isLoading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("pending");
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const t = searchParams.get("tab");
+    return t === "pending" ||
+      t === "books" ||
+      t === "featured" ||
+      t === "authors" ||
+      t === "purchases" ||
+      t === "users"
+      ? t
+      : "pending";
+  });
   const utils = trpc.useUtils();
 
   useEffect(() => {
@@ -54,6 +72,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       utils.book.pendingList.invalidate();
       utils.book.adminList.invalidate();
+      toast.success("Book approved and live");
     },
   });
 
@@ -61,6 +80,7 @@ export default function AdminDashboard() {
     onSuccess: () => {
       utils.book.pendingList.invalidate();
       utils.book.adminList.invalidate();
+      toast.success("Submission rejected");
     },
   });
 
@@ -69,6 +89,7 @@ export default function AdminDashboard() {
       utils.book.adminList.invalidate();
       utils.book.list.invalidate();
       setEditingBook(null);
+      toast.success("Book updated");
     },
   });
 
@@ -76,24 +97,75 @@ export default function AdminDashboard() {
     onSuccess: () => {
       utils.book.adminList.invalidate();
       utils.book.list.invalidate();
+      toast.success("Book deleted");
     },
   });
 
   const updateUserStatusMutation = trpc.auth.adminUpdateStatus.useMutation({
     onSuccess: () => {
       utils.auth.adminList.invalidate();
+      toast.success("User status updated");
     },
   });
 
   const deleteUserMutation = trpc.auth.adminDelete.useMutation({
     onSuccess: () => {
       utils.auth.adminList.invalidate();
+      toast.success("User deleted");
+    },
+  });
+
+  const { data: featuredBooks, isLoading: featuredLoading } =
+    trpc.book.featuredList.useQuery(undefined, { enabled: isAdmin });
+
+  const setFeaturedMutation = trpc.book.setFeatured.useMutation({
+    onSuccess: (_data, variables) => {
+      utils.book.featuredList.invalidate();
+      utils.book.adminList.invalidate();
+      utils.book.list.invalidate();
+      toast.success(
+        variables.featured ? "Added to landing carousel" : "Removed from carousel"
+      );
+    },
+  });
+
+  const moveFeaturedMutation = trpc.book.moveFeatured.useMutation({
+    onSuccess: () => {
+      utils.book.featuredList.invalidate();
+    },
+  });
+
+  const { data: allAuthors, isLoading: authorsLoading } =
+    trpc.author.adminList.useQuery(undefined, { enabled: isAdmin });
+
+  const updateAuthorMutation = trpc.author.update.useMutation({
+    onSuccess: () => {
+      utils.author.adminList.invalidate();
+      setEditingAuthor(null);
+      toast.success("Author profile updated");
+    },
+    onError: (err: { message: string }) => {
+      toast.error(err.message);
     },
   });
 
   const [selectedBooks, setSelectedBooks] = useState<Set<number>>(new Set());
-  const [editingBook, setEditingBook] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<BookFormData>({
+  const [confirmState, setConfirmState] = useState<null | {
+    title: string;
+    body: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+  }>(null);  const [editingBook, setEditingBook] = useState<number | null>(null);
+  const [editingAuthor, setEditingAuthor] = useState<number | null>(null);
+  const [authorForm, setAuthorForm] = useState({
+    bio: "",
+    dedication: "",
+    avatar: "",
+    location: "",
+    website: "",
+    twitter: "",
+    instagram: "",
+  });  const [editForm, setEditForm] = useState<BookFormData>({
     title: "",
     author: "",
     description: "",
@@ -183,18 +255,63 @@ export default function AdminDashboard() {
     });
   };
 
+  const startAuthorEdit = (
+    author: NonNullable<typeof allAuthors>[number]
+  ) => {
+    setEditingAuthor(author.id);
+    setAuthorForm({
+      bio: author.bio || "",
+      dedication: author.dedication || "",
+      avatar: author.avatar || "",
+      location: author.location || "",
+      website: author.website || "",
+      twitter: author.twitter || "",
+      instagram: author.instagram || "",
+    });
+  };
+
+  const cancelAuthorEdit = () => {
+    setEditingAuthor(null);
+    setAuthorForm({
+      bio: "",
+      dedication: "",
+      avatar: "",
+      location: "",
+      website: "",
+      twitter: "",
+      instagram: "",
+    });
+  };
+
+  const saveAuthorEdit = () => {
+    if (!editingAuthor) return;
+    updateAuthorMutation.mutate({
+      id: editingAuthor,
+      ...authorForm,
+    });
+  };
+
   const toggleUserStatus = (user: NonNullable<typeof allUsers>[number]) => {
     const nextStatus = user.status === "banned" ? "active" : "banned";
-    const action = user.status === "banned" ? "unban" : "ban";
-    if (confirm(`${action === "ban" ? "Ban" : "Unban"} user @${user.username}?`)) {
-      updateUserStatusMutation.mutate({ id: user.id, status: nextStatus });
-    }
+    const action = user.status === "banned" ? "Unban" : "Ban";
+    setConfirmState({
+      title: `${action} @${user.username}?`,
+      body:
+        action === "Ban"
+          ? "They immediately lose access to their account and library."
+          : "Their account and library access will be restored.",
+      confirmLabel: `${action} user`,
+      onConfirm: () => updateUserStatusMutation.mutate({ id: user.id, status: nextStatus }),
+    });
   };
 
   const deleteUser = (user: NonNullable<typeof allUsers>[number]) => {
-    if (confirm(`Delete user @${user.username}? This cannot be undone.`)) {
-      deleteUserMutation.mutate({ id: user.id });
-    }
+    setConfirmState({
+      title: `Delete @${user.username}?`,
+      body: "Their account and history are removed. This cannot be undone.",
+      confirmLabel: "Delete user",
+      onConfirm: () => deleteUserMutation.mutate({ id: user.id }),
+    });
   };
 
   const formatNgn = (price: string | number) => {
@@ -225,6 +342,17 @@ export default function AdminDashboard() {
       className="min-h-screen"
       style={{ backgroundColor: "hsl(var(--background))" }}
     >
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title ?? ""}
+        body={confirmState?.body ?? ""}
+        confirmLabel={confirmState?.confirmLabel ?? "Confirm"}
+        onConfirm={() => {
+          confirmState?.onConfirm();
+          setConfirmState(null);
+        }}
+        onCancel={() => setConfirmState(null)}
+      />
       <div
         className="mx-auto"
         style={{ maxWidth: "960px", padding: "32px 24px 80px" }}
@@ -250,18 +378,24 @@ export default function AdminDashboard() {
               borderBottom: "1px solid hsl(var(--border))",
             }}
           >
-            {(["pending", "books", "purchases", "users"] as Tab[]).map(tab => {
+            {(["pending", "books", "featured", "authors", "purchases", "users"] as Tab[]).map(tab => {
               const count =
                 tab === "pending"
                   ? pendingBooks?.length
                   : tab === "books"
                     ? allBooks?.length
-                    : tab === "purchases"
-                      ? allPurchases?.length
-                      : allUsers?.length;
+                    : tab === "featured"
+                      ? featuredBooks?.length
+                      : tab === "authors"
+                        ? allAuthors?.length
+                        : tab === "purchases"
+                          ? allPurchases?.length
+                          : allUsers?.length;
               const labels = {
                 pending: "Pending",
                 books: "All Books",
+                featured: "Featured",
+                authors: "Authors",
                 purchases: "Purchases",
                 users: "Users",
               };
@@ -377,15 +511,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             {pendingLoading ? (
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                LOADING...
-              </p>
+              <RowsSkeleton count={6} />
             ) : pendingBooks && pendingBooks.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -592,15 +718,7 @@ export default function AdminDashboard() {
               </button>
             </div>
             {booksLoading ? (
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                LOADING...
-              </p>
+              <RowsSkeleton count={6} />
             ) : allBooks && allBooks.length > 0 ? (
               <div>
                 <div
@@ -910,6 +1028,38 @@ export default function AdminDashboard() {
                           </span>
                           <div style={{ display: "flex", gap: "4px" }}>
                             <button
+                              onClick={() =>
+                                setFeaturedMutation.mutate({
+                                  id: book.id,
+                                  featured: !book.isFeatured,
+                                })
+                              }
+                              style={{
+                                fontSize: "15px",
+                                fontFamily: "var(--font-mono)",
+                                color: book.isFeatured
+                                  ? "rgb(var(--color-p-yellow-fg))"
+                                  : "hsl(var(--muted-foreground))",
+                                background: book.isFeatured
+                                  ? "rgb(var(--color-p-yellow))"
+                                  : "none",
+                                border: "1px solid hsl(var(--border))",
+                                padding: "4px 6px",
+                                cursor: "pointer",
+                              }}
+                              title={
+                                book.isFeatured
+                                  ? "Remove from landing carousel"
+                                  : "Feature on landing carousel"
+                              }
+                            >
+                              {book.isFeatured ? (
+                                <PiStarFill size={10} />
+                              ) : (
+                                <PiStar size={10} />
+                              )}
+                            </button>
+                            <button
                               onClick={() => startEdit(book)}
                               style={{
                                 fontSize: "15px",
@@ -925,10 +1075,15 @@ export default function AdminDashboard() {
                               <PiPencilSimple size={10} />
                             </button>
                             <button
-                              onClick={() => {
-                                if (confirm("Delete this book?"))
-                                  deleteMutation.mutate({ id: book.id });
-                              }}
+                              onClick={() =>
+                                setConfirmState({
+                                  title: "Delete this book?",
+                                  body: `"${book.title}" will be removed from the catalogue for everyone. This cannot be undone.`,
+                                  confirmLabel: "Delete book",
+                                  onConfirm: () =>
+                                    deleteMutation.mutate({ id: book.id }),
+                                })
+                              }
                               style={{
                                 fontSize: "15px",
                                 fontFamily: "var(--font-mono)",
@@ -964,18 +1119,527 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === "featured" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 400,
+                  fontFamily: "var(--font-serif)",
+                  color: "hsl(var(--foreground))",
+                }}
+              >
+                Landing Carousel
+              </h2>
+            </div>
+            <p
+              style={{
+                fontSize: "15px",
+                color: "hsl(var(--muted-foreground))",
+                marginBottom: "16px",
+              }}
+            >
+              Star books in All Books to add them here, then order the midday
+              carousel. Only approved books appear on the landing page.
+            </p>
+            {featuredLoading ? (
+              <RowsSkeleton count={4} />
+            ) : featuredBooks && featuredBooks.length > 0 ? (
+              <div>
+                {featuredBooks.map((book, i) => (
+                  <div key={book.id}>
+                    <div
+                      className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-colors hover:bg-accent"
+                      style={{
+                        padding: "12px",
+                        borderBottom: "1px solid hsl(var(--border))",
+                      }}
+                    >
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <span
+                          style={{
+                            fontSize: "16px",
+                            fontFamily: "var(--font-mono)",
+                            color: "hsl(var(--muted-foreground))",
+                            width: "28px",
+                            textAlign: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {i + 1}
+                        </span>
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "52px",
+                            objectFit: "cover",
+                            border: "1px solid hsl(var(--border))",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <img
+                            src={book.coverImage}
+                            alt={book.title}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => navigate(bookUrl(book))}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          style={{
+                            fontSize: "19px",
+                            color: "hsl(var(--foreground))",
+                            cursor: "pointer",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                          onClick={() => navigate(bookUrl(book))}
+                        >
+                          {book.title}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "17px",
+                            color: "hsl(var(--muted-foreground))",
+                          }}
+                        >
+                          {book.author}
+                          {book.status !== "approved" && (
+                            <span
+                              style={{
+                                fontSize: "13px",
+                                fontFamily: "var(--font-mono)",
+                                color: "rgb(var(--color-p-red-fg))",
+                                marginLeft: "8px",
+                              }}
+                            >
+                              {book.status?.toUpperCase()} — HIDDEN ON LANDING
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 ml-[52px] md:ml-0">
+                        <div style={{ display: "flex", gap: "4px" }}>
+                          <button
+                            onClick={() =>
+                              moveFeaturedMutation.mutate({
+                                id: book.id,
+                                direction: "up",
+                              })
+                            }
+                            disabled={i === 0 || moveFeaturedMutation.isPending}
+                            style={{
+                              fontSize: "15px",
+                              fontFamily: "var(--font-mono)",
+                              color: "hsl(var(--foreground))",
+                              background: "none",
+                              border: "1px solid hsl(var(--border))",
+                              padding: "4px 6px",
+                              cursor: "pointer",
+                              opacity:
+                                i === 0 || moveFeaturedMutation.isPending
+                                  ? 0.35
+                                  : 1,
+                            }}
+                            title="Move earlier"
+                          >
+                            <PiCaretUp size={10} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              moveFeaturedMutation.mutate({
+                                id: book.id,
+                                direction: "down",
+                              })
+                            }
+                            disabled={
+                              i === (featuredBooks?.length ?? 0) - 1 ||
+                              moveFeaturedMutation.isPending
+                            }
+                            style={{
+                              fontSize: "15px",
+                              fontFamily: "var(--font-mono)",
+                              color: "hsl(var(--foreground))",
+                              background: "none",
+                              border: "1px solid hsl(var(--border))",
+                              padding: "4px 6px",
+                              cursor: "pointer",
+                              opacity:
+                                i === (featuredBooks?.length ?? 0) - 1 ||
+                                moveFeaturedMutation.isPending
+                                  ? 0.35
+                                  : 1,
+                            }}
+                            title="Move later"
+                          >
+                            <PiCaretDown size={10} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setFeaturedMutation.mutate({
+                                id: book.id,
+                                featured: false,
+                              })
+                            }
+                            style={{
+                              fontSize: "15px",
+                              fontFamily: "var(--font-mono)",
+                              color: "rgb(var(--color-p-red-fg))",
+                              background: "none",
+                              border: "1px solid var(--color-p-red-fg)",
+                              padding: "4px 6px",
+                              cursor: "pointer",
+                            }}
+                            title="Remove from carousel"
+                          >
+                            <PiX size={10} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p
+                style={{
+                  fontSize: "19px",
+                  color: "hsl(var(--muted-foreground))",
+                  textAlign: "center",
+                  padding: "40px 0",
+                }}
+              >
+                Nothing featured — star books in All Books to fill the carousel
+              </p>
+            )}
+          </div>
+        )}
+
+        {activeTab === "authors" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 400,
+                  fontFamily: "var(--font-serif)",
+                  color: "hsl(var(--foreground))",
+                }}
+              >
+                Authors
+              </h2>
+            </div>
+            <p
+              style={{
+                fontSize: "15px",
+                color: "hsl(var(--muted-foreground))",
+                marginBottom: "16px",
+              }}
+            >
+              Profiles are created automatically from book authors. Add bios,
+              photos and links here — they show on each author's public page.
+            </p>
+            {authorsLoading ? (
+              <RowsSkeleton count={4} />
+            ) : allAuthors && allAuthors.length > 0 ? (
+              <div>
+                {allAuthors.map(author => (
+                  <div key={author.id}>
+                    {editingAuthor === author.id ? (
+                      <div
+                        style={{
+                          padding: "16px",
+                          border: "1px solid hsl(var(--border))",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div
+                          className="flex items-center gap-4"
+                          style={{ marginBottom: "12px" }}
+                        >
+                          {authorForm.avatar ? (
+                            <img
+                              src={authorForm.avatar}
+                              alt={author.name}
+                              style={{
+                                width: "52px",
+                                height: "52px",
+                                borderRadius: "9999px",
+                                objectFit: "cover",
+                                border: "1px solid hsl(var(--border))",
+                                flexShrink: 0,
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className="flex items-center justify-center"
+                              style={{
+                                width: "52px",
+                                height: "52px",
+                                borderRadius: "9999px",
+                                border: "1px solid hsl(var(--border))",
+                                fontFamily: "var(--font-serif)",
+                                fontSize: "24px",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {author.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <p
+                              style={{
+                                fontSize: "19px",
+                                color: "hsl(var(--foreground))",
+                              }}
+                            >
+                              {author.name}
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "14px",
+                                fontFamily: "var(--font-mono)",
+                                color: "hsl(var(--muted-foreground))",
+                              }}
+                            >
+                              /author/{author.slug}
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            display: "grid",
+                            gap: "10px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <textarea
+                            value={authorForm.bio}
+                            onChange={e =>
+                              setAuthorForm({ ...authorForm, bio: e.target.value })
+                            }
+                            placeholder="Short bio — who they are, what they write"
+                            rows={3}
+                            className="field-input"
+                          />
+                          <input
+                            value={authorForm.dedication}
+                            onChange={e =>
+                              setAuthorForm({
+                                ...authorForm,
+                                dedication: e.target.value,
+                              })
+                            }
+                            placeholder="Dedication e.g. Dedicated to freedom fighters"
+                            style={inputStyle}
+                          />
+                          <input
+                            value={authorForm.avatar}
+                            onChange={e =>
+                              setAuthorForm({ ...authorForm, avatar: e.target.value })
+                            }
+                            placeholder="Photo URL"
+                            style={inputStyle}
+                          />
+                          <div
+                            className="grid sm:grid-cols-2"
+                            style={{ gap: "10px" }}
+                          >
+                            <input
+                              value={authorForm.location}
+                              onChange={e =>
+                                setAuthorForm({
+                                  ...authorForm,
+                                  location: e.target.value,
+                                })
+                              }
+                              placeholder="Location e.g. Lagos, Nigeria"
+                              style={inputStyle}
+                            />
+                            <input
+                              value={authorForm.website}
+                              onChange={e =>
+                                setAuthorForm({
+                                  ...authorForm,
+                                  website: e.target.value,
+                                })
+                              }
+                              placeholder="Website URL"
+                              style={inputStyle}
+                            />
+                            <input
+                              value={authorForm.twitter}
+                              onChange={e =>
+                                setAuthorForm({
+                                  ...authorForm,
+                                  twitter: e.target.value,
+                                })
+                              }
+                              placeholder="X handle (without @)"
+                              style={inputStyle}
+                            />
+                            <input
+                              value={authorForm.instagram}
+                              onChange={e =>
+                                setAuthorForm({
+                                  ...authorForm,
+                                  instagram: e.target.value,
+                                })
+                              }
+                              placeholder="Instagram handle (without @)"
+                              style={inputStyle}
+                            />
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button
+                            onClick={saveAuthorEdit}
+                            disabled={updateAuthorMutation.isPending}
+                            style={{
+                              fontSize: "16px",
+                              fontFamily: "var(--font-mono)",
+                              color: "#fff",
+                              background: "rgb(var(--color-p-green-fg))",
+                              border: "none",
+                              padding: "6px 16px",
+                              cursor: "pointer",
+                              letterSpacing: "0.05em",
+                            }}
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelAuthorEdit}
+                            style={{
+                              fontSize: "16px",
+                              fontFamily: "var(--font-mono)",
+                              color: "rgb(var(--color-p-red-fg))",
+                              background: "transparent",
+                              border: "1px solid var(--color-p-red-fg)",
+                              padding: "6px 16px",
+                              cursor: "pointer",
+                              letterSpacing: "0.05em",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 transition-colors hover:bg-accent"
+                        style={{
+                          padding: "12px",
+                          borderBottom: "1px solid hsl(var(--border))",
+                        }}
+                      >
+                        <div className="flex items-center gap-3 md:gap-4">
+                          {author.avatar ? (
+                            <img
+                              src={author.avatar}
+                              alt={author.name}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "9999px",
+                                objectFit: "cover",
+                                border: "1px solid hsl(var(--border))",
+                                flexShrink: 0,
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className="flex items-center justify-center"
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "9999px",
+                                border: "1px solid hsl(var(--border))",
+                                fontFamily: "var(--font-serif)",
+                                fontSize: "18px",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {author.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            style={{
+                              fontSize: "19px",
+                              color: "hsl(var(--foreground))",
+                              cursor: "pointer",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                            onClick={() => navigate(`/author/${author.slug}`)}
+                          >
+                            {author.name}
+                          </p>
+                          <p
+                            style={{
+                              fontSize: "15px",
+                              fontFamily: "var(--font-mono)",
+                              color: "hsl(var(--muted-foreground))",
+                            }}
+                          >
+                            {author.bookCount} book{author.bookCount !== 1 ? "s" : ""}
+                            {author.bio ? " · has bio" : " · no bio"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3 md:gap-4 ml-[52px] md:ml-0">
+                          <div style={{ display: "flex", gap: "4px" }}>
+                            <button
+                              onClick={() => startAuthorEdit(author)}
+                              style={{
+                                fontSize: "15px",
+                                fontFamily: "var(--font-mono)",
+                                color: "hsl(var(--foreground))",
+                                background: "none",
+                                border: "1px solid hsl(var(--border))",
+                                padding: "4px 6px",
+                                cursor: "pointer",
+                              }}
+                              title="Edit profile"
+                            >
+                              <PiPencilSimple size={10} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p
+                style={{
+                  fontSize: "19px",
+                  color: "hsl(var(--muted-foreground))",
+                  textAlign: "center",
+                  padding: "40px 0",
+                }}
+              >
+                No authors yet — they appear when books are added
+              </p>
+            )}
+          </div>
+        )}
+
         {activeTab === "purchases" && (
           <div>
             {purchasesLoading ? (
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                LOADING...
-              </p>
+              <RowsSkeleton count={6} />
             ) : allPurchases && allPurchases.length > 0 ? (
               <div>
                 <div
@@ -1084,7 +1748,7 @@ export default function AdminDashboard() {
                       >
                         <img
                           src={purchase.book?.coverImage || ""}
-                          alt=""
+                          alt={purchase.book ? `Cover of ${purchase.book.title}` : "Book cover"}
                           style={{
                             width: "100%",
                             height: "100%",
@@ -1220,15 +1884,7 @@ export default function AdminDashboard() {
         {activeTab === "users" && (
           <div>
             {usersLoading ? (
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                LOADING...
-              </p>
+              <RowsSkeleton count={6} />
             ) : allUsers && allUsers.length > 0 ? (
               <div>
                 <div

@@ -1,4 +1,4 @@
-import { eq, and, desc, like, or, sql, gte, lte } from "drizzle-orm";
+import { eq, and, desc, asc, like, or, sql, gte, lte } from "drizzle-orm";
 import { getDb } from "./connection.js";
 import { books } from "../../db/schema.js";
 import type { InsertBook } from "../../db/schema.js";
@@ -109,6 +109,63 @@ export async function findBooksByAuthorSlug(authorSlug: string) {
       and(eq(books.authorSlug, authorSlug), eq(books.status, "approved"))
     )
     .orderBy(desc(books.createdAt));
+}
+
+// ── Featured carousel (admin-curated landing spotlight) ────
+
+export async function findFeaturedBooks() {
+  return getDb()
+    .select()
+    .from(books)
+    .where(and(eq(books.isFeatured, true), eq(books.status, "approved")))
+    .orderBy(asc(books.featuredOrder), desc(books.createdAt));
+}
+
+export async function findAllFeaturedBooks() {
+  return getDb()
+    .select()
+    .from(books)
+    .where(eq(books.isFeatured, true))
+    .orderBy(asc(books.featuredOrder), desc(books.createdAt));
+}
+
+export async function setBookFeatured(id: number, featured: boolean) {
+  if (featured) {
+    const current = await findAllFeaturedBooks();
+    const max = current.reduce(
+      (m, b) => Math.max(m, b.featuredOrder ?? 0),
+      -1
+    );
+    await getDb()
+      .update(books)
+      .set({ isFeatured: true, featuredOrder: max + 1 })
+      .where(eq(books.id, id));
+  } else {
+    await getDb()
+      .update(books)
+      .set({ isFeatured: false })
+      .where(eq(books.id, id));
+  }
+  return findBookById(id);
+}
+
+export async function moveFeaturedBook(id: number, direction: "up" | "down") {
+  const list = await findAllFeaturedBooks();
+  const idx = list.findIndex(b => b.id === id);
+  if (idx < 0) return null;
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= list.length) return findBookById(id);
+  const a = list[idx];
+  const b = list[swapIdx];
+  await getDb()
+    .update(books)
+    .set({ featuredOrder: b.featuredOrder })
+    .where(eq(books.id, a.id));
+  await getDb()
+    .update(books)
+    .set({ featuredOrder: a.featuredOrder })
+    .where(eq(books.id, b.id));
+  return findBookById(id);
 }
 
 /** Generate a unique book slug. Slugs are immutable after publish. */

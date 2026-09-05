@@ -20,6 +20,8 @@ export const env = {
       throw new Error("TURSO_DATABASE_URL is not set");
     })(),
   databaseAuthToken: process.env.TURSO_AUTH_TOKEN ?? "",
+  // Paystack (optional until keys are set — checkout errors clearly meanwhile)
+  paystackSecretKey: process.env.PAYSTACK_SECRET_KEY ?? "",
   rateLimitWindowMs: 3600000,
   rateLimitMaxAttempts: 5,
 };

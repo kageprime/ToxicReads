@@ -4,6 +4,8 @@ import { PiHeartStraight, PiTrash } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import { RowsSkeleton } from "@/components/Skeleton";
+import EmptyState from "@/components/EmptyState";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -46,9 +48,7 @@ export default function WishlistPage() {
         </h1>
 
         {isLoading ? (
-          <p style={{ fontSize: "18px", color: "hsl(var(--muted-foreground))", fontFamily: "var(--font-mono)" }}>
-            LOADING...
-          </p>
+          <RowsSkeleton count={4} />
         ) : items && items.length > 0 ? (
           <div className="space-y-3">
             {items.map(item => (
@@ -113,34 +113,13 @@ export default function WishlistPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <PiHeartStraight
-              size={32}
-              style={{
-                color: "hsl(var(--muted-foreground))",
-                margin: "0 auto 16px",
-              }}
-            />
-            <p style={{ fontSize: "19px", color: "hsl(var(--muted-foreground))", marginBottom: "16px" }}>
-              Your wishlist is empty
-            </p>
-            <button
-              onClick={() => navigate("/home")}
-              className="transition-transform active:scale-[0.98]"
-              style={{
-                fontSize: "17px",
-                fontFamily: "var(--font-mono)",
-                color: "hsl(var(--foreground))",
-                background: "none",
-                border: "1px solid hsl(var(--border))",
-                padding: "8px 16px",
-                cursor: "pointer",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Browse books
-            </button>
-          </div>
+          <EmptyState
+            icon={<PiHeartStraight size={24} />}
+            title="Your wishlist is empty"
+            body="Tap the heart on any book to keep it here for later."
+            actionLabel="Browse books"
+            onAction={() => navigate("/home")}
+          />
         )}
       </div>
     </div>

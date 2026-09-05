@@ -1,278 +1,130 @@
 import { useState } from "react";
-import { PiX } from "react-icons/pi";
+import { PiX, PiLockSimple } from "react-icons/pi";
+import { trpc } from "@/providers/trpc";
+import { toast } from "sonner";
 
 interface PaymentModalProps {
+  bookId: number;
   price: string;
   title: string;
-  onPay: () => Promise<void>;
   onClose: () => void;
 }
 
-function formatCardNumber(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 16)
-    .replace(/(.{4})/g, "$1 ")
-    .trim();
-}
-
-function formatExpiry(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 4);
-  if (digits.length > 2) return digits.slice(0, 2) + " / " + digits.slice(2);
-  return digits;
-}
-
+/** Paystack hosted checkout: order summary → redirect to Paystack. */
 export default function PaymentModal({
+  bookId,
   price,
   title,
-  onPay,
   onClose,
 }: PaymentModalProps) {
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
-  const [processing, setProcessing] = useState(false);
+  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const utils = trpc.useUtils();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const initMutation = trpc.purchase.paystackInit.useMutation({
+    onSuccess: async data => {
+      if (data.free) {
+        await utils.book.hasPurchased.invalidate();
+        await utils.purchase.myPurchases.invalidate();
+        toast.success("Added to your library");
+        onClose();
+        return;
+      }
+      // Hand off to Paystack; we return via /payment/callback.
+      window.location.href = data.authorizationUrl;
+    },
+    onError: err => {
+      setError(err.message);
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    const num = cardNumber.replace(/\s/g, "");
-    if (num.length !== 16) {
-      setError("Card number must be 16 digits");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter a valid email for your receipt");
       return;
     }
-    if (!cardName.trim()) {
-      setError("Cardholder name is required");
-      return;
-    }
-    if (expiry.replace(/\s/g, "").length !== 4) {
-      setError("Invalid expiry date");
-      return;
-    }
-    if (cvc.length !== 3) {
-      setError("Invalid CVC");
-      return;
-    }
-
-    setProcessing(true);
-
-    // Simulate payment processing delay
-    await new Promise(r => setTimeout(r, 1500));
-
-    // Mock: cards ending in 0000 are declined
-    if (num.endsWith("0000")) {
-      setProcessing(false);
-      setError("Card declined. Please try a different card.");
-      return;
-    }
-
-    try {
-      await onPay();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Payment failed");
-    } finally {
-      setProcessing(false);
-    }
+    initMutation.mutate({
+      bookId,
+      email: email.trim(),
+      callbackBase: window.location.origin,
+    });
   };
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{
         backgroundColor: "rgba(0,0,0,0.4)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
       }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Complete payment"
     >
       <div
-        className="w-full max-w-sm mx-4"
-        style={{
-          backgroundColor: "hsl(var(--background))",
-          border: "1px solid hsl(var(--border))",
-          animation: "modalIn 0.25s ease-out both",
-        }}
+        className="w-full max-w-sm bg-background border border-border"
+        style={{ animation: "modalIn 0.25s ease-out both" }}
         onClick={e => e.stopPropagation()}
       >
-        <div
-          className="flex items-center justify-between px-5 pt-4 pb-2"
-          style={{ borderBottom: "1px solid hsl(var(--border))" }}
-        >
-          <h2
-            style={{
-              fontSize: "18px",
-              fontWeight: 400,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              color: "hsl(var(--foreground))",
-            }}
-          >
-            Complete Payment
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
+          <h2 className="text-lg tracking-wide text-foreground">
+            Complete payment
           </h2>
           <button
             onClick={onClose}
-            className="p-1 hover:opacity-70 transition-opacity"
+            className="p-1.5 rounded-full hover:bg-accent transition-colors"
+            aria-label="Close"
           >
-            <PiX size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
+            <PiX size={16} className="text-muted-foreground" />
           </button>
         </div>
 
-        <div className="px-5 py-3">
-          <p
-            style={{
-              fontSize: "17px",
-              color: "hsl(var(--muted-foreground))",
-              fontFamily: "var(--font-mono)",
-              marginBottom: "2px",
-            }}
-          >
+        <div className="px-5 py-4 border-b border-border">
+          <p className="text-pretty text-[17px] text-muted-foreground leading-snug">
             {title}
           </p>
-          <p
-            style={{
-              fontSize: "22px",
-              fontFamily: "var(--font-mono)",
-              color: "hsl(var(--foreground))",
-            }}
-          >
+          <p className="tnum mt-1 font-mono text-2xl text-foreground">
             ₦{price}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-5 pb-5 space-y-3">
+        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
           <div>
-            <label
-              className="field-label"
-            >
-              Card Number
+            <label htmlFor="pay-email" className="field-label mb-1.5">
+              Email for receipt
             </label>
             <input
-              value={cardNumber}
-              onChange={e => setCardNumber(formatCardNumber(e.target.value))}
-              placeholder="4242 4242 4242 4242"
+              id="pay-email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
               className="field-input"
             />
-          </div>
-
-          <div>
-            <label
-              className="field-label"
-            >
-              Cardholder Name
-            </label>
-            <input
-              value={cardName}
-              onChange={e => setCardName(e.target.value)}
-              placeholder="John Doe"
-              className="field-input"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label
-                style={{
-                  fontSize: "16px",
-                  color: "hsl(var(--muted-foreground))",
-                  display: "block",
-                  marginBottom: "3px",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                Expiry
-              </label>
-              <input
-                value={expiry}
-                onChange={e => setExpiry(formatExpiry(e.target.value))}
-                placeholder="MM / YY"
-                style={{
-                  width: "100%",
-                  fontSize: "18px",
-                  padding: "8px 10px",
-                  border: "1px solid hsl(var(--border))",
-                  outline: "none",
-                  color: "hsl(var(--foreground))",
-                  fontFamily: "var(--font-mono)",
-                  background: "transparent",
-                }}
-              />
-            </div>
-            <div style={{ width: "80px" }}>
-              <label
-                style={{
-                  fontSize: "16px",
-                  color: "hsl(var(--muted-foreground))",
-                  display: "block",
-                  marginBottom: "3px",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                CVC
-              </label>
-              <input
-                value={cvc}
-                onChange={e =>
-                  setCvc(e.target.value.replace(/\D/g, "").slice(0, 3))
-                }
-                placeholder="123"
-                style={{
-                  width: "100%",
-                  fontSize: "18px",
-                  padding: "8px 10px",
-                  border: "1px solid hsl(var(--border))",
-                  outline: "none",
-                  color: "hsl(var(--foreground))",
-                  fontFamily: "var(--font-mono)",
-                  background: "transparent",
-                }}
-              />
-            </div>
           </div>
 
           {error && (
-            <p
-              style={{
-                fontSize: "17px",
-                color: "rgb(var(--color-p-red-fg))",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
+            <p role="alert" className="text-sm text-p-red-fg">
               {error}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={processing}
-            style={{
-              width: "100%",
-              padding: "12px",
-              fontSize: "18px",
-              fontFamily: "var(--font-mono)",
-              color: "hsl(var(--background))",
-              background: processing ? "#999" : "hsl(var(--foreground))",
-              border: "none",
-              cursor: processing ? "wait" : "pointer",
-              letterSpacing: "0.05em",
-              marginTop: "4px",
-            }}
+            disabled={initMutation.isPending}
+            className="w-full p-3 text-lg bg-foreground text-background transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait"
           >
-            {processing ? "PROCESSING..." : `PAY ₦${price}`}
+            {initMutation.isPending ? "Starting checkout…" : `Pay ₦${price}`}
           </button>
 
-          <p
-            style={{
-              fontSize: "15px",
-              color: "hsl(var(--muted-foreground))",
-              fontFamily: "var(--font-mono)",
-              textAlign: "center",
-              marginTop: "8px",
-            }}
-          >
-            Mock payment — no real charges
+          <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted-foreground">
+            <PiLockSimple size={14} />
+            Cards, transfer &amp; USSD — secured by Paystack
           </p>
         </form>
       </div>

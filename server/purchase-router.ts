@@ -3,63 +3,139 @@ import { TRPCError } from "@trpc/server";
 import { createRouter, authedQuery, adminQuery } from "./middleware.js";
 import {
   findPurchasesWithBookDetails,
-  createPurchase,
   hasUserPurchasedBook,
+  fulfillPaidOrder,
 } from "./queries/purchases.js";
 import { findApprovedBookById } from "./queries/books.js";
-import { createNotification } from "./queries/notifications.js";
+import {
+  paystackConfigured,
+  nairaToKobo,
+  newPaystackReference,
+  initPaystackTransaction,
+  verifyPaystackTransaction,
+} from "./lib/paystack.js";
+
+function assertCallbackBase(value: string): string {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid app URL." });
+  }
+  const host = url.hostname;
+  const ok =
+    url.protocol === "https:" ||
+    host === "localhost" ||
+    host === "127.0.0.1";
+  if (!ok) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid app URL." });
+  }
+  return url.origin;
+}
+
+async function guardBuyable(bookId: number, buyerId: number) {
+  const book = await findApprovedBookById(bookId);
+  if (!book) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Book not found or not available",
+    });
+  }
+  // Prevent buying your own book
+  if (book.sellerId === buyerId && book.sellerType === "user") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "You cannot purchase your own book",
+    });
+  }
+  const alreadyPurchased = await hasUserPurchasedBook(buyerId, bookId);
+  if (alreadyPurchased) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "You have already purchased this book",
+    });
+  }
+  return book;
+}
 
 export const purchaseRouter = createRouter({
-  // ── Authenticated: buy a book ───────────────────────────────
+  // ── Paystack: start hosted checkout ─────────────────────────
 
-  buy: authedQuery
-    .input(z.object({ bookId: z.number() }))
+  paystackInit: authedQuery
+    .input(
+      z.object({
+        bookId: z.number(),
+        email: z.string().email("Enter a valid email for your receipt"),
+        callbackBase: z.string(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const book = await findApprovedBookById(input.bookId);
+      const book = await guardBuyable(input.bookId, ctx.user.id);
+      const isFree = book.price === "0" || book.price === "0.00";
+      if (isFree) {
+        const { purchase } = await fulfillPaidOrder(ctx.user.id, book.id);
+        return { free: true as const, purchase };
+      }
+      if (!paystackConfigured()) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Card payments are not configured yet. Please try again later.",
+        });
+      }
+      const callbackBase = assertCallbackBase(input.callbackBase);
+      const reference = newPaystackReference();
+      const { authorizationUrl } = await initPaystackTransaction({
+        email: input.email,
+        amountKobo: nairaToKobo(book.price),
+        reference,
+        callbackUrl: `${callbackBase}/payment/callback`,
+        metadata: {
+          bookId: book.id,
+          buyerId: ctx.user.id,
+          bookTitle: book.title.slice(0, 100),
+        },
+      });
+      return { free: false as const, authorizationUrl, reference };
+    }),
+
+  // ── Paystack: verify after redirect back ────────────────────
+
+  paystackVerify: authedQuery
+    .input(z.object({ reference: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await verifyPaystackTransaction(input.reference);
+      if (!result.paid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Payment was not completed. No charge was made.",
+        });
+      }
+      const metaBookId = Number(result.metadata.bookId);
+      const metaBuyerId = Number(result.metadata.buyerId);
+      if (!metaBookId || metaBuyerId !== ctx.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This payment does not belong to your account.",
+        });
+      }
+      const book = await findApprovedBookById(metaBookId);
       if (!book) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Book not found or not available",
         });
       }
-
-      // Prevent buying your own book
-      if (book.sellerId === ctx.user.id && book.sellerType === "user") {
+      if (result.amountKobo !== nairaToKobo(book.price)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "You cannot purchase your own book",
+          message: "Paid amount does not match the book price. Contact support.",
         });
       }
-
-      // Check if already purchased
-      const alreadyPurchased = await hasUserPurchasedBook(
+      const { purchase, alreadyOwned } = await fulfillPaidOrder(
         ctx.user.id,
-        input.bookId
+        book.id
       );
-      if (alreadyPurchased) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "You have already purchased this book",
-        });
-      }
-
-      const purchase = await createPurchase({
-        buyerId: ctx.user.id,
-        bookId: input.bookId,
-        purchasePrice: book.price,
-      });
-
-      // Notify seller
-      if (book.sellerId && book.sellerType === "user") {
-        await createNotification({
-          userId: book.sellerId,
-          type: "book_purchased",
-          message: `Someone purchased your book "${book.title}"`,
-          link: `/book/${book.id}`,
-        });
-      }
-
-      return purchase;
+      return { purchase, book, alreadyOwned };
     }),
 
   // ── Authenticated: my purchases ─────────────────────────────

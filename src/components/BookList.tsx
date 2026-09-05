@@ -2,9 +2,17 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import type { BookDisplay } from "../../contracts/blog";
+import { bookUrl } from "../../contracts/blog";
 import ShaderCanvas from "@/components/ShaderCanvas";
 import BookCard from "@/components/BookCard";
-import { PiMagnifyingGlass, PiPlus, PiSliders } from "react-icons/pi";
+import EmptyState from "@/components/EmptyState";
+import {
+  PiMagnifyingGlass,
+  PiPlus,
+  PiSliders,
+  PiX,
+  PiBookOpen,
+} from "react-icons/pi";
 
 interface BookListProps {
   books: BookDisplay[];
@@ -62,82 +70,174 @@ export default function BookList({ books }: BookListProps) {
     return true;
   });
 
+  const resetFilters = () => {
+    setSearch("");
+    setPriceRange("all");
+    selectCategory("all");
+  };
+
+  const hasActiveFilters =
+    filter !== "all" || search !== "" || priceRange !== "all";
+
+  // Fresh covers for the 3D shelf. Falls back to house covers pre-seed.
+  const fan: { id: number; title: string; author: string; cover: string; link: string }[] =
+    books.length > 0
+      ? books.slice(0, 3).map(b => ({
+          id: b.id,
+          title: b.title,
+          author: b.author,
+          cover: b.coverImage,
+          link: bookUrl(b),
+        }))
+      : [
+          {
+            id: -1,
+            title: "Staff pick",
+            author: "ToxicReads",
+            cover: "/images/blog-1.jpg",
+            link: "/home",
+          },
+          {
+            id: -2,
+            title: "Staff pick",
+            author: "ToxicReads",
+            cover: "/images/blog-2.jpg",
+            link: "/home",
+          },
+          {
+            id: -3,
+            title: "Staff pick",
+            author: "ToxicReads",
+            cover: "/images/blog-3.jpg",
+            link: "/home",
+          },
+        ];
+
   return (
-    <div className="px-4 sm:px-6 md:px-10 pt-4 md:pt-8 pb-28">
-      {/* Mobile header — clean, compact, no hero banner */}
-      <div className="md:hidden mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-serif text-2xl text-baobab tracking-tight">Browse books</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {books.length} {books.length === 1 ? "book" : "books"} available
-            </p>
-          </div>
-          {isAdmin && (
-            <button
-              onClick={() => navigate("/add-book")}
-              className="flex items-center justify-center w-10 h-10 rounded-full border border-border hover:bg-accent transition-colors"
-              aria-label="Add book"
-            >
-              <PiPlus size={20} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Desktop hero banner — kept for larger screens, but cleaner */}
-      <div className="hidden md:block mb-8">
-        <div
-          className="relative overflow-hidden"
-          style={{
-            height: "220px",
-            border: "1px solid hsl(var(--border))",
-          }}
-        >
-          <ShaderCanvas />
-          <div
-            className="absolute inset-0 flex flex-col justify-center px-8"
-            style={{ mixBlendMode: "difference" }}
-          >
-            <h2
-              className="font-serif text-white text-3xl tracking-tight mb-2"
-              style={{ textTransform: "uppercase" }}
-            >
-              ToxicReads
-            </h2>
-            <p className="text-white/90 text-base max-w-lg leading-relaxed mb-4">
-              A community-driven marketplace for African sci-fi, horror &amp; thrillers. Curated by admins, open for submissions.
-            </p>
-            <div className="flex items-center gap-3">
-              {["Sci-Fi", "Horror", "Thriller"].map(genre => (
-                <span
-                  key={genre}
-                  className="text-white text-xs uppercase tracking-wider px-2.5 py-1 border border-white/40"
-                >
-                  {genre}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop section header */}
-      <div className="hidden md:flex items-center justify-between mb-5">
+    <div className="px-4 pb-28 pt-4 sm:px-6 md:px-10 md:pt-8">
+      {/* Section header — one responsive block */}
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-xl text-baobab tracking-tight">Browse</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="font-serif text-2xl tracking-tight text-baobab">
+            Browse books
+          </h1>
+          <p className="tnum mt-1 text-sm text-muted-foreground">
             {books.length} {books.length === 1 ? "book" : "books"} available
           </p>
         </div>
         {isAdmin && (
           <button
             onClick={() => navigate("/add-book")}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-accent text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
           >
             <PiPlus size={16} /> Add book
           </button>
         )}
+      </div>
+
+      {/* Dark showcase hero — fixed art direction, all viewports */}
+      <div className="mb-8 overflow-hidden rounded-2xl border border-white/10 bg-[#0d0e15]">
+        <div className="relative">
+          <ShaderCanvas forceDark />
+          {/* Night gradient + vignette over the smoke */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+            style={{
+              background:
+                "linear-gradient(100deg, rgba(13,14,21,0.92) 20%, rgba(13,14,21,0.55) 55%, rgba(13,14,21,0.25) 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full blur-3xl"
+            aria-hidden="true"
+            style={{ background: "rgba(192,160,64,0.16)" }}
+          />
+          <div className="relative grid items-center gap-6 p-5 sm:p-6 md:grid-cols-[1.05fr_0.95fr] md:p-8">
+            {/* Copy */}
+            <div className="min-w-0">
+              <p className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#f2ede3]/75">
+                <img
+                  src="/images/hero-bg.png"
+                  alt=""
+                  className="h-5 w-5 rounded-full border border-white/20 object-cover"
+                />
+                The library is open
+              </p>
+              <h2 className="text-balance mt-4 font-display text-3xl leading-[1.0] tracking-tight text-[#f2ede3] md:text-5xl">
+                Find the book that{" "}
+                <em className="italic text-[#c0a040]">keeps you up.</em>
+              </h2>
+              <p className="text-pretty mt-4 max-w-md leading-relaxed text-[#f2ede3]/70">
+                Sci-fi, horror and thrillers from the continent's boldest
+                writers — priced in naira, ready tonight.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-2">
+                {["Sci-Fi", "Horror", "Thriller"].map(genre => (
+                  <button
+                    key={genre}
+                    onClick={() => selectCategory(genre)}
+                    className={`rounded-full border px-4 py-2 text-xs font-medium tracking-wide transition-all duration-200 active:scale-[0.96] ${
+                      filter === genre
+                        ? "border-[#c0a040] bg-[#c0a040] text-[#1a1408]"
+                        : "border-white/25 text-[#f2ede3]/85 hover:border-white/60 hover:text-white"
+                    }`}
+                  >
+                    {genre}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 3D shelf */}
+            <div
+              className="relative hidden h-[220px] select-none sm:block md:h-[250px]"
+              style={{ perspective: "1100px" }}
+              aria-label="Featured covers"
+            >
+              <div
+                className="pointer-events-none absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
+                aria-hidden="true"
+                style={{ background: "rgba(192,160,64,0.22)" }}
+              />
+              {/* House emblem behind the shelf */}
+              <div className="absolute left-1/2 top-1/2 w-[64%] max-w-[280px] -translate-x-1/2 -translate-y-1/2">
+                <img
+                  src="/images/hero-bg.png"
+                  alt="ToxicReads golden mask emblem"
+                  className="w-full animate-ambient-drift rounded-2xl border border-white/15 object-cover opacity-90 shadow-soft-lg"
+                  style={{ animationDelay: "0.6s" }}
+                  loading="eager"
+                />
+              </div>
+              {fan.map((b, i) => (
+                <div
+                  key={`${b.id}-${i}`}
+                  className="absolute top-1/2 w-28 lg:w-36"
+                  style={{
+                    left: `${8 + i * 27}%`,
+                    transform: `translateY(-50%) rotateY(-18deg) rotate(${i === 1 ? 0 : i === 0 ? -7 : 7}deg) translateY(${i === 1 ? -14 : 10}px)`,
+                    zIndex: i === 1 ? 2 : 1,
+                  }}
+                >
+                  <button
+                    onClick={() => navigate(b.link)}
+                    aria-label={`${b.title} by ${b.author}`}
+                    className="block w-full animate-ambient-drift overflow-hidden rounded-md border border-white/20 bg-[#171a26] shadow-soft-lg transition-[border-color,filter] duration-300 hover:z-10 hover:border-[#c0a040]/60 hover:brightness-110"
+                    style={{ animationDelay: `${i * 1.1}s` }}
+                  >
+                    <img
+                      src={b.cover}
+                      alt={`Cover of ${b.title} by ${b.author}`}
+                      className="aspect-[3/4] w-full object-cover"
+                      loading="eager"
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Search + price filter */}
@@ -150,9 +250,19 @@ export default function BookList({ books }: BookListProps) {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search title or author..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-full border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
+            placeholder="Search title or author…"
+            aria-label="Search by title or author"
+            className="w-full py-2.5 pl-10 pr-10 rounded-full border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 transition-shadow"
           />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <PiX size={14} />
+            </button>
+          )}
         </div>
         <div className="relative shrink-0">
           <select
@@ -215,12 +325,17 @@ export default function BookList({ books }: BookListProps) {
       </div>
 
       {filteredBooks.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-lg text-muted-foreground">No books found</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Try adjusting your search or filters.
-          </p>
-        </div>
+        <EmptyState
+          icon={<PiBookOpen size={24} />}
+          title={books.length === 0 ? "The shelves are empty" : "No matches"}
+          body={
+            books.length === 0
+              ? "No books are live yet. Check back soon — new stories land here first."
+              : "Nothing matches this combination. Loosen a filter or two."
+          }
+          actionLabel={hasActiveFilters ? "Clear all filters" : undefined}
+          onAction={hasActiveFilters ? resetFilters : undefined}
+        />
       )}
     </div>
   );

@@ -145,8 +145,13 @@ const fragmentShader = `
   }
 `;
 
-export default function ShaderCanvas() {
+export default function ShaderCanvas({
+  forceDark = false,
+}: {
+  forceDark?: boolean;
+}) {
   const { theme } = useTheme();
+  const dark = forceDark || theme === "dark";
   const containerRef = useRef<HTMLDivElement>(null);
   const uniformsRef = useRef<Record<string, THREE.IUniform> | null>(null);
   const frameRef = useRef<number>(0);
@@ -155,9 +160,9 @@ export default function ShaderCanvas() {
   // React to theme changes
   useEffect(() => {
     if (uniformsRef.current) {
-      uniformsRef.current.u_dark_mode.value = theme === "dark" ? 1.0 : 0.0;
+      uniformsRef.current.u_dark_mode.value = dark ? 1.0 : 0.0;
     }
-  }, [theme]);
+  }, [dark]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -190,7 +195,7 @@ export default function ShaderCanvas() {
       u_warp: { value: 0.45 },
       u_grid_width: { value: 0.4 },
       u_color_w: { value: 0.8 },
-      u_dark_mode: { value: theme === "dark" ? 1.0 : 0.0 },
+      u_dark_mode: { value: dark ? 1.0 : 0.0 },
     };
     uniformsRef.current = uniforms;
 
@@ -224,15 +229,19 @@ export default function ShaderCanvas() {
       if (!container) return;
       const nw = container.clientWidth;
       const nh = container.clientHeight;
+      if (nw === 0 || nh === 0) return;
       renderer.setSize(nw, nh);
       uniforms.u_res.value.set(nw, nh);
     };
 
-    window.addEventListener("resize", handleResize);
+    // Observe the container itself (not just the window) so sidebar
+    // collapse/expand, which resizes without a window event, stays crisp.
+    const ro = new ResizeObserver(handleResize);
+    ro.observe(container);
 
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("resize", handleResize);
+      ro.disconnect();
       cancelAnimationFrame(frameRef.current);
       renderer.dispose();
       geometry.dispose();

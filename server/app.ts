@@ -171,6 +171,51 @@ app.post("/api/extract-text", async c => {
   }
 });
 
+// ── Paystack webhook (server-to-server, no auth cookie) ─────
+
+app.post("/api/paystack/webhook", async c => {
+  try {
+    const secret = process.env.PAYSTACK_SECRET_KEY ?? "";
+    if (!secret) return c.json({ error: "Payments not configured" }, 503);
+
+    // Signature must be computed over the raw body.
+    const raw = await c.req.text();
+    const signature = c.req.header("x-paystack-signature") ?? "";
+    const { createHmac, timingSafeEqual } = await import("node:crypto");
+    const expected = createHmac("sha512", secret).update(raw).digest("hex");
+    const a = Buffer.from(signature);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      return c.json({ error: "Invalid signature" }, 401);
+    }
+
+    const event = JSON.parse(raw) as {
+      event?: string;
+      data?: { reference?: string; metadata?: Record<string, unknown> };
+    };
+    if (event.event === "charge.success" && event.data?.reference) {
+      // Re-verify with Paystack (source of truth), then fulfill idempotently.
+      const { verifyPaystackTransaction } = await import("./lib/paystack.js");
+      const { fulfillPaidOrder } = await import("./queries/purchases.js");
+      const { nairaToKobo } = await import("./lib/paystack.js");
+      const { findApprovedBookById } = await import("./queries/books.js");
+      const result = await verifyPaystackTransaction(event.data.reference);
+      if (result.paid) {
+        const bookId = Number(result.metadata.bookId);
+        const buyerId = Number(result.metadata.buyerId);
+        const book = bookId ? await findApprovedBookById(bookId) : null;
+        if (book && buyerId && result.amountKobo === nairaToKobo(book.price)) {
+          await fulfillPaidOrder(buyerId, book.id);
+        }
+      }
+    }
+    return c.json({ received: true });
+  } catch (err) {
+    console.error("[paystack webhook] error:", err);
+    return c.json({ error: "Webhook failed" }, 500);
+  }
+});
+
 // ── tRPC ──────────────────────────────────────────────────────
 
 app.use("/api/trpc/*", async c => {

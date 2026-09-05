@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
@@ -39,8 +39,11 @@ export default function Profile() {
     },
   });
 
+  useEffect(() => {
+    if (!isAuthenticated) navigate("/login");
+  }, [isAuthenticated, navigate]);
+
   if (!isAuthenticated) {
-    navigate("/login");
     return null;
   }
 
@@ -129,7 +132,7 @@ export default function Profile() {
             {error && <p className="text-[14px]" style={{ color: "rgb(var(--color-p-red-fg))" }}>{error}</p>}
             {success && <p className="text-[14px]" style={{ color: "rgb(var(--color-p-green-fg))" }}>{success}</p>}
 
-            <button type="submit" disabled={updateMutation.isPending} className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:bg-[#333333] active:scale-[0.985] transition disabled:opacity-70">
+            <button type="submit" disabled={updateMutation.isPending} className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:opacity-90 active:scale-[0.985] transition disabled:opacity-70">
               {updateMutation.isPending ? "Saving..." : "Save Changes"}
             </button>
           </form>

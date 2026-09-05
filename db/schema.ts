@@ -32,7 +32,6 @@ export type LocalUser = typeof localUsers.$inferSelect;
 export type InsertLocalUser = typeof localUsers.$inferInsert;
 
 // ── Books (marketplace listings) ──────────────────────────────
-
 export const books = sqliteTable("books", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
@@ -44,6 +43,11 @@ export const books = sqliteTable("books", {
   category: text("category").notNull(),
   slug: text("slug").unique(),
   authorSlug: text("authorSlug"),
+  authorId: integer("authorId"),
+  isFeatured: integer("isFeatured", { mode: "boolean" })
+    .default(false)
+    .notNull(),
+  featuredOrder: integer("featuredOrder").default(0).notNull(),
   condition: text("condition").default("New").notNull(),
   sellerId: integer("sellerId"),
   sellerType: text("sellerType", { enum: ["admin", "user"] })
@@ -63,6 +67,31 @@ export const books = sqliteTable("books", {
 
 export type Book = typeof books.$inferSelect;
 export type InsertBook = typeof books.$inferInsert;
+
+// ── Authors (public profiles + catalogues) ────────────────────
+
+export const authors = sqliteTable("authors", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  bio: text("bio").notNull().default(""),
+  dedication: text("dedication").notNull().default(""),
+  avatar: text("avatar").notNull().default(""),
+  location: text("location").notNull().default(""),
+  website: text("website").notNull().default(""),
+  twitter: text("twitter").notNull().default(""),
+  instagram: text("instagram").notNull().default(""),
+  userId: integer("userId"),
+  createdAt: integer("createdAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updatedAt", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+export type Author = typeof authors.$inferSelect;
+export type InsertAuthor = typeof authors.$inferInsert;
 
 // ── Purchases ─────────────────────────────────────────────────
 

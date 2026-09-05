@@ -114,6 +114,7 @@ npm run db:reset   # Drop and recreate all tables
 - id (integer, primary key)
 - title (text)
 - author (text)
+- authorId (integer, FK → authors, nullable)
 - description (text)
 - content (text, optional - reading material)
 - price (text)
@@ -132,6 +133,14 @@ npm run db:reset   # Drop and recreate all tables
 - buyerId (integer, foreign key)
 - purchasePrice (text)
 - createdAt (integer timestamp)
+
+### authors
+
+- id (integer, primary key)
+- name (text, unique)
+- slug (text, unique)
+- bio, avatar, location, website, twitter, instagram (text)
+- createdAt, updatedAt (integer timestamps)
 
 ## API Endpoints (tRPC)
 
@@ -162,9 +171,20 @@ npm run db:reset   # Drop and recreate all tables
 
 ### Purchases
 
-- `purchase.buy` - Purchase a book
+- `purchase.paystackInit` - Start Paystack hosted checkout (bookId, email)
+- `purchase.paystackVerify` - Verify reference after redirect, fulfill order
 - `purchase.myPurchases` - List user's purchases
 - `purchase.adminList` - List all purchases (admin)
+
+### Authors
+
+- `author.profile` - Public profile + catalogue + stats by slug
+- `author.adminList` - List authors with book counts (admin)
+- `author.update` - Edit bio/avatar/location/socials (admin)
+
+### Webhooks
+
+- `POST /api/paystack/webhook` - Paystack charge.success fulfillment (HMAC verified)
 
 ## Environment Variables
 
@@ -173,6 +193,7 @@ Required in `.env`:
 - `DATABASE_URL` — Turso connection string (`file:./data/bookhaven.db` for local, `libsql://...` for production)
 - `DATABASE_AUTH_TOKEN` — Turso auth token (empty for local file)
 - `APP_SECRET` — JWT signing secret
+- `PAYSTACK_SECRET_KEY` — Paystack secret key (checkout + webhook; empty = clear error)
 - `PORT` — server port (default 3000)
 
 Vite exposes `VITE_*` prefixed vars to browser.

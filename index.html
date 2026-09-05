@@ -3,6 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="ToxicReads — buy, sell, and read bold African science fiction, horror, and thrillers."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#111110" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ToxicReads" />
+    <meta
+      property="og:title"
+      content="ToxicReads — African Sci-Fi, Horror & Thrillers"
+    />
+    <meta
+      property="og:description"
+      content="Buy, sell, and read the boldest speculative writing from the continent."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="ToxicReads — African Sci-Fi, Horror & Thrillers"
+    />
+    <meta
+      name="twitter:description"
+      content="Buy, sell, and read the boldest speculative writing from the continent."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23111111'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='30' fill='%23F7F6F3' text-anchor='middle'%3ETR%3C/text%3E%3C/svg%3E"
+    />
     <title>ToxicReads — African Sci-Fi, Horror &amp; Thrillers</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,6 +42,19 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      try {
+        var t =
+          localStorage.getItem("toxicreads-theme") ||
+          localStorage.getItem("neural-atelier-theme");
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark";
+        }
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

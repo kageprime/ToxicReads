@@ -344,3 +344,211 @@
   animation: navIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ── Revamp primitives ────────────────────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+/* Tabular figures for prices, counts, data */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Balanced headlines, pretty body copy */
+.text-balance {
+  text-wrap: balance;
+}
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Skeleton shimmer (matches layout shape, theme-aware) */
+@keyframes skel-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.skel {
+  position: relative;
+  overflow: hidden;
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+.skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--foreground) / 0.07),
+    transparent
+  );
+  animation: skel-sweep 1.4s ease-in-out infinite;
+}
+
+/* ── Hero rise-in masks (one orchestrated load moment) ── */
+.rise-mask {
+  display: block;
+  overflow: hidden;
+}
+.rise-mask > span {
+  display: block;
+  animation: rise-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Genre ticker ── */
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee-x 30s linear infinite;
+}
+
+/* ── Day arc palettes (fixed art direction, theme-independent) ── */
+/* Adjacent sections share edge stops so the day melts, never cuts. */
+.day-sunrise {
+  background: linear-gradient(180deg, #f3cf9f 0%, #f8e3c2 42%, #f7f1e5 100%);
+  color: #2b2118;
+}
+.day-morning {
+  background: linear-gradient(
+    180deg,
+    #f7f1e5 0%,
+    #faf6ec 30%,
+    #faf6ec 70%,
+    #f3efe2 100%
+  );
+  color: #1c1a16;
+}
+.day-midday {
+  background: linear-gradient(
+    180deg,
+    #f3efe2 0%,
+    #e9f1f5 35%,
+    #f7fafb 70%,
+    #f6f2e7 100%
+  );
+  color: #101418;
+}
+.day-golden {
+  background: linear-gradient(
+    180deg,
+    #f6f2e7 0%,
+    #f2d49b 38%,
+    #e9b566 72%,
+    #d9994a 100%
+  );
+  color: #3a2a16;
+}
+.day-dusk {
+  background: linear-gradient(
+    180deg,
+    #8a5a30 0%,
+    #3a3040 14%,
+    #1c2133 38%,
+    #121624 72%,
+    #0f1220 100%
+  );
+  color: #f0ead9;
+}
+
+/* ── Toxic tokens (fixed art direction for the landing) ── */
+.toxic-bg {
+  background-color: #0b0c12;
+  color: #f2efe6;
+}
+
+/* Moon + stars for dusk */
+.moon-disc {
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 38% 35%,
+    #fdf8ea 0%,
+    #e8dfc4 55%,
+    #c9bd9c 100%
+  );
+  box-shadow: 0 0 50px 12px rgba(232, 223, 196, 0.25);
+}
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.star {
+  position: absolute;
+  border-radius: 9999px;
+  background: #f5efdc;
+  animation: star-twinkle 3.2s ease-in-out infinite;
+}
+
+/* Skip link for keyboard users */
+.skip-link {
+  position: fixed;
+  top: -56px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(var(--primary-foreground));
+  background: hsl(var(--primary));
+  border-radius: 999px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus-visible {
+  top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .skel::after {
+    animation: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  .rise-mask > span {
+    animation: none;
+  }
+  .animate-ambient-drift {
+    animation: none;
+  }
+  .star {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+

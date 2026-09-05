@@ -4,6 +4,7 @@ import { PiCaretLeft, PiList, PiSignOut, PiSun, PiMoon, PiX } from "react-icons/
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
+import { ReaderSkeleton } from "@/components/Skeleton";
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>();
@@ -351,18 +352,10 @@ export default function Reader() {
   if (isLoading || authLoading) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-dvh"
         style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}
       >
-        <span
-          style={{
-            fontSize: "18px",
-            fontFamily: "var(--font-mono)",
-            color: "#999",
-          }}
-        >
-          LOADING...
-        </span>
+        <ReaderSkeleton />
       </div>
     );
   }
@@ -370,7 +363,7 @@ export default function Reader() {
   if (error || !book) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center"
         style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}
       >
         <span
@@ -379,7 +372,7 @@ export default function Reader() {
             color: theme === "dark" ? "#999" : "#666",
           }}
         >
-          Unable to load book
+          This book could not be loaded
         </span>
         <button
           onClick={() => navigate("/my-purchases")}
@@ -393,7 +386,7 @@ export default function Reader() {
             cursor: "pointer",
           }}
         >
-          Back
+          Back to library
         </button>
       </div>
     );
@@ -575,7 +568,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
         </div>
       </header>
 
-      <div className="flex" style={{ paddingTop: "48px", minHeight: "100vh" }}>
+      <div className="flex min-h-dvh" style={{ paddingTop: "48px" }}>
         {/* Outline Sidebar */}
         {showOutline && outline.length > 0 && (
           <>
@@ -695,7 +688,8 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
                   color: textColor,
                   marginBottom: "8px",
                   lineHeight: 1.3,
-                  fontFamily: "'Georgia', serif",
+                  fontFamily: "'Newsreader', Georgia, serif",
+                  textWrap: "balance",
                 }}
               >
                 {book.title}
@@ -717,7 +711,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
                 fontSize: `${fontSize}px`,
                 lineHeight: 1.8,
                 color: textColor,
-                fontFamily: "'Georgia', serif",
+                fontFamily: "'Newsreader', Georgia, serif",
                 userSelect: "none",
                 WebkitUserSelect: "none",
                 MozUserSelect: "none",
@@ -726,7 +720,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
             >
                   {paragraphs.length > 0 ? (
                 paragraphs.map((paragraph, i) => (
-                  <p key={i} data-para={i} style={{ marginBottom: "1.5em", textAlign: "justify" }}>
+                  <p key={i} data-para={i} style={{ marginBottom: "1.5em" }}>
                     {paragraph}
                   </p>
                 ))

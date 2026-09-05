@@ -3,6 +3,9 @@ import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
+import { RowsSkeleton } from "@/components/Skeleton";
+import EmptyState from "@/components/EmptyState";
+import { PiBookOpen } from "react-icons/pi";
 
 export default function MyPurchases() {
   const navigate = useNavigate();
@@ -46,15 +49,7 @@ export default function MyPurchases() {
           </h1>
 
         {isLoading ? (
-          <p
-            style={{
-              fontSize: "18px",
-              color: "hsl(var(--muted-foreground))",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            LOADING...
-          </p>
+          <RowsSkeleton count={4} />
         ) : purchases && purchases.length > 0 ? (
           <div className="space-y-4">
             {purchases.map(purchase => (
@@ -180,33 +175,13 @@ export default function MyPurchases() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p
-              style={{
-                fontSize: "19px",
-                color: "hsl(var(--muted-foreground))",
-                marginBottom: "16px",
-              }}
-            >
-              No purchases yet
-            </p>
-            <button
-              onClick={() => navigate("/home")}
-              className="transition-transform active:scale-[0.98] hover:opacity-80"
-              style={{
-                fontSize: "17px",
-                fontFamily: "var(--font-mono)",
-                color: "hsl(var(--foreground))",
-                background: "none",
-                border: "1px solid var(--border)",
-                padding: "8px 16px",
-                cursor: "pointer",
-                letterSpacing: "0.05em",
-              }}
-            >
-              Browse books
-            </button>
-          </div>
+          <EmptyState
+            icon={<PiBookOpen size={24} />}
+            title="No purchases yet"
+            body="Books you buy live here, ready to read on any device."
+            actionLabel="Browse books"
+            onAction={() => navigate("/home")}
+          />
         )}
       </div>
     </div>
