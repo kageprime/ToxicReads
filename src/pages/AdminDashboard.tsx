@@ -31,6 +31,7 @@ interface BookFormData {
   category: string;
   coverImage: string;
   content: string;
+  audioUrl: string;
 }
 
 export default function AdminDashboard() {
@@ -173,6 +174,7 @@ export default function AdminDashboard() {
     category: "Sci-Fi",
     coverImage: "",
     content: "",
+    audioUrl: "",
   });
 
   if (authLoading || !isAdmin) {
@@ -231,6 +233,7 @@ export default function AdminDashboard() {
       category: book.category,
       coverImage: book.coverImage,
       content: book.content || "",
+      audioUrl: (book as { audioUrl?: string }).audioUrl || "",
     });
   };
 
@@ -244,6 +247,7 @@ export default function AdminDashboard() {
       category: "Sci-Fi",
       coverImage: "",
       content: "",
+      audioUrl: "",
     });
   };
 
@@ -862,6 +866,29 @@ export default function AdminDashboard() {
                                   coverImage: e.target.value,
                                 })
                               }
+                              style={inputStyle}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              style={{
+                                fontSize: "16px",
+                                color: "hsl(var(--muted-foreground))",
+                                display: "block",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              Audio URL (optional MP3)
+                            </label>
+                            <input
+                              value={editForm.audioUrl}
+                              onChange={e =>
+                                setEditForm({
+                                  ...editForm,
+                                  audioUrl: e.target.value,
+                                })
+                              }
+                              placeholder="https://…/narration.mp3"
                               style={inputStyle}
                             />
                           </div>

@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { PiCaretLeft, PiList, PiSignOut, PiSun, PiMoon, PiX } from "react-icons/pi";
+import { PiCaretLeft, PiList, PiSignOut, PiSun, PiMoon, PiX, PiHeadphones } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { parseOutline, type OutlineEntry } from "@/lib/outline";
 import { ReaderSkeleton } from "@/components/Skeleton";
+import ListenBar from "@/components/ListenBar";
+import {
+  buildSpeakQueue,
+  useTextToSpeechEngine,
+  useTTSVoices,
+} from "@/hooks/useTextToSpeech";
 
 export default function Reader() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +23,26 @@ export default function Reader() {
   const [loadedChunks, setLoadedChunks] = useState<Record<number, string>>({});
   const [token, setToken] = useState<string | null>(null);
   const [totalChunks, setTotalChunks] = useState(0);
+  // ── Listen (TTS) state ──────────────────────────────────────
+  const [listenOpen, setListenOpen] = useState(false);
+  const [listenPara, setListenPara] = useState(0);
+  const [ttsRate, setTtsRate] = useState(() => {
+    try {
+      const r = Number(localStorage.getItem("tr_tts_rate"));
+      return [0.75, 1, 1.25, 1.5, 2].includes(r) ? r : 1;
+    } catch {
+      /* storage blocked — fall back to 1x */
+      return 1;
+    }
+  });
+  const [ttsVoiceURI, setTtsVoiceURI] = useState(() => {
+    try {
+      return localStorage.getItem("tr_tts_voice") || "";
+    } catch {
+      /* storage blocked — fall back to default voice */
+      return "";
+    }
+  });
   const contentRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingChunksRef = useRef<Set<number>>(new Set());
@@ -39,8 +65,66 @@ export default function Reader() {
 
   const readChunk = trpc.book.readChunk.useMutation();
   const saveMutation = trpc.book.saveProgress.useMutation();
+  const saveListenMutation = trpc.book.saveListenProgress.useMutation();
 
   const book = readData;
+  const bookId = id ? parseInt(id) : 0;
+
+  const { data: listenProgressData } = trpc.book.getListenProgress.useQuery(
+    { bookId },
+    { enabled: !!id && isAuthenticated && bookId > 0 }
+  );
+
+  const ttsVoices = useTTSVoices();
+  const ttsVoice = useMemo(
+    () => ttsVoices.find(v => v.voiceURI === ttsVoiceURI) ?? null,
+    [ttsVoices, ttsVoiceURI]
+  );
+
+  const listenParaRef = useRef(0);
+  const lastQueuedParaRef = useRef(-1);
+  const lastListenSaveRef = useRef(0);
+  const paragraphsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    listenParaRef.current = listenPara;
+  }, [listenPara]);
+
+  const persistListenPosition = useCallback(
+    (para: number) => {
+      if (!bookId) return;
+      try {
+        localStorage.setItem(
+          `tr_audio_${bookId}`,
+          JSON.stringify({ paragraph: para, updatedAt: Date.now() })
+        );
+      } catch {
+        /* storage unavailable — server copy still saves below */
+      }
+      const now = Date.now();
+      if (now - lastListenSaveRef.current < 5000) return;
+      lastListenSaveRef.current = now;
+      saveListenMutation.mutate({ bookId, paragraph: para });
+    },
+    [bookId, saveListenMutation]
+  );
+
+  const tts = useTextToSpeechEngine({
+    voice: ttsVoice,
+    rate: ttsRate,
+    onParagraph: useCallback(
+      (paraIndex: number) => {
+        setListenPara(paraIndex);
+        persistListenPosition(paraIndex);
+      },
+      [persistListenPosition]
+    ),
+    onEnd: useCallback(() => {
+      // Queue exhausted — the append effect resumes if more chunks stream
+      // in; otherwise playback simply stops. Intentionally a no-op.
+      return undefined;
+    }, []),
+  });
 
   // Auth guard
   useEffect(() => {
@@ -240,6 +324,182 @@ export default function Reader() {
     () => (allContent ? parseOutline(allContent) : []),
     [allContent]
   );
+
+  useEffect(() => {
+    paragraphsRef.current = paragraphs;
+  }, [paragraphs]);
+
+  // Restore saved listening position (localStorage wins, server as fallback).
+  useEffect(() => {
+    if (!bookId) return;
+    let saved = 0;
+    try {
+      const cached = localStorage.getItem(`tr_audio_${bookId}`);
+      if (cached) saved = JSON.parse(cached).paragraph || 0;
+    } catch {
+      /* no cached position — fall back to server value below */
+    }
+    const serverPara = listenProgressData?.paragraph ?? 0;
+    if (serverPara > saved) saved = serverPara;
+    if (saved > 0) setListenPara(Math.max(0, saved));
+  }, [bookId, listenProgressData]);
+
+  // When more text streams in mid-playback, append it to the TTS queue.
+  useEffect(() => {
+    if (!tts.isSpeaking) return;
+    const lastQueued = lastQueuedParaRef.current;
+    if (lastQueued < 0) return;
+    if (paragraphs.length - 1 <= lastQueued) return;
+    const extra = buildSpeakQueue(paragraphs, lastQueued + 1);
+    if (extra.length > 0) {
+      lastQueuedParaRef.current = paragraphs.length - 1;
+      tts.append(extra);
+    }
+  }, [paragraphs, tts]);
+
+  // Lock-screen / background controls.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
+    if (!listenOpen || !book) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: book.title,
+        artist: book.author,
+        album: "ToxicReads",
+      });
+      navigator.mediaSession.setActionHandler("play", () => tts.resume());
+      navigator.mediaSession.setActionHandler("pause", () => tts.pause());
+      navigator.mediaSession.setActionHandler("previoustrack", () => {
+        const prev = Math.max(0, listenParaRef.current - 1);
+        setListenPara(prev);
+        const q = buildSpeakQueue(paragraphsRef.current, prev);
+        lastQueuedParaRef.current = paragraphsRef.current.length - 1;
+        tts.speak(q);
+      });
+      navigator.mediaSession.setActionHandler("nexttrack", () => {
+        const next = listenParaRef.current + 1;
+        if (next >= paragraphsRef.current.length) return;
+        setListenPara(next);
+        const q = buildSpeakQueue(paragraphsRef.current, next);
+        lastQueuedParaRef.current = paragraphsRef.current.length - 1;
+        tts.speak(q);
+      });
+    } catch {
+      /* mediaSession unsupported — system controls simply unavailable */
+    }
+    return () => {
+      try {
+        navigator.mediaSession.setActionHandler("play", null);
+        navigator.mediaSession.setActionHandler("pause", null);
+        navigator.mediaSession.setActionHandler("previoustrack", null);
+        navigator.mediaSession.setActionHandler("nexttrack", null);
+      } catch {
+        /* ignore cleanup on browsers without mediaSession */
+      }
+    };
+  }, [listenOpen, book, tts]);
+
+  // Keep the spoken paragraph in view while listening.
+  useEffect(() => {
+    if (!listenOpen || !tts.isSpeaking) return;
+    const el = contentRef.current?.querySelector(`[data-para="${listenPara}"]`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [listenPara, listenOpen, tts.isSpeaking]);
+
+  const startListening = useCallback(
+    (fromPara?: number) => {
+      const start = Math.max(
+        0,
+        Math.min(fromPara ?? listenParaRef.current, Math.max(0, paragraphsRef.current.length - 1))
+      );
+      setListenPara(start);
+      const queue = buildSpeakQueue(paragraphsRef.current, start);
+      lastQueuedParaRef.current = paragraphsRef.current.length - 1;
+      tts.speak(queue);
+    },
+    [tts]
+  );
+
+  const handleListenPrev = useCallback(() => {
+    const prev = Math.max(0, listenParaRef.current - 1);
+    setListenPara(prev);
+    persistListenPosition(prev);
+    if (tts.isSpeaking) {
+      const q = buildSpeakQueue(paragraphsRef.current, prev);
+      lastQueuedParaRef.current = paragraphsRef.current.length - 1;
+      tts.speak(q);
+    } else {
+      contentRef.current
+        ?.querySelector(`[data-para="${prev}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [tts, persistListenPosition]);
+
+  const handleListenNext = useCallback(() => {
+    const next = listenParaRef.current + 1;
+    if (next >= paragraphsRef.current.length) return;
+    setListenPara(next);
+    persistListenPosition(next);
+    if (tts.isSpeaking) {
+      const q = buildSpeakQueue(paragraphsRef.current, next);
+      lastQueuedParaRef.current = paragraphsRef.current.length - 1;
+      tts.speak(q);
+    } else {
+      contentRef.current
+        ?.querySelector(`[data-para="${next}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [tts, persistListenPosition]);
+
+  const handleListenPauseResume = useCallback(() => {
+    if (tts.isPaused) tts.resume();
+    else if (tts.isSpeaking) tts.pause();
+    else startListening();
+  }, [tts, startListening]);
+
+  const handleListenStop = useCallback(() => {
+    tts.stop();
+    lastQueuedParaRef.current = -1;
+  }, [tts]);
+
+  const handleListenClose = useCallback(() => {
+    tts.stop();
+    lastQueuedParaRef.current = -1;
+    setListenOpen(false);
+  }, [tts]);
+
+  const handleRateChange = useCallback(
+    (r: number) => {
+      setTtsRate(r);
+      try {
+        localStorage.setItem("tr_tts_rate", String(r));
+      } catch {
+        /* private mode — rate still applies for this session */
+      }
+      // Restart from current paragraph so the new rate applies immediately.
+      if (tts.isSpeaking) startListening(listenParaRef.current);
+    },
+    [tts, startListening]
+  );
+
+  const handleVoiceChange = useCallback(
+    (uri: string) => {
+      setTtsVoiceURI(uri);
+      try {
+        localStorage.setItem("tr_tts_voice", uri);
+      } catch {
+        /* private mode — voice still applies for this session */
+      }
+      if (tts.isSpeaking) startListening(listenParaRef.current);
+    },
+    [tts, startListening]
+  );
+
+  const openListen = useCallback(() => {
+    setListenOpen(true);
+    // Defer one tick so ListenBar mounts before speech starts (mobile policy).
+    window.setTimeout(() => startListening(listenParaRef.current), 50);
+  }, [startListening]);
 
   // Track visible chapter via IntersectionObserver
   useEffect(() => {
@@ -469,6 +729,34 @@ export default function Reader() {
           </span>
         </div>
         <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+          <button
+            onClick={() => (listenOpen ? handleListenClose() : openListen())}
+            disabled={paragraphs.length === 0 || !paragraphs.join("").trim()}
+            style={{
+              fontSize: "16px",
+              fontFamily: "var(--font-mono)",
+              color: textColor,
+              background: listenOpen
+                ? theme === "dark"
+                  ? "#2a2a2a"
+                  : "#f0ede8"
+                : "none",
+              border: `1px solid ${listenOpen ? textColor : borderColor}`,
+              padding: "4px 6px sm:px-8",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              opacity:
+                paragraphs.length === 0 || !paragraphs.join("").trim() ? 0.4 : 1,
+            }}
+            title={listenOpen ? "Close player" : "Listen to this book"}
+          >
+            <PiHeadphones size={12} />{" "}
+            <span className="hidden sm:inline">
+              {listenOpen ? "Listening" : "Listen"}
+            </span>
+          </button>
           {outline.length > 0 && (
             <button
               onClick={() => setShowOutline(!showOutline)}
@@ -661,7 +949,7 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
         <main
           style={{
             flex: 1,
-            paddingBottom: "120px",
+            paddingBottom: listenOpen ? "160px" : "120px",
             transition: "margin-left 0.2s",
           }}
           className={showOutline && outline.length > 0 ? "md:ml-[220px]" : ""}
@@ -719,11 +1007,30 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
               }}
             >
                   {paragraphs.length > 0 ? (
-                paragraphs.map((paragraph, i) => (
-                  <p key={i} data-para={i} style={{ marginBottom: "1.5em" }}>
-                    {paragraph}
-                  </p>
-                ))
+                paragraphs.map((paragraph, i) => {
+                  const isActive = listenOpen && i === listenPara;
+                  return (
+                    <p
+                      key={i}
+                      data-para={i}
+                      style={{
+                        marginBottom: "1.5em",
+                        backgroundColor: isActive
+                          ? theme === "dark"
+                            ? "#2a2a2a"
+                            : "#f0ede8"
+                          : "transparent",
+                        borderRadius: "2px",
+                        padding: isActive ? "4px 8px" : "4px 0",
+                        marginLeft: isActive ? "-8px" : 0,
+                        marginRight: isActive ? "-8px" : 0,
+                        transition: "background-color 0.3s",
+                      }}
+                    >
+                      {paragraph}
+                    </p>
+                  );
+                })
               ) : (
                 <div
                   style={{
@@ -747,9 +1054,10 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
         </main>
       </div>
 
-      {/* Mobile bottom toolbar (font controls) */}
-      <div
-        className="sm:hidden fixed bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-2"
+      {/* Mobile bottom toolbar (font controls) — hidden while listening */}
+      {!listenOpen && (
+        <div
+          className="sm:hidden fixed bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-2"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
       >
         <div
@@ -833,24 +1141,49 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
             )}
           </button>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Progress indicator */}
-      <div
-        className="fixed bottom-0 left-0 right-0 h-1"
-        style={{
-          backgroundColor: borderColor,
-          marginBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
-      >
+      {!listenOpen && (
         <div
+          className="fixed bottom-0 left-0 right-0 h-1"
           style={{
-            width: `${Math.min(100, (loadedCount / Math.max(totalChunks, 1)) * 100)}%`,
-            height: "100%",
-            backgroundColor: theme === "dark" ? "#666" : "#ccc",
+            backgroundColor: borderColor,
+            marginBottom: "env(safe-area-inset-bottom, 0px)",
           }}
+        >
+          <div
+            style={{
+              width: `${Math.min(100, (loadedCount / Math.max(totalChunks, 1)) * 100)}%`,
+              height: "100%",
+              backgroundColor: theme === "dark" ? "#666" : "#ccc",
+            }}
+          />
+        </div>
+      )}
+
+      {listenOpen && (
+        <ListenBar
+          theme={theme}
+          isPlaying={tts.isSpeaking}
+          isPaused={tts.isPaused}
+          isSupported={tts.isSupported}
+          currentPara={listenPara}
+          totalParas={paragraphs.length}
+          rate={ttsRate}
+          onRateChange={handleRateChange}
+          voices={ttsVoices}
+          voiceURI={ttsVoiceURI}
+          onVoiceChange={handleVoiceChange}
+          onPlay={() => startListening()}
+          onPauseResume={handleListenPauseResume}
+          onStop={handleListenStop}
+          onPrev={handleListenPrev}
+          onNext={handleListenNext}
+          onClose={handleListenClose}
         />
-      </div>
+      )}
     </div>
   );
 }

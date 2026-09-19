@@ -36,6 +36,10 @@ import { getBookRatingAverage } from "./queries/reviews.js";
 import { checkRateLimit } from "./lib/rate-limiter.js";
 import { signReadToken, verifyReadToken } from "./lib/read-token.js";
 import { upsertProgress, getProgress } from "./queries/reading-progress.js";
+import {
+  upsertListeningProgress,
+  getListeningProgress,
+} from "./queries/listening-progress.js";
 
 const CHUNK_SIZE = 5000;
 const READ_LIMIT_PER_HOUR = 10;
@@ -168,6 +172,7 @@ export const bookRouter = createRouter({
         price: book.price,
         coverImage: book.coverImage,
         category: book.category,
+        audioUrl: (book as { audioUrl?: string }).audioUrl ?? "",
         views: book.views,
         createdAt: book.createdAt,
         chunks: chunks.length,
@@ -238,6 +243,44 @@ export const bookRouter = createRouter({
     .input(z.object({ bookId: z.number() }))
     .query(async ({ ctx, input }) => {
       return getProgress(ctx.user.id, input.bookId);
+    }),
+
+  // ── Authenticated: save/restore listening (TTS) position ────
+
+  saveListenProgress: authedQuery
+    .input(
+      z.object({
+        bookId: z.number(),
+        paragraph: z.number().min(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const book = await findBookById(input.bookId);
+      if (!book) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Book not found" });
+      }
+      const isFree = book.price === "0" || book.price === "0.00";
+      if (!isFree) {
+        const purchased = await hasUserPurchasedBook(ctx.user.id, input.bookId);
+        if (!purchased) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Purchase required",
+          });
+        }
+      }
+      await upsertListeningProgress(
+        ctx.user.id,
+        input.bookId,
+        input.paragraph
+      );
+      return { success: true };
+    }),
+
+  getListenProgress: authedQuery
+    .input(z.object({ bookId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return getListeningProgress(ctx.user.id, input.bookId);
     }),
 
   // ── Authenticated: check if user can access a book ───────────
@@ -442,6 +485,7 @@ export const bookRouter = createRouter({
         category: z.string().min(1).max(100),
         condition: z.string().max(50).optional(),
         slug: z.string().min(1).max(100).optional(),
+        audioUrl: z.string().max(1000).optional().default(""),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -477,6 +521,7 @@ export const bookRouter = createRouter({
           .optional(),
         coverImage: z.string().max(500).optional(),
         category: z.string().max(100).optional(),
+        audioUrl: z.string().max(1000).optional(),
         // Explicit slug override only — title edits never rewrite the slug.
         slug: z.string().min(1).max(100).optional(),
       })

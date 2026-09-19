@@ -44,6 +44,8 @@ export const books = sqliteTable("books", {
   slug: text("slug").unique(),
   authorSlug: text("authorSlug"),
   authorId: integer("authorId"),
+  // Optional hosted narration (mp3/url). Empty = TTS from content.
+  audioUrl: text("audioUrl").notNull().default(""),
   isFeatured: integer("isFeatured", { mode: "boolean" })
     .default(false)
     .notNull(),
@@ -132,6 +134,30 @@ export const readingProgress = sqliteTable(
 
 export type ReadingProgress = typeof readingProgress.$inferSelect;
 export type InsertReadingProgress = typeof readingProgress.$inferInsert;
+
+// ── Listening Progress (TTS resume) ───────────────────────────
+
+export const listeningProgress = sqliteTable(
+  "listeningProgress",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("userId").notNull(),
+    bookId: integer("bookId").notNull(),
+    paragraph: integer("paragraph").notNull().default(0),
+    updatedAt: integer("updatedAt", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  table => ({
+    uniqueUserBook: uniqueIndex("uq_listeningProgress_user_book").on(
+      table.userId,
+      table.bookId
+    ),
+  })
+);
+
+export type ListeningProgress = typeof listeningProgress.$inferSelect;
+export type InsertListeningProgress = typeof listeningProgress.$inferInsert;
 
 // ── Reviews ───────────────────────────────────────────────────
 
