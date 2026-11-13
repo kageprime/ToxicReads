@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import SafeImage from "./SafeImage";
 
 interface EmptyStateProps {
   icon: ReactNode;
@@ -6,12 +7,10 @@ interface EmptyStateProps {
   body: string;
   actionLabel?: string;
   onAction?: () => void;
-  /** Optional cover art shown above the icon tile. */
   image?: string;
   imageAlt?: string;
 }
 
-/** Composed empty state: art, headline, explanation, one action. */
 export default function EmptyState({
   icon,
   title,
@@ -19,35 +18,42 @@ export default function EmptyState({
   actionLabel,
   onAction,
   image,
-  imageAlt,
+  imageAlt = "",
 }: EmptyStateProps) {
   return (
-    <div className="mx-auto flex max-w-sm flex-col items-center px-6 py-16 text-center">
-      {image ? (
-        <img
-          src={image}
-          alt={imageAlt ?? ""}
-          className="h-32 w-24 rotate-[-3deg] rounded-md border border-border object-cover shadow-soft-lg"
-        />
-      ) : (
-        <span className="grid h-14 w-14 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-soft">
-          {icon}
-        </span>
-      )}
-      <h3 className="text-balance mt-5 font-serif text-2xl tracking-tight text-baobab">
-        {title}
-      </h3>
-      <p className="text-pretty mt-2 text-sm leading-relaxed text-muted-foreground">
-        {body}
-      </p>
-      {actionLabel && onAction && (
-        <button
-          onClick={onAction}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
-        >
-          {actionLabel}
-        </button>
-      )}
+    <div className="w-full py-12 px-6">
+      <div className="max-w-md mx-auto rounded-xl border border-border bg-card/70 px-6 py-10 text-center">
+        {image ? (
+          <div className="w-24 aspect-[2/3] mx-auto mb-5 rounded-sm overflow-hidden cover-frame shadow-soft bg-secondary">
+            <SafeImage
+              src={image}
+              alt={imageAlt}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-11 h-11 rounded-full bg-secondary border border-border flex items-center justify-center mx-auto mb-4 text-foreground/80">
+            {icon}
+          </div>
+        )}
+
+        <h3 className="font-serif text-xl font-medium text-foreground tracking-tight mb-2">
+          {title}
+        </h3>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-6 text-pretty">
+          {body}
+        </p>
+
+        {actionLabel && onAction && (
+          <button
+            type="button"
+            onClick={onAction}
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            {actionLabel}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

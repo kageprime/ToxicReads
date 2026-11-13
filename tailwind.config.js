@@ -5,19 +5,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ── Repointed brand tokens → warm monochrome editorial ── */
-        /* ink: near-black, used for text + solid CTAs */
+        /* Ink & paper brand tokens (adapt across light/dark via CSS vars) */
         terracotta: "rgb(var(--color-terracotta) / <alpha-value>)",
-        /* ink alt (headings / brand chips) */
         baobab: "rgb(var(--color-baobab) / <alpha-value>)",
-        /* neutral accent (subtle) */
         ochre: "rgb(var(--color-ochre) / <alpha-value>)",
-        /* canvas / surface */
         cream: "rgb(var(--color-cream) / <alpha-value>)",
-        /* foreground ink */
         charcoal: "rgb(var(--color-charcoal) / <alpha-value>)",
 
-        /* ── Muted pastel spot accents ── */
+        /* Single press spot accent: Signal Crimson */
+        signal: {
+          DEFAULT: "hsl(var(--primary-signal))",
+          foreground: "hsl(var(--primary-signal-foreground))",
+        },
+
+        /* Muted status tones */
         "p-red": "rgb(var(--color-p-red) / <alpha-value>)",
         "p-red-fg": "rgb(var(--color-p-red-fg) / <alpha-value>)",
         "p-blue": "rgb(var(--color-p-blue) / <alpha-value>)",
@@ -73,17 +74,15 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          '"Plus Jakarta Sans"',
           "-apple-system",
           "BlinkMacSystemFont",
-          '"SF Pro Text"',
-          '"Helvetica Neue"',
-          "Helvetica",
-          "Arial",
+          '"Segoe UI"',
           "sans-serif",
         ],
         serif: ["Newsreader", "Georgia", "Cambria", "serif"],
-        display: ['"Instrument Serif"', "Newsreader", "Georgia", "serif"],
-        mono: ['"JetBrains Mono"', '"SF Mono"', "ui-monospace", "monospace"],
+        display: ["Newsreader", "Georgia", "Cambria", "serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
       },
       borderRadius: {
         xl: "calc(var(--radius) + 4px)",
@@ -93,9 +92,10 @@ module.exports = {
         xs: "calc(var(--radius) - 6px)",
       },
       boxShadow: {
-        xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
-        soft: "0 2px 8px rgba(0,0,0,0.04)",
-        "soft-lg": "0 8px 24px rgba(0,0,0,0.05)",
+        xs: "0 1px 2px 0 rgb(0 0 0 / 0.04)",
+        soft: "0 2px 10px -2px rgb(0 0 0 / 0.06), 0 1px 3px 0 rgb(0 0 0 / 0.04)",
+        "soft-lg":
+          "0 14px 36px -8px rgb(0 0 0 / 0.14), 0 4px 12px -2px rgb(0 0 0 / 0.06)",
       },
       letterSpacing: {
         tightest: "-0.04em",
@@ -119,18 +119,12 @@ module.exports = {
           from: { opacity: "0", transform: "translateY(12px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "ambient-drift": {
-          "0%": { transform: "translate3d(0,0,0)" },
-          "50%": { transform: "translate3d(0,-3%,0)" },
-          "100%": { transform: "translate3d(0,0,0)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
-        "fade-up": "fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both",
-        "ambient-drift": "ambient-drift 24s ease-in-out infinite",
+        "fade-up": "fade-up 0.5s cubic-bezier(0.16,1,0.3,1) both",
       },
     },
   },

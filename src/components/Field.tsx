@@ -12,17 +12,17 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <div>
-      <label className="field-label mb-1.5">
+    <div className="space-y-1.5">
+      <label className="field-label">
         {label}
         {required && (
-          <span style={{ color: "rgb(var(--color-p-red-fg))" }}> *</span>
+          <span className="ml-1 text-signal" aria-hidden="true">
+            *
+          </span>
         )}
       </label>
-      {children}
-      {hint && (
-        <p className="mt-1.5 text-[13px] text-muted-foreground">{hint}</p>
-      )}
+      <div>{children}</div>
+      {hint && <p className="text-xs text-muted-foreground leading-relaxed">{hint}</p>}
     </div>
   );
 }

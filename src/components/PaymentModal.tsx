@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PiX, PiLockSimple } from "react-icons/pi";
 import { trpc } from "@/providers/trpc";
 import { toast } from "sonner";
@@ -10,7 +10,15 @@ interface PaymentModalProps {
   onClose: () => void;
 }
 
-/** Paystack hosted checkout: order summary → redirect to Paystack. */
+function formatNaira(price: string) {
+  const numeric = Number(String(price).replace(/[^0-9.]/g, ""));
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return `₦${numeric.toLocaleString("en-NG")}`;
+  }
+  return `₦${price}`;
+}
+
+/** Paystack hosted checkout: order summary -> redirect to Paystack. */
 export default function PaymentModal({
   bookId,
   price,
@@ -21,8 +29,16 @@ export default function PaymentModal({
   const [error, setError] = useState("");
   const utils = trpc.useUtils();
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   const initMutation = trpc.purchase.paystackInit.useMutation({
-    onSuccess: async data => {
+    onSuccess: async (data) => {
       if (data.free) {
         await utils.book.hasPurchased.invalidate();
         await utils.purchase.myPurchases.invalidate();
@@ -30,10 +46,9 @@ export default function PaymentModal({
         onClose();
         return;
       }
-      // Hand off to Paystack; we return via /payment/callback.
       window.location.href = data.authorizationUrl;
     },
-    onError: err => {
+    onError: (err) => {
       setError(err.message);
     },
   });
@@ -42,7 +57,7 @@ export default function PaymentModal({
     e.preventDefault();
     setError("");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("Enter a valid email for your receipt");
+      setError("Enter a valid email address for your receipt.");
       return;
     }
     initMutation.mutate({
@@ -52,47 +67,47 @@ export default function PaymentModal({
     });
   };
 
+  const formattedPrice = formatNaira(price);
+
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{
-        backgroundColor: "rgba(0,0,0,0.4)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/75 backdrop-blur-sm animate-fade-up"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Complete payment"
+      aria-labelledby="payment-modal-title"
     >
       <div
-        className="w-full max-w-sm bg-background border border-border"
-        style={{ animation: "modalIn 0.25s ease-out both" }}
-        onClick={e => e.stopPropagation()}
+        className="w-full max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-soft-lg overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border">
-          <h2 className="text-lg tracking-wide text-foreground">
-            Complete payment
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2
+            id="payment-modal-title"
+            className="font-serif text-xl font-medium text-foreground tracking-tight"
+          >
+            Complete purchase
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-accent transition-colors"
-            aria-label="Close"
+            className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label="Close payment modal"
           >
-            <PiX size={16} className="text-muted-foreground" />
+            <PiX className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="px-5 py-4 border-b border-border">
-          <p className="text-pretty text-[17px] text-muted-foreground leading-snug">
+        <div className="px-6 py-4 bg-secondary/40 border-b border-border">
+          <p className="font-serif text-lg font-medium text-foreground leading-snug text-pretty">
             {title}
           </p>
-          <p className="tnum mt-1 font-mono text-2xl text-foreground">
-            ₦{price}
+          <p className="font-mono text-2xl font-medium text-foreground tnum mt-1">
+            {formattedPrice}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label htmlFor="pay-email" className="field-label mb-1.5">
               Email for receipt
@@ -101,15 +116,16 @@ export default function PaymentModal({
               id="pay-email"
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               autoComplete="email"
               className="field-input"
+              autoFocus
             />
           </div>
 
           {error && (
-            <p role="alert" className="text-sm text-p-red-fg">
+            <p role="alert" className="text-sm text-destructive font-medium">
               {error}
             </p>
           )}
@@ -117,24 +133,19 @@ export default function PaymentModal({
           <button
             type="submit"
             disabled={initMutation.isPending}
-            className="w-full p-3 text-lg bg-foreground text-background transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait"
+            className="w-full py-3 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-wait"
           >
-            {initMutation.isPending ? "Starting checkout…" : `Pay ₦${price}`}
+            {initMutation.isPending
+              ? "Starting checkout..."
+              : `Pay ${formattedPrice}`}
           </button>
 
-          <p className="flex items-center justify-center gap-1.5 text-center text-[13px] text-muted-foreground">
-            <PiLockSimple size={14} />
-            Cards, transfer &amp; USSD — secured by Paystack
+          <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground pt-1">
+            <PiLockSimple className="h-3.5 w-3.5" aria-hidden="true" />
+            Cards, bank transfer &amp; USSD secured by Paystack
           </p>
         </form>
       </div>
-
-      <style>{`
-        @keyframes modalIn {
-          from { opacity: 0; transform: scale(0.95) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

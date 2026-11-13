@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { bookUrl, authorUrl } from "../../contracts/blog";
 import SafeImage from "./SafeImage";
-import { PiHeart, PiHeartStraight } from "react-icons/pi";
+import { PiHeart, PiHeartFill } from "react-icons/pi";
 
 interface BookCardProps {
   id: number;
@@ -19,7 +20,15 @@ interface BookCardProps {
   createdAt?: Date | string | number | null;
 }
 
-const NEW_BADGE_MS = 14 * 24 * 60 * 60 * 1000;
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
+
+function formatNaira(price: string) {
+  const numeric = Number(String(price).replace(/[^0-9.]/g, ""));
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return `₦${numeric.toLocaleString("en-NG")}`;
+  }
+  return `₦${price}`;
+}
 
 export default function BookCard({
   id,
@@ -37,9 +46,20 @@ export default function BookCard({
 }: BookCardProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const isNew =
-    !!createdAt &&
-    Date.now() - new Date(createdAt).getTime() < NEW_BADGE_MS;
+  const [mountedAt] = useState(() => Date.now());
+
+  const isNew = (() => {
+    if (!createdAt) return false;
+    const ts =
+      createdAt instanceof Date
+        ? createdAt.getTime()
+        : typeof createdAt === "number"
+          ? createdAt < 1e12
+            ? createdAt * 1000
+            : createdAt
+          : Date.parse(createdAt);
+    return Number.isFinite(ts) && mountedAt - ts < FOURTEEN_DAYS_MS;
+  })();
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,63 +70,90 @@ export default function BookCard({
     onToggleWishlist?.(id);
   };
 
+  const destination = bookUrl({ slug, id });
+
   return (
     <article
-      className="sidebar-item group cursor-pointer transition-transform duration-200 ease-spring active:scale-[0.98]"
-      style={{ animationDelay: `${Math.min(index * 45, 450)}ms` }}
-      onClick={() => navigate(bookUrl({ slug, id }))}
+      className="group flex flex-col animate-fade-up"
+      style={{
+        animationDelay: `${Math.min(index, 12) * 35}ms`,
+      }}
     >
-      {/* Cushioned cover well (tinted backdrop + inset cover) */}
-      <div className="relative mb-3 rounded-[4px] bg-secondary p-3 pb-4 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-soft-lg">
-        <div className="relative overflow-hidden rounded-[2px] shadow-soft">
+      {/* Physical book cover */}
+      <div className="relative mb-3">
+        <button
+          type="button"
+          onClick={() => navigate(destination)}
+          className="block w-full aspect-[2/3] rounded-sm overflow-hidden bg-secondary cover-frame shadow-soft transition-all duration-300 ease-spring group-hover:-translate-y-0.5 group-hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={`View ${title} by ${author}`}
+        >
           <SafeImage
             src={coverImage}
-            alt={`Cover of ${title} by ${author}`}
-            className="aspect-[3/4] w-full object-cover"
+            alt={`${title} cover`}
+            className="h-full w-full object-cover transition-transform duration-500 ease-spring group-hover:scale-[1.015]"
           />
-          {isNew && (
-            <span className="absolute left-2 top-2 rounded-[4px] bg-[#c0a040] px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-[#141005]">
-              New
-            </span>
-          )}
+        </button>
+
+        {onToggleWishlist && (
           <button
+            type="button"
             onClick={handleWishlist}
-            className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-background/95 transition-all duration-300 ease-spring hover:bg-accent active:scale-90"
-            title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={wishlisted ? `Remove ${title} from wishlist` : `Save ${title} to wishlist`}
             aria-pressed={!!wishlisted}
+            className={`absolute top-2.5 right-2.5 h-8 w-8 rounded-full flex items-center justify-center border transition-all duration-200 backdrop-blur-sm ${
+              wishlisted
+                ? "bg-card/95 border-border text-signal opacity-100 shadow-xs"
+                : "bg-card/85 border-border/70 text-foreground/75 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:text-signal hover:bg-card"
+            }`}
           >
             {wishlisted ? (
-              <PiHeartStraight size={15} className="text-red-500" />
+              <PiHeartFill className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <PiHeart size={15} className="text-foreground" />
+              <PiHeart className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
-        </div>
+        )}
       </div>
-      <h3 className="line-clamp-2 min-h-[2.6em] font-serif text-base leading-snug tracking-tight text-foreground md:text-[19px]">
-        {title}
-      </h3>
-      <p className="mt-0.5 truncate text-sm text-muted-foreground">
+
+      {/* Metadata footer — keeps cover completely free of pills */}
+      <div className="flex flex-col gap-1 min-w-0">
+        {(category || isNew) && (
+          <div className="flex items-center gap-2 text-[11.5px] leading-none">
+            {category && (
+              <span className="text-muted-foreground font-medium truncate">
+                {category}
+              </span>
+            )}
+            {isNew && (
+              <span className="inline-flex items-center gap-1 text-signal font-medium shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-signal" aria-hidden="true" />
+                New
+              </span>
+            )}
+          </div>
+        )}
+
         <button
-          className="transition-colors hover:text-foreground hover:underline hover:underline-offset-2"
-          onClick={e => {
-            e.stopPropagation();
-            navigate(authorUrl({ authorSlug, author }));
-          }}
+          type="button"
+          onClick={() => navigate(destination)}
+          className="text-left focus-visible:outline-none focus-visible:underline"
+        >
+          <h3 className="font-serif text-[17px] leading-[1.28] font-medium text-foreground line-clamp-2 group-hover:text-signal transition-colors">
+            {title}
+          </h3>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate(authorUrl({ authorSlug, author }))}
+          className="text-left text-[13px] text-muted-foreground hover:text-foreground transition-colors truncate w-fit max-w-full"
         >
           {author}
         </button>
-      </p>
-      <div className="mt-1.5 flex items-center justify-between">
-        {category && (
-          <span className="max-w-[60%] truncate font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground md:text-[11px]">
-            {category}
-          </span>
-        )}
-        <span className="tnum font-mono text-[13px] text-foreground md:text-[14px]">
-          ₦{price}
-        </span>
+
+        <p className="font-mono text-[13px] font-medium tnum text-foreground mt-0.5">
+          {formatNaira(price)}
+        </p>
       </div>
     </article>
   );

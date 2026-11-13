@@ -1,17 +1,35 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { PiWarningCircle } from "react-icons/pi";
+import { PiWarningCircle, PiUpload, PiPlus, PiTrash } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { bookUrl } from "../../contracts/blog";
 import { RowsSkeleton } from "@/components/Skeleton";
 import EmptyState from "@/components/EmptyState";
-import { PiUpload } from "react-icons/pi";
+import SafeImage from "@/components/SafeImage";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import { toast } from "sonner";
+
+function formatNaira(price?: string | null) {
+  if (!price) return "₦0";
+  const numeric = Number(String(price).replace(/[^0-9.]/g, ""));
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return `₦${numeric.toLocaleString("en-NG")}`;
+  }
+  return `₦${price}`;
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: "bg-p-yellow text-p-yellow-fg",
+  approved: "bg-p-green text-p-green-fg",
+  rejected: "bg-p-red text-p-red-fg",
+};
 
 export default function MySubmissions() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const utils = trpc.useUtils();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const { data: submissions, isLoading } = trpc.book.mySubmissions.useQuery(
     undefined,
@@ -21,6 +39,11 @@ export default function MySubmissions() {
   const deleteMutation = trpc.book.deleteMySubmission.useMutation({
     onSuccess: () => {
       utils.book.mySubmissions.invalidate();
+      setConfirmDeleteId(null);
+      toast.success("Submission deleted");
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 
@@ -30,248 +53,152 @@ export default function MySubmissions() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  if (authLoading) {
-    return null;
-  }
+  if (authLoading) return null;
 
-  const statusColors: Record<string, string> = {
-    pending: "rgb(var(--color-p-yellow-fg))",
-    approved: "rgb(var(--color-p-green-fg))",
-    rejected: "rgb(var(--color-p-red-fg))",
-  };
+  const targetBook = submissions?.find((b) => b.id === confirmDeleteId);
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "hsl(var(--background))" }}
-    >
-      <div
-        className="mx-auto"
-        style={{ maxWidth: "1120px", padding: "40px 32px 96px" }}
-      >
-        <div className="flex items-center justify-between mb-8">
-          <h1
-            style={{
-              fontSize: "34px",
-              fontWeight: 400,
-              fontFamily: "var(--font-serif)",
-              color: "hsl(var(--foreground))",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            My Submissions
-          </h1>
+    <div className="min-h-full bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20">
+        <div className="pb-6 border-b border-border flex items-end justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
+              Submissions
+            </h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Track review status and manage manuscripts you submitted.
+            </p>
+          </div>
           <button
+            type="button"
             onClick={() => navigate("/submit-book")}
-            className="transition-transform active:scale-[0.98] hover:opacity-90"
-            style={{
-              fontSize: "16px",
-              fontFamily: "var(--font-mono)",
-              letterSpacing: "0.05em",
-              color: "hsl(var(--background))",
-              background: "hsl(var(--foreground))",
-              border: "none",
-              padding: "8px 16px",
-              cursor: "pointer",
-            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity shrink-0"
           >
-            + New
+            <PiPlus className="h-4 w-4" aria-hidden="true" />
+            Submit book
           </button>
         </div>
 
-        <div
-          style={{
-            border: "1px solid var(--color-p-yellow-fg)",
-            padding: "10px 14px",
-            marginBottom: "16px",
-            backgroundColor: "rgba(243, 156, 18, 0.08)",
-          }}
-        >
-          <div
-            style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}
-          >
-            <PiWarningCircle
-              size={12}
-              style={{ color: "rgb(var(--color-p-yellow-fg))", marginTop: "3px", flexShrink: 0 }}
-            />
-            <p
-              style={{
-                fontSize: "15px",
-                fontFamily: "var(--font-mono)",
-                color: "hsl(var(--foreground))",
-                lineHeight: 1.6,
-              }}
+        <div className="mt-6 form-note flex items-start gap-3 text-sm">
+          <PiWarningCircle
+            className="h-4 w-4 text-signal shrink-0 mt-0.5"
+            aria-hidden="true"
+          />
+          <p className="text-muted-foreground leading-relaxed">
+            <strong className="font-medium text-foreground">
+              Original writing only.
+            </strong>{" "}
+            All manuscripts are reviewed before publishing to the catalog. AI-generated submissions are declined.{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/submit-book")}
+              className="font-medium text-foreground underline underline-offset-4 hover:text-signal transition-colors"
             >
-              <strong>NO AI GENERATED CONTENT.</strong> All submissions are reviewed. Violations will be rejected.{" "}
-              <span
-                style={{ textDecoration: "underline", cursor: "pointer" }}
-                onClick={() => navigate("/submit-book")}
-              >
-                View full submission guidelines.
-              </span>
-            </p>
-          </div>
+              Read submission guidelines
+            </button>
+          </p>
         </div>
 
-        {isLoading ? (
-          <RowsSkeleton count={4} />
-        ) : submissions && submissions.length > 0 ? (
-          <div className="space-y-4">
-            {submissions.map(book => (
-              <div
-                key={book.id}
-                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 transition-colors hover:bg-accent"
-                style={{
-                  padding: "20px 16px",
-                  borderBottom: "1px solid hsl(var(--border))",
-                }}
-              >
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <img
-                    src={book.coverImage || ""}
-                    alt={book.title || ""}
-                    style={{
-                      width: "50px",
-                      height: "66px",
-                      objectFit: "cover",
-                      border: "1px solid hsl(var(--border))",
-                      flexShrink: 0,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => navigate(bookUrl(book))}
-                  />
-                  <div className="flex-1 min-w-0 sm:hidden">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p
-                        style={{
-                          fontSize: "20px",
-                          fontWeight: 400,
-                          color: "hsl(var(--foreground))",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
+        <div className="mt-6">
+          {isLoading ? (
+            <RowsSkeleton count={4} />
+          ) : submissions && submissions.length > 0 ? (
+            <div className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+              {submissions.map((book) => {
+                const statusClass =
+                  STATUS_STYLES[book.status] || "bg-secondary text-muted-foreground";
+                return (
+                  <div
+                    key={book.id}
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 hover:bg-secondary/35 transition-colors"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => navigate(bookUrl(book))}
+                        className="w-14 aspect-[2/3] rounded-sm overflow-hidden bg-secondary cover-frame shrink-0"
                       >
-                        {book.title}
-                      </p>
-                      <span
-                        className="shrink-0"
-                        style={{
-                          fontSize: "15px",
-                          fontFamily: "var(--font-mono)",
-                          color:
-                            statusColors[book.status] || "hsl(var(--muted-foreground))",
-                          border: `1px solid ${statusColors[book.status] || "hsl(var(--border))"}`,
-                          padding: "2px 6px",
-                        }}
-                      >
-                        {book.status?.toUpperCase()}
-                      </span>
+                        {book.coverImage && (
+                          <SafeImage
+                            src={book.coverImage}
+                            alt={book.title || "Book cover"}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </button>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => navigate(bookUrl(book))}
+                            className="text-left min-w-0"
+                          >
+                            <h2 className="font-serif text-lg sm:text-xl font-medium text-foreground truncate hover:text-signal transition-colors">
+                              {book.title}
+                            </h2>
+                          </button>
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium capitalize ${statusClass}`}
+                          >
+                            {book.status}
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-muted-foreground truncate mt-0.5">
+                          {book.author}
+                        </p>
+
+                        <p className="font-mono text-xs text-muted-foreground tnum mt-1.5">
+                          {formatNaira(book.price)} ·{" "}
+                          {book.content ? "Manuscript attached" : "Listing only"}
+                        </p>
+                      </div>
                     </div>
-                    <p
-                      style={{
-                        fontSize: "18px",
-                        color: "hsl(var(--muted-foreground))",
-                        marginBottom: "2px",
-                      }}
-                    >
-                      {book.author}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "17px",
-                        fontFamily: "var(--font-mono)",
-                        color: "hsl(var(--muted-foreground))",
-                      }}
-                    >
-                      ₦{book.price} ·{" "}
-                      {book.content ? "Has content" : "No content"}
-                    </p>
+
+                    {book.status === "pending" && (
+                      <div className="flex items-center sm:shrink-0 pl-[72px] sm:pl-0">
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteId(book.id)}
+                          disabled={deleteMutation.isPending}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium text-destructive hover:border-destructive/50 hover:bg-p-red/50 transition-colors disabled:opacity-50"
+                        >
+                          <PiTrash className="h-3.5 w-3.5" aria-hidden="true" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="hidden sm:block flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p
-                      style={{
-                        fontSize: "20px",
-                        fontWeight: 400,
-                        fontFamily: "var(--font-serif)",
-                        color: "hsl(var(--foreground))",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {book.title}
-                    </p>
-                    <span
-                      className="shrink-0"
-                      style={{
-                        fontSize: "15px",
-                        fontFamily: "var(--font-mono)",
-                        color: statusColors[book.status] || "hsl(var(--muted-foreground))",
-                        border: `1px solid ${statusColors[book.status] || "hsl(var(--border))"}`,
-                        padding: "2px 6px",
-                      }}
-                    >
-                      {book.status?.toUpperCase()}
-                    </span>
-                  </div>
-                  <p
-                    style={{
-                      fontSize: "18px",
-                      color: "hsl(var(--muted-foreground))",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {book.author}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "17px",
-                      fontFamily: "var(--font-mono)",
-                      color: "hsl(var(--muted-foreground))",
-                    }}
-                  >
-                    ₦{book.price} ·{" "}
-                    {book.content ? "Has content" : "No content"}
-                  </p>
-                </div>
-                {book.status === "pending" && (
-                  <button
-                    onClick={() => {
-                      if (confirm("Delete this submission?"))
-                        deleteMutation.mutate({ id: book.id });
-                    }}
-                    disabled={deleteMutation.isPending}
-                    className="w-full sm:w-auto ml-[66px] sm:ml-0 transition-transform active:scale-[0.98] hover:opacity-90"
-                    style={{
-                      fontSize: "15px",
-                      fontFamily: "var(--font-mono)",
-                      color: "rgb(var(--color-p-red-fg))",
-                      background: "none",
-                      border: "1px solid var(--color-p-red-fg)",
-                      padding: "6px 12px",
-                      cursor: deleteMutation.isPending ? "wait" : "pointer",
-                      opacity: deleteMutation.isPending ? 0.7 : 1,
-                    }}
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            icon={<PiUpload size={24} />}
-            title="No submissions yet"
-            body="Send us your manuscript. Our editors review within a day."
-            actionLabel="Submit a book"
-            onAction={() => navigate("/submit-book")}
-          />
-        )}
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<PiUpload className="h-5 w-5" aria-hidden="true" />}
+              title="No submissions yet"
+              body="Send us your completed manuscript or book listing. Editors review submissions within one day."
+              actionLabel="Submit a book"
+              onAction={() => navigate("/submit-book")}
+            />
+          )}
+        </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Delete pending submission?"
+        body={`Remove "${targetBook?.title || "this submission"}" from the review queue? This action cannot be undone.`}
+        confirmLabel="Delete submission"
+        danger
+        busy={deleteMutation.isPending}
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => {
+          if (confirmDeleteId !== null) {
+            deleteMutation.mutate({ id: confirmDeleteId });
+          }
+        }}
+      />
     </div>
   );
 }

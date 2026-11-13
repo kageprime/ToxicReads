@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { PiBell, PiBellRinging } from "react-icons/pi";
+import { PiBell, PiBellRinging, PiCheck } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 
@@ -8,19 +8,19 @@ export default function NotificationsBell() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
-    enabled: isAuthenticated,
-    refetchInterval: 30000,
-  });
+  const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(
+    undefined,
+    { enabled: isAuthenticated, refetchInterval: 30000 }
+  );
 
-  const { data: notifications } = trpc.notifications.list.useQuery(undefined, {
-    enabled: isAuthenticated && open,
-  });
+  const { data: notifications = [] } = trpc.notifications.list.useQuery(
+    undefined,
+    { enabled: isAuthenticated && open }
+  );
 
   const utils = trpc.useUtils();
-
   const markAllRead = trpc.notifications.markAllRead.useMutation({
     onSuccess: () => {
       utils.notifications.unreadCount.invalidate();
@@ -36,117 +36,107 @@ export default function NotificationsBell() {
   });
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    if (!open) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
 
   if (!isAuthenticated) return null;
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative" ref={panelRef}>
       <button
-        onClick={() => {
-          if (!isAuthenticated) navigate("/login");
-          else setOpen(!open);
-        }}
-        className="relative p-2 hover:bg-accent rounded-full transition-colors"
-        aria-label="Notifications"
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+        aria-expanded={open}
+        className="relative h-9 w-9 rounded-full flex items-center justify-center border border-border bg-background/80 text-foreground hover:bg-secondary transition-colors"
       >
-        {unreadCount && unreadCount > 0 ? (
-          <PiBellRinging size={20} style={{ color: "hsl(var(--foreground))" }} />
+        {unreadCount > 0 ? (
+          <PiBellRinging className="h-4 w-4 text-signal" aria-hidden="true" />
         ) : (
-          <PiBell size={20} style={{ color: "hsl(var(--muted-foreground))" }} />
+          <PiBell className="h-4 w-4" aria-hidden="true" />
         )}
-        {unreadCount && unreadCount > 0 && (
-          <span
-            className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: "rgb(var(--color-p-red-fg))",
-              color: "#fff",
-              fontSize: "9px",
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-            }}
-          >
-            {unreadCount > 9 ? "9+" : unreadCount}
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-signal text-signal-foreground text-[10px] font-mono font-medium flex items-center justify-center tnum">
+            {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 z-50 w-[320px] max-h-[400px] overflow-y-auto"
-          style={{
-            backgroundColor: "hsl(var(--background))",
-            border: "1px solid hsl(var(--border))",
-          }}
+          className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-11 w-[calc(100vw-2rem)] sm:w-80 rounded-xl border border-border bg-popover text-popover-foreground shadow-soft-lg z-50 overflow-hidden"
+          role="region"
+          aria-label="Notifications"
         >
-          <div
-            className="flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: "1px solid hsl(var(--border))" }}
-          >
-            <span
-              className="font-mono uppercase tracking-[0.1em]"
-              style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}
-            >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="text-sm font-medium text-foreground">
               Notifications
             </span>
-            {unreadCount && unreadCount > 0 && (
+            {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={() => markAllRead.mutate()}
-                className="font-mono text-[11px] uppercase tracking-[0.1em] hover:underline"
-                style={{ color: "hsl(var(--foreground))" }}
+                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
+                <PiCheck className="h-3.5 w-3.5" aria-hidden="true" />
                 Mark all read
               </button>
             )}
           </div>
-          {notifications && notifications.length > 0 ? (
-            notifications.map((n) => (
-              <div
-                key={n.id}
-                onClick={() => {
-                  if (!n.read) markRead.mutate({ id: n.id });
-                  if (n.link) navigate(n.link);
-                  setOpen(false);
-                }}
-                className="px-4 py-3 cursor-pointer transition-colors hover:bg-accent"
-                style={{
-                  borderBottom: "1px solid hsl(var(--border))",
-                  backgroundColor: n.read ? "transparent" : "rgba(var(--color-p-yellow), 0.3)",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "hsl(var(--foreground))",
-                    lineHeight: 1.4,
+
+          <div className="max-h-80 overflow-y-auto divide-y divide-border">
+            {notifications.length === 0 ? (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+                No notifications yet.
+              </p>
+            ) : (
+              notifications.map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => {
+                    if (!n.read) markRead.mutate({ id: n.id });
+                    if (n.link) {
+                      setOpen(false);
+                      navigate(n.link);
+                    }
                   }}
+                  className={`w-full text-left px-4 py-3 hover:bg-secondary/60 transition-colors flex items-start gap-2.5 ${
+                    !n.read ? "bg-secondary/35" : ""
+                  }`}
                 >
-                  {n.message}
-                </p>
-                <p
-                  style={{
-                    fontSize: "11px",
-                    color: "hsl(var(--muted-foreground))",
-                    marginTop: "4px",
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  {new Date(n.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p className="text-center py-8 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
-              No notifications
-            </p>
-          )}
+                  <span
+                    className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${
+                      !n.read ? "bg-signal" : "bg-transparent"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-foreground leading-snug">
+                      {n.message}
+                    </p>
+                    <p className="font-mono text-[11px] text-muted-foreground mt-1 tnum">
+                      {new Date(n.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>

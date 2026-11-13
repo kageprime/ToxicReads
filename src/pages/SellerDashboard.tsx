@@ -1,12 +1,33 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { PiBookOpen, PiEye, PiCurrencyNgn, PiUpload, PiArrowRight } from "react-icons/pi";
+import {
+  PiCurrencyNgn,
+  PiEye,
+  PiBookOpen,
+  PiUpload,
+  PiChartBar,
+  PiArrowUpRight,
+  PiPlus,
+} from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
-import { bookUrl } from "../../contracts/blog";
+import { bookUrl, authorUrl } from "../../contracts/blog";
 import { RowsSkeleton, Skel } from "@/components/Skeleton";
+import EmptyState from "@/components/EmptyState";
 import AuthorSelfEdit from "@/components/AuthorSelfEdit";
+import SafeImage from "@/components/SafeImage";
 import { toast } from "sonner";
+
+function formatNgn(value: string | number) {
+  const num = Number(value) || 0;
+  return `₦${num.toLocaleString("en-NG")}`;
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  approved: "bg-p-green text-p-green-fg",
+  pending: "bg-p-yellow text-p-yellow-fg",
+  rejected: "bg-p-red text-p-red-fg",
+};
 
 export default function SellerDashboard() {
   const navigate = useNavigate();
@@ -28,12 +49,14 @@ export default function SellerDashboard() {
   const { data: profiles } = trpc.author.myProfiles.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
   const claimMutation = trpc.author.claim.useMutation({
     onSuccess: () => {
+      toast.success("Author profile claimed and ready to manage.");
       utils.author.myProfiles.invalidate();
-      toast.success("Author profile claimed — it is yours to manage");
+      utils.author.profile.invalidate();
     },
-    onError: (err: { message: string }) => {
+    onError: (err) => {
       toast.error(err.message);
     },
   });
@@ -44,91 +67,60 @@ export default function SellerDashboard() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  if (authLoading) {
-    return null;
-  }
+  if (authLoading) return null;
 
-  const formatNgn = (price: string | number) => {
-    const value = typeof price === "string" ? Number(price) : price;
-    return `₦${value.toLocaleString("en-NG")}`;
-  };
-
-  // Onboarding: user has no books
-  const hasBooks = books && books.length > 0;
-
-  if (!hasBooks && !isLoading) {
+  if (!isLoading && (!books || books.length === 0)) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--background))" }}>
-        <div className="mx-auto" style={{ maxWidth: "640px", padding: "80px 24px" }}>
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-accent grid place-items-center">
-              <PiUpload size={28} style={{ color: "hsl(var(--foreground))" }} />
+      <div className="min-h-full bg-background">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-12 pb-20">
+          <div className="rounded-xl border border-border bg-card p-8 sm:p-10 text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-foreground">
+              <PiChartBar className="h-6 w-6" aria-hidden="true" />
             </div>
-            <h1
-              style={{
-                fontSize: "34px",
-                fontWeight: 400,
-                fontFamily: "var(--font-serif)",
-                color: "hsl(var(--foreground))",
-                marginBottom: "12px",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Start Selling Your Books
+
+            <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
+              Author &amp; Sales Hub
             </h1>
-            <p
-              style={{
-                fontSize: "18px",
-                color: "hsl(var(--muted-foreground))",
-                lineHeight: 1.6,
-                marginBottom: "32px",
-                maxWidth: "480px",
-                margin: "0 auto 32px",
-              }}
-            >
-              Submit your book for review. Once approved, it will be listed in
-              the marketplace and you can start earning from every sale.
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed text-pretty">
+              Publish your work on ToxicReads, claim your public author page, and track reader sales in naira.
             </p>
-            <div className="space-y-3 max-w-sm mx-auto">
-              <div
-                className="flex items-center gap-3 p-4 border border-border text-left"
-              >
-                <span className="w-8 h-8 rounded-full bg-accent grid place-items-center font-mono text-sm">
-                  1
-                </span>
-                <div>
-                  <p className="font-medium text-foreground">Submit your book</p>
-                  <p className="text-sm text-muted-foreground">Title, cover, price, content</p>
+
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+              {[
+                {
+                  title: "Submit manuscript",
+                  body: "Upload your cover, description, and manuscript text in minutes.",
+                },
+                {
+                  title: "Editorial approval",
+                  body: "Editors review submissions and publish approved editions cleanly.",
+                },
+                {
+                  title: "Track revenue",
+                  body: "Monitor reads, individual sales, and public pen-name stats.",
+                },
+              ].map((step) => (
+                <div
+                  key={step.title}
+                  className="rounded-xl border border-border bg-secondary/40 p-4"
+                >
+                  <h2 className="font-serif text-base font-medium text-foreground">
+                    {step.title}
+                  </h2>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    {step.body}
+                  </p>
                 </div>
-              </div>
-              <div
-                className="flex items-center gap-3 p-4 border border-border text-left"
-              >
-                <span className="w-8 h-8 rounded-full bg-accent grid place-items-center font-mono text-sm">
-                  2
-                </span>
-                <div>
-                  <p className="font-medium text-foreground">Admin review</p>
-                  <p className="text-sm text-muted-foreground">We verify within 24 hours</p>
-                </div>
-              </div>
-              <div
-                className="flex items-center gap-3 p-4 border border-border text-left"
-              >
-                <span className="w-8 h-8 rounded-full bg-accent grid place-items-center font-mono text-sm">
-                  3
-                </span>
-                <div>
-                  <p className="font-medium text-foreground">Start earning</p>
-                  <p className="text-sm text-muted-foreground">Get paid when readers buy</p>
-                </div>
-              </div>
+              ))}
             </div>
+
             <button
+              type="button"
               onClick={() => navigate("/submit-book")}
-              className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:opacity-90 active:scale-[0.98] transition"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-7 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
             >
-              Submit a Book <PiArrowRight size={14} />
+              <PiUpload className="h-4 w-4" aria-hidden="true" />
+              Submit your first book
             </button>
           </div>
         </div>
@@ -137,317 +129,237 @@ export default function SellerDashboard() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--background))" }}>
-      <div className="mx-auto" style={{ maxWidth: "1120px", padding: "40px 32px 96px" }}>
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-full bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20 space-y-10">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-border">
           <div>
-            <h1
-              style={{
-                fontSize: "34px",
-                fontWeight: 400,
-                fontFamily: "var(--font-serif)",
-                color: "hsl(var(--foreground))",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Seller Dashboard
+            <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
+              Author hub
             </h1>
-            <p style={{ fontSize: "17px", color: "hsl(var(--muted-foreground))", marginTop: "4px" }}>
+            <p className="mt-1 text-sm text-muted-foreground font-mono">
               @{user?.username}
             </p>
           </div>
+
           <button
+            type="button"
             onClick={() => navigate("/submit-book")}
-            className="transition-transform active:scale-[0.98]"
-            style={{
-              fontSize: "16px",
-              fontFamily: "var(--font-mono)",
-              letterSpacing: "0.05em",
-              color: "hsl(var(--background))",
-              background: "hsl(var(--foreground))",
-              border: "none",
-              padding: "10px 18px",
-              cursor: "pointer",
-            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity self-start sm:self-auto"
           >
-            + New Book
+            <PiPlus className="h-4 w-4" aria-hidden="true" />
+            New submission
           </button>
         </div>
 
         {isLoading ? (
-          <div aria-label="Loading dashboard" role="status">
-            <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-              {[0, 1, 2, 3].map(i => (
-                <Skel key={i} className="h-[104px] !rounded-none" />
+          <div className="space-y-6" aria-label="Loading dashboard" role="status">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[0, 1, 2, 3].map((i) => (
+                <Skel key={i} className="h-[104px] !rounded-xl" />
               ))}
             </div>
             <RowsSkeleton count={3} />
           </div>
         ) : (
           <>
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {/* Metrics Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Approved Books", value: stats?.totalBooks ?? 0, icon: <PiBookOpen size={18} /> },
-                { label: "Total Views", value: stats?.totalViews ?? 0, icon: <PiEye size={18} /> },
-                { label: "Books Sold", value: stats?.totalSales ?? 0, icon: <PiCurrencyNgn size={18} /> },
-                { label: "Total Revenue", value: formatNgn(stats?.totalRevenue ?? "0"), icon: <PiCurrencyNgn size={18} /> },
-              ].map(stat => (
+                {
+                  label: "Published books",
+                  value: stats?.totalBooks ?? 0,
+                  icon: <PiBookOpen className="h-4 w-4" aria-hidden="true" />,
+                },
+                {
+                  label: "Page reads",
+                  value: (stats?.totalViews ?? 0).toLocaleString(),
+                  icon: <PiEye className="h-4 w-4" aria-hidden="true" />,
+                },
+                {
+                  label: "Copies sold",
+                  value: stats?.totalSales ?? 0,
+                  icon: <PiCurrencyNgn className="h-4 w-4" aria-hidden="true" />,
+                },
+                {
+                  label: "Total revenue",
+                  value: formatNgn(stats?.totalRevenue ?? "0"),
+                  icon: <PiCurrencyNgn className="h-4 w-4" aria-hidden="true" />,
+                },
+              ].map((stat) => (
                 <div
                   key={stat.label}
-                  style={{
-                    border: "1px solid hsl(var(--border))",
-                    padding: "20px",
-                  }}
+                  className="rounded-xl border border-border bg-card p-5"
                 >
-                  <div className="flex items-center gap-2 mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
                     {stat.icon}
-                    <span
-                      className="font-mono uppercase"
-                      style={{ fontSize: "11px", letterSpacing: "0.14em" }}
-                    >
-                      {stat.label}
-                    </span>
+                    <span>{stat.label}</span>
                   </div>
-                  <p
-                    style={{
-                      fontSize: "28px",
-                      fontFamily: "var(--font-mono)",
-                      color: "hsl(var(--foreground))",
-                    }}
-                  >
+                  <p className="font-mono text-2xl sm:text-[26px] font-medium text-foreground tnum">
                     {stat.value}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Author profile */}
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: 400,
-                fontFamily: "var(--font-serif)",
-                color: "hsl(var(--foreground))",
-                marginBottom: "8px",
-              }}
-            >
-              Author profile
-            </h2>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "hsl(var(--muted-foreground))",
-                marginBottom: "16px",
-              }}
-            >
-              Readers see this on your public author page. Claim a pen name
-              from your books to manage it yourself.
-            </p>
-            <div style={{ marginBottom: "32px" }}>
-              {profiles?.owned.map(a => (
+            {/* Public Author Profiles */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="font-serif text-2xl font-medium text-foreground tracking-tight">
+                  Public author profiles
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Manage your bio, dedication note, avatar, and reader links.
+                </p>
+              </div>
+
+              {profiles?.owned.map((a) => (
                 <AuthorSelfEdit
                   key={a.id}
                   author={a}
-                  onSaved={() => utils.author.myProfiles.invalidate()}
+                  onSaved={() => {
+                    utils.author.myProfiles.invalidate();
+                    utils.author.profile.invalidate({ slug: a.slug });
+                  }}
                 />
               ))}
-              {profiles?.suggested.map(a => (
+
+              {profiles?.suggested.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-center gap-3 border border-border bg-card"
-                  style={{ padding: "12px", marginBottom: "12px" }}
+                  className="rounded-xl border border-dashed border-border bg-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4"
                 >
-                  <div
-                    className="flex items-center justify-center"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "9999px",
-                      border: "1px solid hsl(var(--border))",
-                      fontFamily: "var(--font-serif)",
-                      fontSize: "18px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {a.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p
-                      style={{
-                        fontSize: "17px",
-                        color: "hsl(var(--foreground))",
-                      }}
-                    >
-                      {a.name}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        color: "hsl(var(--muted-foreground))",
-                      }}
-                    >
-                      Used in your books · unclaimed
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-serif text-lg font-medium text-foreground">
+                        {a.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(authorUrl({ authorSlug: a.slug, author: a.name }))
+                        }
+                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Preview page
+                        <PiArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Used on your books. Unclaimed pen-name profile.
                     </p>
                   </div>
                   <button
-                    onClick={() => claimMutation.mutate({ id: a.id })}
+                    type="button"
                     disabled={claimMutation.isPending}
-                    className="transition-transform active:scale-[0.98]"
-                    style={{
-                      fontSize: "15px",
-                      fontFamily: "var(--font-mono)",
-                      color: "hsl(var(--background))",
-                      background: "hsl(var(--foreground))",
-                      border: "none",
-                      padding: "8px 16px",
-                      cursor: "pointer",
-                    }}
+                    onClick={() => claimMutation.mutate({ id: a.id })}
+                    className="rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
                   >
-                    Claim
+                    {claimMutation.isPending ? "Claiming..." : "Claim profile"}
                   </button>
                 </div>
               ))}
+
               {(!profiles ||
-                (profiles.owned.length === 0 &&
-                  profiles.suggested.length === 0)) && (
-                <p
-                  style={{
-                    fontSize: "15px",
-                    color: "hsl(var(--muted-foreground))",
-                  }}
-                >
-                  No pen names yet — they appear here when your submitted
-                  books carry an author name.
-                </p>
-              )}
-            </div>
-
-            {/* My Books */}
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: 400,
-                fontFamily: "var(--font-serif)",
-                color: "hsl(var(--foreground))",
-                marginBottom: "16px",
-              }}
-            >
-              My Books
-            </h2>
-            <div className="space-y-2 mb-8">
-              {books?.map(book => (
-                <div
-                  key={book.id}
-                  className="flex items-center gap-4 transition-colors hover:bg-accent"
-                  style={{
-                    padding: "12px",
-                    borderBottom: "1px solid hsl(var(--border))",
-                  }}
-                >
-                  <img
-                    src={book.coverImage}
-                    alt={book.title}
-                    style={{
-                      width: "40px",
-                      height: "52px",
-                      objectFit: "cover",
-                      border: "1px solid hsl(var(--border))",
-                      flexShrink: 0,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => navigate(bookUrl(book))}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p
-                      style={{
-                        fontSize: "17px",
-                        color: "hsl(var(--foreground))",
-                        cursor: "pointer",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                      onClick={() => navigate(bookUrl(book))}
-                    >
-                      {book.title}
-                    </p>
-                    <p style={{ fontSize: "15px", color: "hsl(var(--muted-foreground))" }}>
-                      ₦{book.price} · {book.views} views
-                    </p>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontFamily: "var(--font-mono)",
-                      color:
-                        book.status === "approved"
-                          ? "rgb(var(--color-p-green-fg))"
-                          : book.status === "pending"
-                            ? "rgb(var(--color-p-yellow-fg))"
-                            : "rgb(var(--color-p-red-fg))",
-                      border: "1px solid hsl(var(--border))",
-                      padding: "2px 6px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {book.status}
-                  </span>
+                (profiles.owned.length === 0 && profiles.suggested.length === 0)) && (
+                <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+                  No author pen-name profiles yet. Profiles generate automatically when your books are submitted.
                 </div>
-              ))}
-            </div>
+              )}
+            </section>
 
-            {/* Recent Sales */}
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: 400,
-                fontFamily: "var(--font-serif)",
-                color: "hsl(var(--foreground))",
-                marginBottom: "16px",
-              }}
-            >
-              Recent Sales
-            </h2>
-            {sales && sales.length > 0 ? (
-              <div className="space-y-2">
-                {sales.slice(0, 10).map(sale => (
+            {/* Your Books */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl font-medium text-foreground tracking-tight">
+                Your catalog ({books?.length || 0})
+              </h2>
+
+              <div className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+                {books?.map((book) => (
                   <div
-                    key={sale.id}
-                    className="flex items-center gap-4"
-                    style={{
-                      padding: "10px 12px",
-                      borderBottom: "1px solid hsl(var(--border))",
-                    }}
+                    key={book.id}
+                    className="flex items-center gap-4 p-4 hover:bg-secondary/35 transition-colors"
                   >
+                    <button
+                      type="button"
+                      onClick={() => navigate(bookUrl(book))}
+                      className="w-12 aspect-[2/3] rounded-sm overflow-hidden bg-secondary cover-frame shrink-0"
+                    >
+                      {book.coverImage && (
+                        <SafeImage
+                          src={book.coverImage}
+                          alt={book.title}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </button>
+
                     <div className="flex-1 min-w-0">
-                      <p style={{ fontSize: "16px", color: "hsl(var(--foreground))" }}>
-                        {sale.book?.title}
-                      </p>
-                      <p style={{ fontSize: "14px", color: "hsl(var(--muted-foreground))" }}>
-                        {sale.buyer?.username || "Unknown"} ·{" "}
-                        {sale.createdAt
-                          ? new Date(sale.createdAt).toLocaleDateString()
-                          : ""}
+                      <button
+                        type="button"
+                        onClick={() => navigate(bookUrl(book))}
+                        className="text-left block w-full"
+                      >
+                        <h3 className="font-serif text-lg font-medium text-foreground truncate hover:text-signal transition-colors">
+                          {book.title}
+                        </h3>
+                      </button>
+                      <p className="font-mono text-xs text-muted-foreground tnum mt-0.5">
+                        {formatNgn(book.price)} · {book.views}{" "}
+                        {book.views === 1 ? "view" : "views"}
                       </p>
                     </div>
+
                     <span
-                      style={{
-                        fontSize: "16px",
-                        fontFamily: "var(--font-mono)",
-                        color: "rgb(var(--color-p-green-fg))",
-                      }}
+                      className={`rounded-full px-3 py-1 text-[11px] font-medium capitalize shrink-0 ${
+                        STATUS_BADGE[book.status] || "bg-secondary text-muted-foreground"
+                      }`}
                     >
-                      +₦{sale.purchasePrice}
+                      {book.status}
                     </span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p style={{ fontSize: "17px", color: "hsl(var(--muted-foreground))", textAlign: "center", padding: "24px" }}>
-                No sales yet
-              </p>
-            )}
+            </section>
+
+            {/* Recent Sales */}
+            <section className="space-y-4">
+              <h2 className="font-serif text-2xl font-medium text-foreground tracking-tight">
+                Recent sales ({sales?.length || 0})
+              </h2>
+
+              {sales && sales.length > 0 ? (
+                <div className="divide-y divide-border rounded-xl border border-border bg-card overflow-hidden">
+                  {sales.map((sale) => (
+                    <div
+                      key={sale.id}
+                      className="flex items-center justify-between gap-4 p-4"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-serif text-base font-medium text-foreground truncate">
+                          {sale.book?.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Reader @{sale.buyer?.username || "Unknown"} ·{" "}
+                          {sale.createdAt
+                            ? new Date(sale.createdAt).toLocaleDateString()
+                            : ""}
+                        </p>
+                      </div>
+                      <span className="font-mono text-sm font-medium text-p-green-fg tnum shrink-0">
+                        +{formatNgn(sale.purchasePrice)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<PiCurrencyNgn className="h-5 w-5" aria-hidden="true" />}
+                  title="No sales yet"
+                  body="Once readers purchase one of your approved editions, transactions appear here automatically."
+                />
+              )}
+            </section>
           </>
         )}
       </div>

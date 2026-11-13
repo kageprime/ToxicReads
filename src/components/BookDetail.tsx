@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 import {
   PiCaretLeft,
   PiHeart,
-  PiHeartStraight,
+  PiHeartFill,
   PiStar,
   PiStarFill,
   PiBookOpen,
+  PiCopy,
+  PiShareNetwork,
+  PiWhatsappLogo,
 } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
@@ -15,15 +18,23 @@ import { toast } from "sonner";
 import PaymentModal from "./PaymentModal";
 import PreviewModal from "./PreviewModal";
 import BookCard from "./BookCard";
+import SafeImage from "./SafeImage";
 import { BookDetailSkeleton } from "./Skeleton";
 import EmptyState from "./EmptyState";
+
+function formatNaira(price: string) {
+  const numeric = Number(String(price).replace(/[^0-9.]/g, ""));
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return `₦${numeric.toLocaleString("en-NG")}`;
+  }
+  return `₦${price}`;
+}
 
 export default function BookDetail() {
   const { slug: slugParam } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  // Accept both canonical slugs and legacy numeric IDs (/book/9).
   const isNumeric = !!slugParam && /^\d+$/.test(slugParam);
   const idQuery = trpc.book.byId.useQuery(
     { id: isNumeric ? Number(slugParam) : 0 },
@@ -36,7 +47,6 @@ export default function BookDetail() {
   const book = (isNumeric ? idQuery.data : slugQuery.data) ?? undefined;
   const isLoading = isNumeric ? idQuery.isLoading : slugQuery.isLoading;
 
-  // Legacy numeric URL → canonical slug URL.
   useEffect(() => {
     if (isNumeric && idQuery.data?.slug) {
       navigate(`/book/${idQuery.data.slug}`, { replace: true });
@@ -74,6 +84,7 @@ export default function BookDetail() {
   const addWishlist = trpc.wishlistItems.add.useMutation({
     onSuccess: () => {
       utils.wishlistItems.check.invalidate();
+      utils.wishlistItems.list.invalidate();
       toast.success("Saved to wishlist");
     },
   });
@@ -81,6 +92,7 @@ export default function BookDetail() {
   const removeWishlist = trpc.wishlistItems.remove.useMutation({
     onSuccess: () => {
       utils.wishlistItems.check.invalidate();
+      utils.wishlistItems.list.invalidate();
       toast.success("Removed from wishlist");
     },
   });
@@ -121,12 +133,12 @@ export default function BookDetail() {
 
   if (!book) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-background px-4 py-24">
+      <div className="min-h-full flex items-center justify-center px-4 py-20">
         <EmptyState
-          icon={<PiBookOpen size={24} />}
-          title="Book not found"
-          body="It may have been removed, or the link is incorrect. Browse the library to find something else."
-          actionLabel="Back to library"
+          icon={<PiBookOpen className="h-5 w-5" aria-hidden="true" />}
+          title="Edition not found"
+          body="This book may have been removed or moved. Browse the catalog to explore current titles."
+          actionLabel="Back to catalog"
           onAction={() => navigate("/home")}
         />
       </div>
@@ -139,7 +151,7 @@ export default function BookDetail() {
 
   const similar =
     similarBooks
-      ?.filter(b => b.category === book.category && b.id !== book.id)
+      ?.filter((b) => b.category === book.category && b.id !== book.id)
       .slice(0, 4) || [];
 
   const reviews = reviewData?.reviews || [];
@@ -172,239 +184,350 @@ export default function BookDetail() {
   const shareUrl = () => window.location.origin + bookUrl(book);
 
   const copyLink = async () => {
-    const url = shareUrl();
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl());
       toast.success("Link copied");
     } catch {
-      toast.error("Could not copy the link");
+      toast.error("Could not copy link");
     }
   };
 
   return (
     <div className="min-h-full bg-background">
-      <div className="mx-auto max-w-[880px] animate-fade-up px-4 pb-24 pt-6 sm:px-8 md:pt-10">
-        {/* Back */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20 animate-fade-up">
         <button
+          type="button"
           onClick={() => navigate("/home")}
-          className="mb-6 flex items-center gap-1 text-muted-foreground transition-opacity hover:opacity-70"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
-          <PiCaretLeft size={14} />
-          <span className="text-[17px]">Back</span>
+          <PiCaretLeft className="h-4 w-4" aria-hidden="true" />
+          Back to catalog
         </button>
 
-        <div className="flex flex-col gap-8 md:flex-row">
-          {/* Cover */}
-          <div className="relative w-full max-w-[320px] shrink-0 self-start overflow-hidden border border-border bg-card shadow-soft">
-            <img
-              src={book.coverImage}
-              alt={`Cover of ${book.title} by ${book.author}`}
-              className="block aspect-[3/4] w-full object-cover"
-              loading="eager"
-            />
-            <button
-              onClick={handleToggleWishlist}
-              className="absolute left-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/90 transition-colors hover:bg-accent"
-              title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              aria-pressed={!!wishlisted}
-            >
-              {wishlisted ? (
-                <PiHeartStraight size={18} className="text-p-red-fg" />
-              ) : (
-                <PiHeart size={18} className="text-foreground" />
-              )}
-            </button>
+        {/* Main 2-column Editorial Spread */}
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] lg:grid-cols-[300px_1fr] gap-8 lg:gap-12 items-start">
+          {/* Sticky Cover Column */}
+          <div className="md:sticky md:top-8 flex flex-col items-center md:items-stretch">
+            <div className="w-full max-w-[260px] md:max-w-none aspect-[2/3] rounded-sm overflow-hidden bg-secondary cover-frame shadow-soft-lg">
+              <SafeImage
+                src={book.coverImage}
+                alt={`Cover of ${book.title} by ${book.author}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="mt-4 w-full max-w-[260px] md:max-w-none flex items-center justify-between text-xs text-muted-foreground px-0.5">
+              <span>{book.category}</span>
+              <span className="font-mono tnum">
+                {book.views} {book.views === 1 ? "view" : "views"}
+              </span>
+            </div>
           </div>
 
-          {/* Info */}
-          <div className="min-w-0 flex-1">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <span className="border border-border px-2 py-[3px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                {book.category}
-              </span>
-              {book.content && (
-                <span className="border border-border px-2 py-[3px] font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  Includes reading
+          {/* Info & Reading Actions */}
+          <div className="min-w-0 space-y-6">
+            <div className="space-y-2.5">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="rounded-full bg-secondary px-3 py-1 font-medium text-foreground">
+                  {book.category}
                 </span>
+                {book.content && (
+                  <span className="rounded-full border border-border px-3 py-1 font-medium text-muted-foreground">
+                    Digital edition
+                  </span>
+                )}
+              </div>
+
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-[42px] font-medium leading-[1.08] tracking-tight text-foreground text-balance">
+                {book.title}
+              </h1>
+
+              <p className="text-base text-muted-foreground">
+                By{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate(authorUrl(book))}
+                  className="font-medium text-foreground underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors"
+                >
+                  {book.author}
+                </button>
+              </p>
+
+              {reviewStats.count > 0 && (
+                <div className="flex items-center gap-2 pt-1">
+                  <div
+                    className="flex items-center gap-0.5"
+                    aria-label={`Rated ${reviewStats.avg} out of 5`}
+                  >
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <PiStarFill
+                        key={s}
+                        className={`h-3.5 w-3.5 ${
+                          s <= Math.round(reviewStats.avg)
+                            ? "text-p-yellow-fg"
+                            : "text-border"
+                        }`}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono text-xs text-muted-foreground tnum">
+                    {reviewStats.avg} ({reviewStats.count}{" "}
+                    {reviewStats.count === 1 ? "review" : "reviews"})
+                  </span>
+                </div>
               )}
             </div>
 
-            <h1 className="text-balance mb-1.5 font-serif text-3xl leading-[1.2] tracking-tight text-baobab md:text-4xl">
-              {book.title}
-            </h1>
-            <p className="mb-1 text-xl text-muted-foreground">
-              by{" "}
-              <button
-                onClick={() => navigate(authorUrl(book))}
-                className="underline underline-offset-[3px] transition-opacity hover:opacity-70"
-              >
-                {book.author}
-              </button>
-            </p>
+            <div className="pt-2 border-t border-border">
+              <p className="font-mono text-2xl sm:text-[28px] font-medium text-foreground tnum">
+                {isFree ? "Free" : formatNaira(book.price)}
+              </p>
+            </div>
 
-            {/* Rating */}
-            {reviewStats.count > 0 && (
-              <div className="mb-4 flex items-center gap-2">
-                <div className="flex items-center gap-0.5" aria-label={`Rated ${reviewStats.avg} out of 5`}>
-                  {[1, 2, 3, 4, 5].map(s => (
-                    <span
-                      key={s}
-                      className={
-                        s <= Math.round(reviewStats.avg)
-                          ? "text-p-yellow-fg"
-                          : "text-muted-foreground"
-                      }
-                    >
-                      <PiStarFill size={14} />
+            {/* Action Pills */}
+            <div className="flex flex-wrap items-center gap-3">
+              {canRead ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/read/${book.id}`)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground px-7 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    <PiBookOpen className="h-4 w-4" aria-hidden="true" />
+                    Read edition
+                  </button>
+                  {!isFree && (
+                    <span className="inline-flex items-center rounded-full bg-p-green text-p-green-fg px-4 py-2 text-xs font-medium">
+                      In your library
                     </span>
-                  ))}
-                </div>
-                <span className="tnum font-mono text-sm text-muted-foreground">
-                  {reviewStats.avg} ({reviewStats.count})
-                </span>
-              </div>
-            )}
+                  )}
+                </>
+              ) : isAuthenticated ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowPayment(true)}
+                    className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-7 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Buy edition
+                  </button>
+                  {book.content && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(true)}
+                      className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground px-6 py-3 text-sm font-medium hover:bg-secondary transition-colors"
+                    >
+                      Read free sample
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-7 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    {isFree ? "Sign in to read" : "Sign in to buy"}
+                  </button>
+                  {book.content && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(true)}
+                      className="inline-flex items-center justify-center rounded-full border border-border bg-card text-foreground px-6 py-3 text-sm font-medium hover:bg-secondary transition-colors"
+                    >
+                      Read free sample
+                    </button>
+                  )}
+                </>
+              )}
 
-            <p className="tnum mb-1 font-mono text-xl text-foreground">
-              {isFree ? "Free" : `₦${book.price}`}
-            </p>
-            <p className="tnum mb-6 font-mono text-sm text-muted-foreground">
-              {book.views} view{book.views !== 1 ? "s" : ""}
-            </p>
+              <button
+                type="button"
+                onClick={handleToggleWishlist}
+                aria-pressed={!!wishlisted}
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-medium transition-colors ${
+                  wishlisted
+                    ? "border-signal/40 bg-card text-signal"
+                    : "border-border bg-card text-foreground hover:bg-secondary"
+                }`}
+              >
+                {wishlisted ? (
+                  <PiHeartFill className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <PiHeart className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span>{wishlisted ? "Saved" : "Save"}</span>
+              </button>
+            </div>
 
-            {/* Actions */}
-            {canRead ? (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => navigate(`/read/${book.id}`)}
-                  className="flex-1 bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
-                >
-                  Read
-                </button>
-                <div className="flex items-center border border-p-green-fg bg-p-green px-4 py-3 text-lg text-p-green-fg">
-                  Purchased
-                </div>
-              </div>
-            ) : isAuthenticated ? (
-              <>
-                <button
-                  onClick={() => setShowPayment(true)}
-                  className="mb-3 w-full bg-foreground p-3 text-lg text-background transition hover:opacity-90 active:scale-[0.98]"
-                >
-                  Buy now
-                </button>
-                <button
-                  onClick={() => setShowPreview(true)}
-                  className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-foreground transition hover:bg-accent active:scale-[0.98]"
-                >
-                  Read a free sample
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => navigate("/login")}
-                  className="mb-3 w-full border border-border bg-transparent p-3 text-lg text-muted-foreground transition hover:bg-accent"
-                >
-                  {isFree ? "Log in to read" : "Log in to buy"}
-                </button>
-                <button
-                  onClick={() => setShowPreview(true)}
-                  className="mb-4 w-full border border-border bg-transparent p-3 text-lg text-foreground transition hover:bg-accent active:scale-[0.98]"
-                >
-                  Read a free sample
-                </button>
-              </>
-            )}
-
-            <div className="border-t border-border pt-4">
-              <h3 className="mb-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                Description
-              </h3>
-              <p className="text-pretty text-[19px] leading-[1.8] text-foreground">
+            {/* Synopsis */}
+            <div className="pt-6 border-t border-border space-y-2.5">
+              <h2 className="text-xs font-medium text-muted-foreground">
+                About this edition
+              </h2>
+              <p className="text-base sm:text-[17px] leading-[1.75] text-foreground/90 max-w-[65ch] text-pretty whitespace-pre-line">
                 {book.description}
               </p>
+            </div>
+
+            {/* Compact Share Bar */}
+            <div className="pt-5 border-t border-border flex flex-wrap items-center gap-2.5">
+              <span className="text-xs font-medium text-muted-foreground mr-1 inline-flex items-center gap-1.5">
+                <PiShareNetwork className="h-3.5 w-3.5" aria-hidden="true" />
+                Share
+              </span>
+              <button
+                type="button"
+                onClick={copyLink}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                <PiCopy className="h-3.5 w-3.5" aria-hidden="true" />
+                Copy link
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const text = `Read ${book.title} by ${book.author} on ToxicReads: `;
+                  window.open(
+                    "https://wa.me/?text=" + encodeURIComponent(text + shareUrl()),
+                    "wa-share",
+                    "width=600,height=400"
+                  );
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                <PiWhatsappLogo className="h-3.5 w-3.5" aria-hidden="true" />
+                WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(
+                    "https://www.facebook.com/sharer/sharer.php?u=" +
+                      encodeURIComponent(shareUrl()),
+                    "fb-share",
+                    "width=600,height=400"
+                  );
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                Facebook
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Reviews */}
+        {/* Reader Reviews */}
         <section
           aria-label="Reviews"
-          className="mt-12 border-t border-border pt-6"
+          className="mt-14 pt-8 border-t border-border"
         >
-          <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            Reviews{reviewStats.count > 0 ? ` (${reviewStats.count})` : ""}
-          </h3>
+          <div className="flex items-baseline justify-between mb-6">
+            <h2 className="font-serif text-2xl font-medium text-foreground tracking-tight">
+              Reader reviews
+              {reviewStats.count > 0 && (
+                <span className="ml-2 font-mono text-sm font-normal text-muted-foreground tnum">
+                  ({reviewStats.count})
+                </span>
+              )}
+            </h2>
+          </div>
 
           {isAuthenticated && !myReview && (
-            <div className="mb-6 border border-border bg-card p-4">
-              <div className="mb-2 flex items-center gap-1" role="radiogroup" aria-label="Your rating">
-                {[1, 2, 3, 4, 5].map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setReviewRating(s)}
-                    role="radio"
-                    aria-checked={s === reviewRating}
-                    aria-label={`${s} star${s > 1 ? "s" : ""}`}
-                    className="cursor-pointer border-none bg-none p-0.5 transition-opacity hover:opacity-80"
-                  >
-                    {s <= reviewRating ? (
-                      <PiStarFill size={18} className="text-p-yellow-fg" />
-                    ) : (
-                      <PiStar size={18} className="text-muted-foreground" />
-                    )}
-                  </button>
-                ))}
+            <div className="mb-8 rounded-xl border border-border bg-card p-5 space-y-3.5 max-w-2xl">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">
+                  Write a review
+                </span>
+                <div
+                  className="flex items-center gap-1"
+                  role="radiogroup"
+                  aria-label="Your rating"
+                >
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setReviewRating(s)}
+                      role="radio"
+                      aria-checked={s === reviewRating}
+                      aria-label={`${s} star${s > 1 ? "s" : ""}`}
+                      className="p-1 rounded hover:bg-secondary transition-colors"
+                    >
+                      {s <= reviewRating ? (
+                        <PiStarFill
+                          className="h-4 w-4 text-p-yellow-fg"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <PiStar
+                          className="h-4 w-4 text-muted-foreground"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
+
               <textarea
-                className="field-input mb-2"
-                rows={2}
+                className="field-input"
+                rows={3}
                 value={reviewText}
-                onChange={e => setReviewText(e.target.value)}
-                placeholder="Share what you thought (optional)"
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Share your thoughts on the story..."
                 aria-label="Review text"
               />
-              <button
-                onClick={handleSubmitReview}
-                disabled={createReview.isPending}
-                className="bg-foreground px-4 py-2 font-mono text-xs uppercase tracking-[0.1em] text-background transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-              >
-                {createReview.isPending ? "Submitting…" : "Submit review"}
-              </button>
-              {createReview.error && (
-                <p role="alert" className="mt-2 text-sm text-p-red-fg">
-                  {createReview.error.message}
-                </p>
-              )}
+
+              <div className="flex items-center justify-between gap-3">
+                {createReview.error ? (
+                  <p role="alert" className="text-xs text-destructive">
+                    {createReview.error.message}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <button
+                  type="button"
+                  onClick={handleSubmitReview}
+                  disabled={createReview.isPending}
+                  className="rounded-full bg-primary text-primary-foreground px-5 py-2 text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+                >
+                  {createReview.isPending ? "Publishing..." : "Publish review"}
+                </button>
+              </div>
             </div>
           )}
 
           {reviews.length > 0 ? (
-            <div className="space-y-4">
-              {reviews.map(review => (
-                <div key={review.id} className="border-b border-border py-3">
-                  <div className="mb-1 flex items-center gap-2">
-                    <div className="flex items-center gap-0.5" aria-label={`Rated ${review.rating} out of 5`}>
-                      {[1, 2, 3, 4, 5].map(s => (
+            <div className="divide-y divide-border max-w-2xl">
+              {reviews.map((review) => (
+                <div key={review.id} className="py-4 first:pt-0">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <div
+                      className="flex items-center gap-0.5"
+                      aria-label={`Rated ${review.rating} out of 5`}
+                    >
+                      {[1, 2, 3, 4, 5].map((s) => (
                         <PiStarFill
                           key={s}
-                          size={12}
-                          className={
+                          className={`h-3.5 w-3.5 ${
                             s <= review.rating
                               ? "text-p-yellow-fg"
                               : "text-border"
-                          }
+                          }`}
+                          aria-hidden="true"
                         />
                       ))}
                     </div>
-                    <span className="tnum font-mono text-sm text-muted-foreground">
+                    <span className="font-mono text-xs text-muted-foreground tnum">
                       {new Date(review.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   {review.text && (
-                    <p className="text-pretty text-[17px] leading-[1.6] text-foreground">
+                    <p className="text-sm sm:text-[15px] leading-relaxed text-foreground/90 text-pretty">
                       {review.text}
                     </p>
                   )}
@@ -412,67 +535,23 @@ export default function BookDetail() {
               ))}
             </div>
           ) : (
-            <p className="text-base text-muted-foreground">
-              No reviews yet.{" "}
-              {isAuthenticated ? "Be the first to share your thoughts." : ""}
+            <p className="text-sm text-muted-foreground">
+              No reviews yet.
+              {isAuthenticated ? " Share the first impression." : ""}
             </p>
           )}
         </section>
 
-        {/* Share */}
-        <section
-          aria-label="Share this book"
-          className="mt-8 border-t border-border pt-6"
-        >
-          <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            Share this book
-          </h3>
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                window.open(
-                  "https://www.facebook.com/sharer/sharer.php?u=" +
-                    encodeURIComponent(shareUrl()),
-                  "fb-share",
-                  "width=600,height=400"
-                );
-              }}
-              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
-            >
-              Facebook
-            </button>
-            <button
-              onClick={() => {
-                const text = "Check out this book: " + book.title + " - ";
-                window.open(
-                  "https://wa.me/?text=" + encodeURIComponent(text + shareUrl()),
-                  "wa-share",
-                  "width=600,height=400"
-                );
-              }}
-              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
-            >
-              WhatsApp
-            </button>
-            <button
-              onClick={copyLink}
-              className="flex-1 border border-border bg-transparent p-2.5 text-sm font-medium tracking-[0.1em] text-foreground transition hover:bg-accent active:scale-[0.98]"
-            >
-              Copy link
-            </button>
-          </div>
-        </section>
-
-        {/* Similar books */}
+        {/* Similar Editions */}
         {similar.length > 0 && (
           <section
             aria-label="Similar books"
-            className="mt-12 border-t border-border pt-6"
+            className="mt-14 pt-8 border-t border-border"
           >
-            <h3 className="mb-4 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Similar books
-            </h3>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <h2 className="font-serif text-2xl font-medium text-foreground tracking-tight mb-6">
+              More in {book.category}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
               {similar.map((similarBook, i) => (
                 <BookCard
                   key={similarBook.id}
@@ -521,12 +600,12 @@ export default function BookDetail() {
 
       {showPreview && book && !previewData && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-sm p-4"
           onClick={() => setShowPreview(false)}
         >
-          <p className="text-lg text-white">
-            {previewLoading ? "Loading sample…" : "Sample unavailable."}
-          </p>
+          <div className="rounded-xl border border-border bg-card px-5 py-3 text-sm text-foreground shadow-soft">
+            {previewLoading ? "Loading sample..." : "Sample unavailable."}
+          </div>
         </div>
       )}
     </div>

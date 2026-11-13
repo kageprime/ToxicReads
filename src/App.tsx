@@ -5,6 +5,7 @@ import LeftColumn from "./components/LeftColumn";
 import BookDetail from "./components/BookDetail";
 import BottomNav from "./components/BottomNav";
 import NotificationsBell from "./components/NotificationsBell";
+import BrandMark from "./components/BrandMark";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -28,7 +29,7 @@ import Landing from "./pages/Landing";
 import SellerDashboard from "./pages/SellerDashboard";
 import AuthorProfile from "./pages/AuthorProfile";
 import WishlistPage from "./pages/WishlistPage";
-import { PiCaretRight } from "react-icons/pi";
+import { PiList } from "react-icons/pi";
 import { Toaster } from "sonner";
 
 function AppToaster() {
@@ -58,29 +59,37 @@ function AppShell() {
   }, [location.pathname, isMobile, setCollapsed]);
 
   return (
-    <div
-      className="flex"
-      style={{ height: "100vh", backgroundColor: "hsl(var(--background))" }}
-    >
+    <div className="flex h-dvh bg-background text-foreground overflow-hidden">
       <LeftColumn />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
-        <main id="main-content" className="flex-1 overflow-y-auto">
+
+        {/* Mobile utility bar triggers (drawer + notifications) */}
+        {isMobile && collapsed && (
+          <div className="fixed top-[max(12px,env(safe-area-inset-top))] inset-x-3 z-30 flex items-center justify-between pointer-events-none md:hidden">
+            <button
+              type="button"
+              onClick={() => setCollapsed(false)}
+              aria-label="Open menu"
+              className="pointer-events-auto h-9 w-9 rounded-full border border-border bg-background/90 backdrop-blur-md flex items-center justify-center text-foreground shadow-xs hover:bg-secondary transition-colors"
+            >
+              <PiList className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <div className="pointer-events-auto">
+              <NotificationsBell />
+            </div>
+          </div>
+        )}
+
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto pb-20 md:pb-10"
+        >
           <Outlet />
         </main>
       </div>
-      {/* Mobile overlay bell: zero layout space, one-tap access */}
-      {isMobile && collapsed && (
-        <div
-          className="fixed z-40 rounded-full border border-border bg-background/90 backdrop-blur md:hidden"
-          style={{ right: "12px", top: "max(12px, env(safe-area-inset-top))" }}
-        >
-          <NotificationsBell />
-        </div>
-      )}
-      <FloatingOpen />
     </div>
   );
 }
@@ -89,20 +98,10 @@ function HomePage() {
   const { data: dbBooks, isLoading } = trpc.book.list.useQuery();
   const books: BookDisplay[] = dbBooks ? dbBooks.map(toBookDisplay) : [];
 
-  // The library reads best after dark: pin the theme while mounted.
-  useEffect(() => {
-    const root = document.documentElement;
-    const prev = root.getAttribute("data-theme") ?? "dark";
-    root.setAttribute("data-theme", "dark");
-    return () => {
-      root.setAttribute("data-theme", prev);
-    };
-  }, []);
-
   return (
     <div className="min-h-full">
       {isLoading ? (
-        <div className="px-4 pt-4 sm:px-6 md:px-10 md:pt-8">
+        <div className="max-w-7xl mx-auto px-4 pt-14 sm:px-6 lg:px-8 md:pt-8 pb-12">
           <BookGridSkeleton count={10} />
         </div>
       ) : (
@@ -116,41 +115,11 @@ function BookPage() {
   return <BookDetail />;
 }
 
-function FloatingOpen() {
-  const location = useLocation();
-  const { collapsed, setCollapsed } = useSidebar();
-
-  if (!collapsed || location.pathname === "/") return null;
-
-  return (
-    <button
-      onClick={() => setCollapsed(false)}
-      className="fixed top-1/2 -translate-y-1/2 z-50 p-2 transition-all duration-300 ease-out hover:opacity-80"
-      style={{
-        left: "12px",
-        backgroundColor: "hsl(var(--background))",
-        border: "1px solid hsl(var(--border))",
-      }}
-      title="Open sidebar"
-    >
-      <PiCaretRight size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
-    </button>
-  );
-}
-
 function AuthSplash() {
   return (
-    <div
-      className="flex items-center justify-center"
-      style={{
-        height: "100vh",
-        backgroundColor: "hsl(var(--background))",
-      }}
-    >
+    <div className="flex h-dvh items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-4">
-        <span className="font-serif text-[26px] tracking-tight text-foreground">
-          ToxicReads
-        </span>
+        <BrandMark to={null} />
         <span
           className="inline-block w-5 h-5 border-2 border-border border-t-foreground rounded-full animate-spin"
           aria-label="Loading"
@@ -163,10 +132,6 @@ function AuthSplash() {
 export default function App() {
   const { isAuthLoading } = useAuth();
 
-  // Block first paint only while the initial auth.me is in flight. React Query's
-  // `isLoading` is true solely on the first fetch (no cached data), so background
-  // refetches never re-trigger the splash and the sidebar never flashes the
-  // wrong Login/Logout button.
   if (isAuthLoading) {
     return <AuthSplash />;
   }

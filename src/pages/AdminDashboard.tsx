@@ -332,20 +332,17 @@ export default function AdminDashboard() {
 
   const inputStyle = {
     width: "100%",
-    fontSize: "18px",
-    padding: "8px 10px",
-    border: "1px solid hsl(var(--border))",
+    fontSize: "15px",
+    padding: "9px 12px",
+    borderRadius: "var(--radius)",
+    border: "1px solid hsl(var(--input))",
     outline: "none",
     color: "hsl(var(--foreground))",
-    fontFamily: "var(--font-mono)",
-    background: "transparent",
+    background: "hsl(var(--card))",
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "hsl(var(--background))" }}
-    >
+    <div className="min-h-full bg-background text-foreground">
       <ConfirmDialog
         open={!!confirmState}
         title={confirmState?.title ?? ""}
@@ -357,31 +354,18 @@ export default function AdminDashboard() {
         }}
         onCancel={() => setConfirmState(null)}
       />
-      <div
-        className="mx-auto"
-        style={{ maxWidth: "960px", padding: "32px 24px 80px" }}
-      >
-        <h1
-          style={{
-            fontSize: "34px",
-            fontWeight: 400,
-            fontFamily: "var(--font-serif)",
-            color: "hsl(var(--foreground))",
-            marginBottom: "24px",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          Admin Dashboard
-        </h1>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20">
+        <div className="pb-6 border-b border-border mb-6">
+          <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
+            Admin console
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Review submissions, manage editions, curate featured placements, and monitor orders.
+          </p>
+        </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <div
-            style={{
-              display: "flex",
-              gap: "1px",
-              borderBottom: "1px solid hsl(var(--border))",
-            }}
-          >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             {(["pending", "books", "featured", "authors", "purchases", "users"] as Tab[]).map(tab => {
               const count =
                 tab === "pending"
@@ -397,83 +381,60 @@ export default function AdminDashboard() {
                           : allUsers?.length;
               const labels = {
                 pending: "Pending",
-                books: "All Books",
+                books: "All books",
                 featured: "Featured",
                 authors: "Authors",
                 purchases: "Purchases",
                 users: "Users",
               };
+              const isActive = activeTab === tab;
               return (
                 <button
                   key={tab}
+                  type="button"
                   onClick={() => setActiveTab(tab)}
-                  style={{
-                    fontSize: "17px",
-                    fontFamily: "var(--font-mono)",
-                    letterSpacing: "0.05em",
-                    padding: "8px 16px",
-                    border: "none",
-                    borderBottom:
-                      activeTab === tab
-                        ? "2px solid hsl(var(--foreground))"
-                        : "2px solid transparent",
-                    background: "transparent",
-                    color:
-                      activeTab === tab
-                        ? "hsl(var(--foreground))"
-                        : "hsl(var(--muted-foreground))",
-                    cursor: "pointer",
-                  }}
+                  className={`rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  {labels[tab].toUpperCase()} {count ? `(${count})` : ""}
+                  {labels[tab]}
+                  {typeof count === "number" && count > 0 ? (
+                    <span className="ml-1.5 font-mono text-[11px] opacity-80 tnum">
+                      {count}
+                    </span>
+                  ) : null}
                 </button>
               );
             })}
           </div>
 
           {activeTab === "pending" && selectedBooks.size > 0 && (
-            <div className="flex gap-2">
-              <span
-                style={{
-                  fontSize: "17px",
-                  color: "hsl(var(--muted-foreground))",
-                  fontFamily: "var(--font-mono)",
-                  alignSelf: "center",
-                }}
-              >
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="font-mono text-xs text-muted-foreground tnum">
                 {selectedBooks.size} selected
               </span>
               <button
+                type="button"
                 onClick={bulkApprove}
                 disabled={approveMutation.isPending}
-                style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-mono)",
-                  color: "#fff",
-                  background: "rgb(var(--color-p-green-fg))",
-                  border: "none",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                  letterSpacing: "0.05em",
-                }}
+                className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                style={{ backgroundColor: "rgb(var(--color-p-green-fg))" }}
               >
-                Approve All
+                Approve selected
               </button>
               <button
+                type="button"
                 onClick={bulkReject}
                 disabled={rejectMutation.isPending}
+                className="rounded-full border px-4 py-1.5 text-xs font-medium transition-opacity hover:opacity-85 disabled:opacity-60"
                 style={{
-                  fontSize: "16px",
-                  fontFamily: "var(--font-mono)",
                   color: "rgb(var(--color-p-red-fg))",
-                  background: "transparent",
-                  border: "1px solid var(--color-p-red-fg)",
-                  padding: "6px 12px",
-                  cursor: "pointer",
-                  letterSpacing: "0.05em",
+                  borderColor: "rgb(var(--color-p-red-fg))",
                 }}
               >
-                Reject All
+                Reject selected
               </button>
             </div>
           )}
@@ -481,38 +442,14 @@ export default function AdminDashboard() {
 
         {activeTab === "pending" && (
           <div>
-            <div
-              style={{
-                border: "1px solid var(--color-p-yellow-fg)",
-                padding: "10px 14px",
-                marginBottom: "16px",
-                backgroundColor: "rgba(243, 156, 18, 0.08)",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  alignItems: "flex-start",
-                }}
-              >
-                <PiWarningCircle
-                  size={12}
-                  style={{ color: "rgb(var(--color-p-yellow-fg))", marginTop: "3px", flexShrink: 0 }}
-                />
-                <p
-                  style={{
-                    fontSize: "15px",
-                    fontFamily: "var(--font-mono)",
-                    color: "hsl(var(--foreground))",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  Before approving, verify: accurate title/author, appropriate
-                  description, and original content (no AI). Reject submissions
-                  that violate our content policies.
-                </p>
-              </div>
+            <div className="form-note flex items-start gap-2.5 text-xs sm:text-sm mb-6">
+              <PiWarningCircle
+                className="h-4 w-4 text-signal shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
+              <p className="text-muted-foreground leading-relaxed">
+                Before approving, verify accurate title and author attribution, clear synopsis text, and original non-AI manuscript quality.
+              </p>
             </div>
             {pendingLoading ? (
               <RowsSkeleton count={6} />
@@ -542,8 +479,7 @@ export default function AdminDashboard() {
                   <div
                     key={book.id}
                     style={{
-                      border: "1px solid hsl(var(--border))",
-                      padding: "16px",
+                      border: "1px solid hsl(var(--border))", borderRadius: "calc(var(--radius) + 4px)", backgroundColor: "hsl(var(--card))", padding: "18px",
                     }}
                   >
                     <div className="flex gap-4">
@@ -614,7 +550,7 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: statusColors[book.status],
                               border: `1px solid ${statusColors[book.status]}`,
-                              padding: "2px 8px",
+                              padding: "2px 10px", borderRadius: "9999px",
                             }}
                           >
                             {book.status?.toUpperCase()}
@@ -643,7 +579,7 @@ export default function AdminDashboard() {
                               color: "#fff",
                               background: "rgb(var(--color-p-green-fg))",
                               border: "none",
-                              padding: "6px 16px",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -660,8 +596,8 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: "rgb(var(--color-p-red-fg))",
                               background: "transparent",
-                              border: "1px solid var(--color-p-red-fg)",
-                              padding: "6px 16px",
+                              border: "1px solid rgb(var(--color-p-red-fg))",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -710,7 +646,7 @@ export default function AdminDashboard() {
                   color: "#fff",
                   background: "rgb(var(--color-p-green-fg))",
                   border: "none",
-                  padding: "8px 14px",
+                  padding: "8px 14px", borderRadius: "9999px",
                   cursor: "pointer",
                   letterSpacing: "0.05em",
                   display: "inline-flex",
@@ -926,7 +862,7 @@ export default function AdminDashboard() {
                               color: "#fff",
                               background: "rgb(var(--color-p-green-fg))",
                               border: "none",
-                              padding: "6px 16px",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -941,8 +877,8 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: "rgb(var(--color-p-red-fg))",
                               background: "transparent",
-                              border: "1px solid var(--color-p-red-fg)",
-                              padding: "6px 16px",
+                              border: "1px solid rgb(var(--color-p-red-fg))",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -1047,7 +983,7 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: statusColors[book.status],
                               border: `1px solid ${statusColors[book.status]}`,
-                              padding: "2px 6px",
+                              padding: "2px 10px", borderRadius: "9999px",
                               textAlign: "center",
                             }}
                           >
@@ -1071,7 +1007,7 @@ export default function AdminDashboard() {
                                   ? "rgb(var(--color-p-yellow))"
                                   : "none",
                                 border: "1px solid hsl(var(--border))",
-                                padding: "4px 6px",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                               }}
                               title={
@@ -1094,7 +1030,7 @@ export default function AdminDashboard() {
                                 color: "hsl(var(--foreground))",
                                 background: "none",
                                 border: "1px solid hsl(var(--border))",
-                                padding: "4px 6px",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                               }}
                               title="Edit"
@@ -1116,8 +1052,8 @@ export default function AdminDashboard() {
                                 fontFamily: "var(--font-mono)",
                                 color: "rgb(var(--color-p-red-fg))",
                                 background: "none",
-                                border: "1px solid var(--color-p-red-fg)",
-                                padding: "4px 6px",
+                                border: "1px solid rgb(var(--color-p-red-fg))",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                               }}
                               title="Delete"
@@ -1248,7 +1184,7 @@ export default function AdminDashboard() {
                                 marginLeft: "8px",
                               }}
                             >
-                              {book.status?.toUpperCase()} — HIDDEN ON LANDING
+                              {book.status} · Hidden on landing
                             </span>
                           )}
                         </p>
@@ -1269,7 +1205,7 @@ export default function AdminDashboard() {
                               color: "hsl(var(--foreground))",
                               background: "none",
                               border: "1px solid hsl(var(--border))",
-                              padding: "4px 6px",
+                              padding: "4px 6px", borderRadius: "9999px",
                               cursor: "pointer",
                               opacity:
                                 i === 0 || moveFeaturedMutation.isPending
@@ -1297,7 +1233,7 @@ export default function AdminDashboard() {
                               color: "hsl(var(--foreground))",
                               background: "none",
                               border: "1px solid hsl(var(--border))",
-                              padding: "4px 6px",
+                              padding: "4px 6px", borderRadius: "9999px",
                               cursor: "pointer",
                               opacity:
                                 i === (featuredBooks?.length ?? 0) - 1 ||
@@ -1321,8 +1257,8 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: "rgb(var(--color-p-red-fg))",
                               background: "none",
-                              border: "1px solid var(--color-p-red-fg)",
-                              padding: "4px 6px",
+                              border: "1px solid rgb(var(--color-p-red-fg))",
+                              padding: "4px 6px", borderRadius: "9999px",
                               cursor: "pointer",
                             }}
                             title="Remove from carousel"
@@ -1344,7 +1280,7 @@ export default function AdminDashboard() {
                   padding: "40px 0",
                 }}
               >
-                Nothing featured — star books in All Books to fill the carousel
+                Nothing featured yet. Star books in All Books to feature them on the homepage.
               </p>
             )}
           </div>
@@ -1372,7 +1308,7 @@ export default function AdminDashboard() {
               }}
             >
               Profiles are created automatically from book authors. Add bios,
-              photos and links here — they show on each author's public page.
+              photos, and social links to display on each author's public page.
             </p>
             {authorsLoading ? (
               <RowsSkeleton count={4} />
@@ -1383,8 +1319,7 @@ export default function AdminDashboard() {
                     {editingAuthor === author.id ? (
                       <div
                         style={{
-                          padding: "16px",
-                          border: "1px solid hsl(var(--border))",
+                          padding: "18px", border: "1px solid hsl(var(--border))", borderRadius: "calc(var(--radius) + 4px)", backgroundColor: "hsl(var(--card))",
                           marginBottom: "12px",
                         }}
                       >
@@ -1453,7 +1388,7 @@ export default function AdminDashboard() {
                             onChange={e =>
                               setAuthorForm({ ...authorForm, bio: e.target.value })
                             }
-                            placeholder="Short bio — who they are, what they write"
+                            placeholder="Short biography: who they are and what they write"
                             rows={3}
                             className="field-input"
                           />
@@ -1536,7 +1471,7 @@ export default function AdminDashboard() {
                               color: "#fff",
                               background: "rgb(var(--color-p-green-fg))",
                               border: "none",
-                              padding: "6px 16px",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -1550,8 +1485,8 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: "rgb(var(--color-p-red-fg))",
                               background: "transparent",
-                              border: "1px solid var(--color-p-red-fg)",
-                              padding: "6px 16px",
+                              border: "1px solid rgb(var(--color-p-red-fg))",
+                              padding: "6px 16px", borderRadius: "9999px",
                               cursor: "pointer",
                               letterSpacing: "0.05em",
                             }}
@@ -1634,7 +1569,7 @@ export default function AdminDashboard() {
                                 color: "hsl(var(--foreground))",
                                 background: "none",
                                 border: "1px solid hsl(var(--border))",
-                                padding: "4px 6px",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                               }}
                               title="Edit profile"
@@ -1657,7 +1592,7 @@ export default function AdminDashboard() {
                   padding: "40px 0",
                 }}
               >
-                No authors yet — they appear when books are added
+                No authors yet. Author pages appear automatically when books are added.
               </p>
             )}
           </div>
@@ -1674,8 +1609,7 @@ export default function AdminDashboard() {
                 >
                   <div
                     style={{
-                      border: "1px solid hsl(var(--border))",
-                      padding: "16px",
+                      border: "1px solid hsl(var(--border))", borderRadius: "calc(var(--radius) + 4px)", backgroundColor: "hsl(var(--card))", padding: "18px",
                     }}
                   >
                     <p
@@ -1701,8 +1635,7 @@ export default function AdminDashboard() {
                   </div>
                   <div
                     style={{
-                      border: "1px solid hsl(var(--border))",
-                      padding: "16px",
+                      border: "1px solid hsl(var(--border))", borderRadius: "calc(var(--radius) + 4px)", backgroundColor: "hsl(var(--card))", padding: "18px",
                     }}
                   >
                     <p
@@ -1872,7 +1805,7 @@ export default function AdminDashboard() {
                           fontFamily: "var(--font-mono)",
                         }}
                       >
-                        {purchase.buyer?.username || "—"}
+                        {purchase.buyer?.username || "-"}
                       </span>
                       <span>·</span>
                       <span
@@ -1887,7 +1820,7 @@ export default function AdminDashboard() {
                       <span>
                         {purchase.createdAt
                           ? new Date(purchase.createdAt).toLocaleDateString()
-                          : "—"}
+                          : "-"}
                       </span>
                     </div>
                   </div>
@@ -1961,7 +1894,7 @@ export default function AdminDashboard() {
                               fontFamily: "var(--font-mono)",
                               color: "rgb(var(--color-p-green-fg))",
                               border: "1px solid rgb(var(--color-p-green-fg))",
-                              padding: "1px 6px",
+                              padding: "2px 10px", borderRadius: "9999px",
                             }}
                           >
                             ADMIN
@@ -2000,7 +1933,7 @@ export default function AdminDashboard() {
                           fontFamily: "var(--font-mono)",
                           color: userStatusColors[user.status],
                           border: `1px solid ${userStatusColors[user.status]}`,
-                          padding: "2px 6px",
+                          padding: "2px 10px", borderRadius: "9999px",
                           textAlign: "center",
                           width: "80px",
                         }}
@@ -2017,7 +1950,7 @@ export default function AdminDashboard() {
                       >
                         {user.createdAt
                           ? new Date(user.createdAt).toLocaleDateString()
-                          : "—"}
+                          : "-"}
                       </span>
                       <div
                         style={{
@@ -2050,7 +1983,7 @@ export default function AdminDashboard() {
                                     : "rgb(var(--color-p-yellow-fg))",
                                 background: "none",
                                 border: "1px solid hsl(var(--border))",
-                                padding: "4px 6px",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                                 display: "inline-flex",
                                 alignItems: "center",
@@ -2071,8 +2004,8 @@ export default function AdminDashboard() {
                                 fontFamily: "var(--font-mono)",
                                 color: "rgb(var(--color-p-red-fg))",
                                 background: "none",
-                                border: "1px solid var(--color-p-red-fg)",
-                                padding: "4px 6px",
+                                border: "1px solid rgb(var(--color-p-red-fg))",
+                                padding: "4px 6px", borderRadius: "9999px",
                                 cursor: "pointer",
                                 display: "inline-flex",
                                 alignItems: "center",

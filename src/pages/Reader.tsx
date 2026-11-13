@@ -609,12 +609,17 @@ export default function Reader() {
     };
   }, []);
 
+  const bgColor = theme === "dark" ? "#121211" : "#F7F7F4";
+  const textColor = theme === "dark" ? "#F2F1EC" : "#141413";
+  const mutedInk = theme === "dark" ? "#A09D94" : "#5C5A55";
+  const headerBg = theme === "dark" ? "#1A1A18" : "#FFFFFF";
+  const borderColor = theme === "dark" ? "#2C2B27" : "#E4E3DD";
+  const activeBg = theme === "dark" ? "#242320" : "#ECEBE4";
+  const accentColor = theme === "dark" ? "#DF5348" : "#B82E24";
+
   if (isLoading || authLoading) {
     return (
-      <div
-        className="min-h-dvh"
-        style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}
-      >
+      <div className="min-h-dvh" style={{ backgroundColor: bgColor }}>
         <ReaderSkeleton />
       </div>
     );
@@ -624,27 +629,16 @@ export default function Reader() {
     return (
       <div
         className="flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center"
-        style={{ backgroundColor: theme === "dark" ? "#1a1a1a" : "#faf8f5" }}
+        style={{ backgroundColor: bgColor, color: textColor }}
       >
-        <span
-          style={{
-            fontSize: "20px",
-            color: theme === "dark" ? "#999" : "#666",
-          }}
-        >
-          This book could not be loaded
-        </span>
+        <p className="font-serif text-xl" style={{ color: mutedInk }}>
+          This book could not be loaded.
+        </p>
         <button
+          type="button"
           onClick={() => navigate("/my-purchases")}
-          style={{
-            fontSize: "17px",
-            fontFamily: "var(--font-mono)",
-            color: theme === "dark" ? "#ccc" : "#333",
-            background: "none",
-            border: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`,
-            padding: "8px 16px",
-            cursor: "pointer",
-          }}
+          className="rounded-full border px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
+          style={{ borderColor, color: textColor }}
         >
           Back to library
         </button>
@@ -652,43 +646,30 @@ export default function Reader() {
     );
   }
 
-  const bgColor = theme === "dark" ? "#1a1a1a" : "#faf8f5";
-  const textColor = theme === "dark" ? "#e8e6e3" : "#2a2520";
-  const headerBg = theme === "dark" ? "#141414" : "#fff";
-  const borderColor = theme === "dark" ? "#333" : "#e8e4df";
-  const outlineBg = theme === "dark" ? "#141414" : "#fff";
+  const outlineBg = headerBg;
   const watermarkColor =
-    theme === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)";
+    theme === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.035)";
   const loadedCount = Object.keys(loadedChunks).length;
+  const audioDisabled =
+    paragraphs.length === 0 || !paragraphs.join("").trim();
 
   return (
     <div
-      className="min-h-screen"
-      style={{ backgroundColor: bgColor, position: "relative" }}
+      className="min-h-dvh relative transition-colors duration-200"
+      style={{ backgroundColor: bgColor, color: textColor }}
     >
       {/* Watermark overlay */}
       <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 60,
-          pointerEvents: "none",
-          overflow: "hidden",
-          fontSize: "18px",
-          fontFamily: "var(--font-mono)",
-          color: watermarkColor,
-          whiteSpace: "pre",
-          userSelect: "none",
-        }}
+        className="fixed inset-0 z-[60] pointer-events-none overflow-hidden font-mono text-base whitespace-pre select-none"
+        style={{ color: watermarkColor }}
       >
         {Array.from({ length: 40 }).map((_, ri) => (
           <div
             key={ri}
+            className="text-center opacity-50"
             style={{
-              textAlign: "center",
               lineHeight: "2.5",
               transform: "rotate(-20deg)",
-              opacity: 0.5,
             }}
           >
             {`TOXICREADS · ${user?.name || user?.username || "Reader"} · ${new Date().toISOString().slice(0, 10)} `.repeat(
@@ -700,240 +681,167 @@ export default function Reader() {
 
       {/* Header */}
       <header
-        className="fixed top-0 left-0 right-0 flex items-center justify-between px-2 sm:px-4 z-50"
+        className="fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-3 sm:px-6 z-50 border-b transition-colors"
         style={{
-          height: "48px",
           backgroundColor: headerBg,
-          borderBottom: `1px solid ${borderColor}`,
+          borderColor,
         }}
       >
-        <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
           <button
+            type="button"
             onClick={() => navigate("/my-purchases")}
-            className="p-1.5 rounded hover:opacity-70 transition-opacity shrink-0"
+            aria-label="Back to library"
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:opacity-70 transition-opacity shrink-0"
+            style={{ color: textColor }}
           >
-            <PiCaretLeft size={18} style={{ color: textColor }} />
+            <PiCaretLeft size={18} />
           </button>
           <span
-            className="hidden sm:inline"
-            style={{
-              fontSize: "17px",
-              color: theme === "dark" ? "#999" : "#666",
-              maxWidth: "200px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+            className="hidden sm:inline font-serif text-[16px] max-w-[260px] truncate"
+            style={{ color: mutedInk }}
           >
             {book.title}
           </span>
         </div>
-        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
+            type="button"
             onClick={() => (listenOpen ? handleListenClose() : openListen())}
-            disabled={paragraphs.length === 0 || !paragraphs.join("").trim()}
+            disabled={audioDisabled}
+            className="h-9 rounded-full border px-3 sm:px-3.5 text-xs font-medium inline-flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer"
             style={{
-              fontSize: "16px",
-              fontFamily: "var(--font-mono)",
               color: textColor,
-              background: listenOpen
-                ? theme === "dark"
-                  ? "#2a2a2a"
-                  : "#f0ede8"
-                : "none",
-              border: `1px solid ${listenOpen ? textColor : borderColor}`,
-              padding: "4px 6px sm:px-8",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              opacity:
-                paragraphs.length === 0 || !paragraphs.join("").trim() ? 0.4 : 1,
+              backgroundColor: listenOpen ? activeBg : "transparent",
+              borderColor: listenOpen ? textColor : borderColor,
             }}
-            title={listenOpen ? "Close player" : "Listen to this book"}
+            title={listenOpen ? "Close audio player" : "Listen to this book"}
           >
-            <PiHeadphones size={12} />{" "}
+            <PiHeadphones size={15} />
             <span className="hidden sm:inline">
               {listenOpen ? "Listening" : "Listen"}
             </span>
           </button>
+
           {outline.length > 0 && (
             <button
+              type="button"
               onClick={() => setShowOutline(!showOutline)}
+              className="h-9 rounded-full border px-3 sm:px-3.5 text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
               style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-mono)",
                 color: textColor,
-                background: "none",
-                border: `1px solid ${showOutline ? textColor : borderColor}`,
-                padding: "4px 6px sm:px-8",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "2px sm:gap-4px",
+                backgroundColor: showOutline ? activeBg : "transparent",
+                borderColor: showOutline ? textColor : borderColor,
               }}
-              title="Outline"
+              title="Chapters outline"
             >
-              <PiList size={12} />{" "}
-              <span className="hidden sm:inline">Outline</span>
+              <PiList size={15} />
+              <span className="hidden sm:inline">Contents</span>
             </button>
           )}
-          <span className="hidden sm:flex items-center gap-0.5 sm:gap-1">
+
+          <div className="hidden sm:flex items-center gap-1 rounded-full border px-1.5 h-9" style={{ borderColor }}>
             <button
-onClick={() => setFontSize(Math.max(20, fontSize - 2))}
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-mono)",
-                color: textColor,
-                background: "none",
-                border: `1px solid ${borderColor}`,
-                padding: "4px 5px sm:px-8",
-                cursor: "pointer",
-              }}
-              title="Decrease font"
+              type="button"
+              onClick={() => setFontSize(Math.max(16, fontSize - 2))}
+              className="h-7 w-7 rounded-full font-mono text-xs flex items-center justify-center hover:opacity-75 transition-opacity"
+              style={{ color: textColor }}
+              title="Decrease font size"
             >
-              A−
+              A-
             </button>
             <span
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-mono)",
-                color: theme === "dark" ? "#666" : "#999",
-                minWidth: "20px sm:min-w-24px",
-                textAlign: "center",
-              }}
+              className="font-mono text-xs tnum min-w-[24px] text-center"
+              style={{ color: mutedInk }}
             >
               {fontSize}
             </span>
             <button
-onClick={() => setFontSize(Math.min(36, fontSize + 2))}
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-mono)",
-                color: textColor,
-                background: "none",
-                border: `1px solid ${borderColor}`,
-                padding: "4px 5px sm:px-8",
-                cursor: "pointer",
-              }}
-              title="Increase font"
+              type="button"
+              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+              className="h-7 w-7 rounded-full font-mono text-xs flex items-center justify-center hover:opacity-75 transition-opacity"
+              style={{ color: textColor }}
+              title="Increase font size"
             >
               A+
             </button>
-            <span
-              style={{
-                fontSize: "16px",
-                color: theme === "dark" ? "#666" : "#999",
-              }}
-            >
-              |
-            </span>
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              style={{
-                fontSize: "16px",
-                fontFamily: "var(--font-mono)",
-                color: textColor,
-                background: "none",
-                border: `1px solid ${borderColor}`,
-                padding: "4px 6px sm:px-10",
-                cursor: "pointer",
-              }}
-              title={theme === "dark" ? "Light mode" : "Dark mode"}
-            >
-              <span className="hidden sm:inline">
-                {theme === "dark" ? "Light" : "Dark"}
-              </span>
-              <span className="sm:hidden">{theme === "dark" ? <PiSun size={16} /> : <PiMoon size={16} />}</span>
-            </button>
-          </span>
+          </div>
+
           <button
-            onClick={logout}
-            className="p-1.5 rounded hover:opacity-70 transition-opacity shrink-0"
+            type="button"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={
+              theme === "dark" ? "Switch to light reader" : "Switch to dark reader"
+            }
+            className="hidden sm:inline-flex h-9 w-9 rounded-full border items-center justify-center hover:opacity-75 transition-opacity"
+            style={{ borderColor, color: textColor }}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
           >
-            <PiSignOut size={16} style={{ color: textColor }} />
+            {theme === "dark" ? <PiSun size={16} /> : <PiMoon size={16} />}
+          </button>
+
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="Sign out"
+            title="Sign out"
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:opacity-70 transition-opacity shrink-0"
+            style={{ color: textColor }}
+          >
+            <PiSignOut size={16} />
           </button>
         </div>
       </header>
 
-      <div className="flex min-h-dvh" style={{ paddingTop: "48px" }}>
+      <div className="flex min-h-dvh pt-14">
         {/* Outline Sidebar */}
         {showOutline && outline.length > 0 && (
           <>
-            {/* Mobile overlay */}
             <div
-              className="sm:hidden fixed inset-0 z-30"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+              className="sm:hidden fixed inset-0 z-30 bg-black/45"
               onClick={() => setShowOutline(false)}
             />
             <aside
-              className="fixed left-0 z-40 overflow-y-auto sm:block"
+              className="fixed left-0 top-14 bottom-0 z-40 w-[min(80vw,240px)] overflow-y-auto border-r"
               style={{
-                top: "48px",
-                bottom: 0,
-                width: "min(80vw, 220px)",
                 backgroundColor: outlineBg,
-                borderRight: `1px solid ${borderColor}`,
-                transform: "translateX(0)",
-                transition: "transform 0.2s",
+                borderColor,
               }}
             >
-              <div style={{ padding: "16px" }}>
-                <div className="flex items-center justify-between sm:justify-start mb-3">
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-3">
                   <h3
-                    style={{
-                      fontSize: "15px",
-                      fontFamily: "var(--font-mono)",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: theme === "dark" ? "#666" : "#999",
-                    }}
+                    className="text-xs font-medium tracking-wide"
+                    style={{ color: mutedInk }}
                   >
                     Contents
                   </h3>
                   <button
-                    className="sm:hidden p-1"
+                    type="button"
+                    className="sm:hidden h-7 w-7 rounded-full flex items-center justify-center"
                     onClick={() => setShowOutline(false)}
-                     style={{
-                      color: theme === "dark" ? "#999" : "#666",
-                      fontSize: "16px",
-                      lineHeight: 1,
-                    }}
+                    style={{ color: mutedInk }}
+                    aria-label="Close contents"
                   >
-                    <PiX size={16} />
+                    <PiX size={15} />
                   </button>
                 </div>
                 <div className="space-y-1">
                   {outline.map((entry, i) => (
                     <button
                       key={i}
+                      type="button"
                       onClick={() => {
                         scrollToChapter(entry);
                         if (window.innerWidth < 640) setShowOutline(false);
                       }}
+                      className="block w-full text-left px-3 py-2 rounded-lg font-serif text-[15px] leading-snug transition-colors cursor-pointer"
                       style={{
-                        display: "block",
-                        width: "100%",
-                        textAlign: "left",
-                        padding: "6px 8px",
-                        fontSize: "17px",
-                        lineHeight: 1.4,
-                        fontFamily: "'Georgia', serif",
-                        color:
-                          i === activeChapter
-                            ? textColor
-                            : theme === "dark"
-                              ? "#888"
-                              : "#888",
-                        background:
-                          i === activeChapter
-                            ? theme === "dark"
-                              ? "#2a2a2a"
-                              : "#f0ede8"
-                            : "none",
-                        border: "none",
-                        cursor: "pointer",
-                        borderRadius: "2px",
+                        color: i === activeChapter ? textColor : mutedInk,
+                        backgroundColor:
+                          i === activeChapter ? activeBg : "transparent",
+                        fontWeight: i === activeChapter ? 500 : 400,
                       }}
                     >
                       {entry.title}
@@ -947,84 +855,53 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
 
         {/* Content */}
         <main
-          style={{
-            flex: 1,
-            paddingBottom: listenOpen ? "160px" : "120px",
-            transition: "margin-left 0.2s",
-          }}
-          className={showOutline && outline.length > 0 ? "md:ml-[220px]" : ""}
+          className={`flex-1 transition-[margin-left] duration-200 ${
+            showOutline && outline.length > 0 ? "md:ml-[240px]" : ""
+          } ${listenOpen ? "pb-40" : "pb-28"}`}
         >
-          <article
-            style={{
-              maxWidth: "680px",
-              margin: "0 auto",
-              padding: "32px 32px",
-            }}
-          >
+          <article className="max-w-[680px] mx-auto px-5 sm:px-8 py-8 sm:py-12">
             {/* Book header */}
             <div
-              style={{
-                marginBottom: "48px",
-                paddingBottom: "32px",
-                borderBottom: `1px solid ${borderColor}`,
-              }}
+              className="mb-10 pb-7 border-b"
+              style={{ borderColor }}
             >
               <h1
-                style={{
-                  fontSize: "34px",
-                  fontWeight: 400,
-                  color: textColor,
-                  marginBottom: "8px",
-                  lineHeight: 1.3,
-                  fontFamily: "'Newsreader', Georgia, serif",
-                  textWrap: "balance",
-                }}
+                className="font-serif text-3xl sm:text-4xl font-medium leading-[1.18] tracking-tight mb-2 text-balance"
+                style={{ color: textColor }}
               >
                 {book.title}
               </h1>
-              <p
-                style={{
-                  fontSize: "20px",
-                  color: theme === "dark" ? "#888" : "#888",
-                  fontStyle: "italic",
-                }}
-              >
+              <p className="text-base italic font-serif" style={{ color: mutedInk }}>
                 by {book.author}
               </p>
             </div>
 
             <div
               ref={contentRef}
+              className="font-serif select-none"
               style={{
                 fontSize: `${fontSize}px`,
                 lineHeight: 1.8,
                 color: textColor,
-                fontFamily: "'Newsreader', Georgia, serif",
                 userSelect: "none",
                 WebkitUserSelect: "none",
                 MozUserSelect: "none",
                 msUserSelect: "none",
               }}
             >
-                  {paragraphs.length > 0 ? (
+              {paragraphs.length > 0 ? (
                 paragraphs.map((paragraph, i) => {
                   const isActive = listenOpen && i === listenPara;
                   return (
                     <p
                       key={i}
                       data-para={i}
+                      className="mb-[1.45em] rounded-md transition-colors duration-300"
                       style={{
-                        marginBottom: "1.5em",
-                        backgroundColor: isActive
-                          ? theme === "dark"
-                            ? "#2a2a2a"
-                            : "#f0ede8"
-                          : "transparent",
-                        borderRadius: "2px",
-                        padding: isActive ? "4px 8px" : "4px 0",
-                        marginLeft: isActive ? "-8px" : 0,
-                        marginRight: isActive ? "-8px" : 0,
-                        transition: "background-color 0.3s",
+                        backgroundColor: isActive ? activeBg : "transparent",
+                        padding: isActive ? "6px 10px" : "2px 0",
+                        marginLeft: isActive ? "-10px" : 0,
+                        marginRight: isActive ? "-10px" : 0,
                       }}
                     >
                       {paragraph}
@@ -1032,15 +909,9 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
                   );
                 })
               ) : (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "40px 0",
-                    color: theme === "dark" ? "#666" : "#999",
-                  }}
-                >
-                  <p style={{ fontSize: "20px" }}>
-                    Content not available for this book.
+                <div className="py-12 text-center" style={{ color: mutedInk }}>
+                  <p className="font-serif text-lg">
+                    Content is not available for this book yet.
                   </p>
                 </div>
               )}
@@ -1048,116 +919,74 @@ onClick={() => setFontSize(Math.min(36, fontSize + 2))}
 
             {/* Sentinel — triggers next chunk load */}
             {hasMoreRef.current && (
-              <div ref={sentinelRef} style={{ height: 1 }} />
+              <div ref={sentinelRef} className="h-px" />
             )}
           </article>
         </main>
       </div>
 
-      {/* Mobile bottom toolbar (font controls) — hidden while listening */}
+      {/* Mobile bottom font & theme toolbar */}
       {!listenOpen && (
         <div
-          className="sm:hidden fixed bottom-1 left-0 right-0 z-40 flex items-center justify-center gap-2"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
-      >
-        <div
-          style={{
-            backgroundColor: headerBg,
-            border: `1px solid ${borderColor}`,
-            borderRadius: "20px",
-            padding: "6px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
+          className="sm:hidden fixed bottom-3 inset-x-0 z-40 flex items-center justify-center pointer-events-none"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         >
-          <button
-            onClick={() => setFontSize(Math.max(14, fontSize - 2))}
-            style={{
-              fontSize: "19px",
-              fontFamily: "var(--font-mono)",
-              color: textColor,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              lineHeight: 1,
-            }}
-            title="Decrease font"
+          <div
+            className="pointer-events-auto flex items-center gap-1.5 rounded-full border px-3 py-1.5 shadow-soft-lg"
+            style={{ backgroundColor: headerBg, borderColor }}
           >
-            A−
-          </button>
-          <span
-            style={{
-              fontSize: "17px",
-              fontFamily: "var(--font-mono)",
-              color: theme === "dark" ? "#666" : "#999",
-              minWidth: "22px",
-              textAlign: "center",
-            }}
-          >
-            {fontSize}
-          </span>
-          <button
-            onClick={() => setFontSize(Math.min(28, fontSize + 2))}
-            style={{
-              fontSize: "19px",
-              fontFamily: "var(--font-mono)",
-              color: textColor,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              lineHeight: 1,
-            }}
-            title="Increase font"
-          >
-            A+
-          </button>
-          <span
-            style={{
-              fontSize: "20px",
-              color: theme === "dark" ? "#444" : "#ddd",
-            }}
-          >
-            |
-          </span>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            style={{
-              fontSize: "19px",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              lineHeight: 1,
-            }}
-            title={theme === "dark" ? "Light mode" : "Dark mode"}
-          >
-            {theme === "dark" ? (
-              <PiSun size={18} color="#e8e6e3" />
-            ) : (
-              <PiMoon size={18} color="#555" />
-            )}
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setFontSize(Math.max(16, fontSize - 2))}
+              className="h-8 w-8 rounded-full font-mono text-xs flex items-center justify-center"
+              style={{ color: textColor }}
+              title="Decrease font"
+            >
+              A-
+            </button>
+            <span
+              className="font-mono text-xs tnum min-w-[24px] text-center"
+              style={{ color: mutedInk }}
+            >
+              {fontSize}
+            </span>
+            <button
+              type="button"
+              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+              className="h-8 w-8 rounded-full font-mono text-xs flex items-center justify-center"
+              style={{ color: textColor }}
+              title="Increase font"
+            >
+              A+
+            </button>
+            <span className="h-4 w-px mx-1" style={{ backgroundColor: borderColor }} />
+            <button
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-8 w-8 rounded-full flex items-center justify-center"
+              style={{ color: textColor }}
+              title={theme === "dark" ? "Light mode" : "Dark mode"}
+            >
+              {theme === "dark" ? <PiSun size={16} /> : <PiMoon size={16} />}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Progress indicator */}
+      {/* Reading chunk progress bar */}
       {!listenOpen && (
         <div
-          className="fixed bottom-0 left-0 right-0 h-1"
+          className="fixed bottom-0 left-0 right-0 h-1 z-30"
           style={{
             backgroundColor: borderColor,
             marginBottom: "env(safe-area-inset-bottom, 0px)",
           }}
         >
           <div
+            className="h-full transition-all duration-300"
             style={{
               width: `${Math.min(100, (loadedCount / Math.max(totalChunks, 1)) * 100)}%`,
-              height: "100%",
-              backgroundColor: theme === "dark" ? "#666" : "#ccc",
+              backgroundColor: accentColor,
             }}
           />
         </div>

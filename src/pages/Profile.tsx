@@ -17,23 +17,30 @@ export default function Profile() {
   const { user, isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
 
-  const [name, setName] = useState(user?.name || "");
-  const [username, setUsername] = useState(user?.username || "");
-  const [location, setLocation] = useState(user?.location || "");
+  const [nameOverride, setNameOverride] = useState<string | null>(null);
+  const [usernameOverride, setUsernameOverride] = useState<string | null>(null);
+  const [locationOverride, setLocationOverride] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const name = nameOverride ?? user?.name ?? "";
+  const username = usernameOverride ?? user?.username ?? "";
+  const location = locationOverride ?? user?.location ?? "";
+
   const updateMutation = trpc.auth.updateCredentials.useMutation({
     onSuccess: () => {
-      setSuccess("Profile updated");
+      setSuccess("Profile settings saved.");
       setError("");
       setCurrentPassword("");
       setNewPassword("");
+      setNameOverride(null);
+      setUsernameOverride(null);
+      setLocationOverride(null);
       utils.auth.me.invalidate();
     },
-    onError: err => {
+    onError: (err) => {
       setError(err.message);
       setSuccess("");
     },
@@ -43,13 +50,14 @@ export default function Profile() {
     if (!isAuthenticated) navigate("/login");
   }, [isAuthenticated, navigate]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
     if (!currentPassword) {
-      setError("Current password is required");
+      setError("Enter your current password to confirm changes.");
       return;
     }
     const changedName = name !== (user?.name || "");
@@ -57,7 +65,7 @@ export default function Profile() {
     const changedPassword = newPassword.length > 0;
     const changedLocation = location !== (user?.location || "");
     if (!changedName && !changedUsername && !changedPassword && !changedLocation) {
-      setError("No changes to save");
+      setError("No changes detected.");
       return;
     }
     updateMutation.mutate({
@@ -72,69 +80,121 @@ export default function Profile() {
   const initial = (user?.name || user?.username || "?").charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "hsl(var(--background))" }}>
-      <div className="mx-auto measure" style={{ padding: "40px 24px 96px" }}>
-        <div className="grid md:grid-cols-[280px_1fr] gap-12">
-          <aside className="md:sticky md:top-24 self-start">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
-              Settings
-            </p>
-            <h1 className="font-serif text-foreground mb-6" style={{ fontSize: "42px", lineHeight: 1.04, letterSpacing: "-0.02em", fontWeight: 400 }}>
+    <div className="min-h-full bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20">
+        <div className="grid md:grid-cols-[260px_1fr] gap-10 lg:gap-14 items-start">
+          {/* Sticky left identity rail */}
+          <aside className="md:sticky md:top-8 space-y-4">
+            <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
               Account
             </h1>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center rounded-full" style={{ width: "52px", height: "52px", border: "1px solid hsl(var(--border))", fontFamily: '"Newsreader", Georgia, serif', fontSize: "24px", color: "hsl(var(--foreground))", flexShrink: 0 }}>
+
+            <div className="flex items-center gap-3.5 pt-2">
+              <div className="h-12 w-12 rounded-full border border-border bg-card flex items-center justify-center font-serif text-xl font-medium text-foreground shrink-0">
                 {initial}
               </div>
               <div className="min-w-0">
-                <p className="text-foreground truncate" style={{ fontSize: "16px" }}>{user?.name || user?.username}</p>
-                <p className="font-mono uppercase text-muted-foreground truncate" style={{ fontSize: "11px", letterSpacing: "0.1em" }}>{user?.role || "user"}</p>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.name || user?.username}
+                </p>
+                <p className="text-xs text-muted-foreground capitalize">
+                  {user?.role || "Reader"} account
+                </p>
               </div>
             </div>
-            <p className="text-muted-foreground" style={{ fontSize: "14px", lineHeight: 1.6 }}>
-              Update your display name, username, location, or password.
+
+            <p className="text-sm text-muted-foreground leading-relaxed text-pretty">
+              Update your display name, handle, location, or password. Current password is required for security.
             </p>
           </aside>
 
-          <form onSubmit={e => { e.preventDefault(); handleSubmit(); }} className="space-y-7">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Display Name">
-                <input className="field-input" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
+          {/* Settings form card */}
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-xl border border-border bg-card p-6 sm:p-8 space-y-6"
+          >
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field label="Display name">
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setNameOverride(e.target.value)}
+                  placeholder="Your name"
+                  className="field-input"
+                />
               </Field>
-              <Field label="Username">
-                <input className="field-input" value={username} onChange={e => setUsername(e.target.value)} placeholder="username" />
+
+              <Field label="Username" required>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsernameOverride(e.target.value)}
+                  placeholder="Username"
+                  className="field-input"
+                />
               </Field>
             </div>
 
-            <Field label="Location (State)">
-              <select className="field-input" value={location} onChange={e => setLocation(e.target.value)}>
-                <option value="">Select your state</option>
-                {NIGERIAN_STATES.map(s => (
-                  <option key={s} value={s}>{s}</option>
+            <Field label="Location" hint="Optional. Shown alongside reader profile activity.">
+              <select
+                value={location}
+                onChange={(e) => setLocationOverride(e.target.value)}
+                className="field-input cursor-pointer"
+              >
+                <option value="">Prefer not to say</option>
+                {NIGERIAN_STATES.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
                 ))}
               </select>
             </Field>
 
-            <div className="pt-2" style={{ borderTop: "1px solid hsl(var(--border))" }}>
-              <p className="font-mono uppercase text-foreground mb-5 mt-6" style={{ fontSize: "12px", letterSpacing: "0.16em" }}>
-                Password
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <Field label="Current Password" required>
-                  <input className="field-input" type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Required to save" />
-                </Field>
-                <Field label="New Password" hint="Leave blank to keep current">
-                  <input className="field-input" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password" />
-                </Field>
-              </div>
+            <div className="pt-5 border-t border-border grid sm:grid-cols-2 gap-5">
+              <Field label="Current password" required>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Required to save changes"
+                  autoComplete="current-password"
+                  className="field-input"
+                />
+              </Field>
+
+              <Field label="New password" hint="Leave blank to keep your current password.">
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                  className="field-input"
+                />
+              </Field>
             </div>
 
-            {error && <p className="text-[14px]" style={{ color: "rgb(var(--color-p-red-fg))" }}>{error}</p>}
-            {success && <p className="text-[14px]" style={{ color: "rgb(var(--color-p-green-fg))" }}>{success}</p>}
+            {error && (
+              <div role="alert" className="form-note form-note--alert text-sm">
+                {error}
+              </div>
+            )}
 
-            <button type="submit" disabled={updateMutation.isPending} className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:opacity-90 active:scale-[0.985] transition disabled:opacity-70">
-              {updateMutation.isPending ? "Saving..." : "Save Changes"}
-            </button>
+            {success && (
+              <div role="status" className="form-note form-note--ok text-sm">
+                {success}
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={updateMutation.isPending}
+                className="rounded-full bg-primary text-primary-foreground px-7 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+              >
+                {updateMutation.isPending ? "Saving..." : "Save changes"}
+              </button>
+            </div>
           </form>
         </div>
       </div>

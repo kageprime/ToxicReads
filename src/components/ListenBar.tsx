@@ -52,10 +52,11 @@ export default function ListenBar(props: ListenBarProps) {
   } = props;
 
   const dark = theme === "dark";
-  const barBg = dark ? "#141414" : "#fff";
-  const borderColor = dark ? "#333" : "#e8e4df";
-  const textColor = dark ? "#e8e6e3" : "#2a2520";
-  const muted = dark ? "#888" : "#888";
+  const surfaceBg = dark ? "#1A1A18" : "#FFFFFF";
+  const borderCol = dark ? "#2C2B27" : "#E4E3DD";
+  const ink = dark ? "#F2F1EC" : "#141413";
+  const mutedInk = dark ? "#A09D94" : "#5C5A55";
+  const accentCol = dark ? "#DF5348" : "#B82E24";
 
   const pct =
     totalParas > 0
@@ -64,152 +65,125 @@ export default function ListenBar(props: ListenBarProps) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50"
+      className="fixed inset-x-0 bottom-0 z-50 border-t transition-colors"
       style={{
-        backgroundColor: barBg,
-        borderTop: `1px solid ${borderColor}`,
+        backgroundColor: surfaceBg,
+        borderColor: borderCol,
+        color: ink,
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
       role="region"
-      aria-label="Listen to this book"
+      aria-label="Audio narration controls"
     >
-      <div style={{ height: "3px", backgroundColor: borderColor }}>
+      {/* Top progress strip */}
+      <div
+        className="h-0.5 w-full"
+        style={{ backgroundColor: borderCol }}
+        aria-hidden="true"
+      >
         <div
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            backgroundColor: dark ? "#888" : "#2a2520",
-            transition: "width 0.3s",
-          }}
+          className="h-full transition-all duration-300"
+          style={{ width: `${pct}%`, backgroundColor: accentCol }}
         />
       </div>
-      <div
-        className="mx-auto flex items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4"
-        style={{ maxWidth: "680px" }}
-      >
+
+      <div className="max-w-3xl mx-auto px-3 sm:px-6 h-14 flex items-center gap-2 sm:gap-3">
         <span
-          className="hidden sm:flex items-center gap-1 shrink-0"
-          style={{
-            fontSize: "13px",
-            fontFamily: "var(--font-mono)",
-            letterSpacing: "0.1em",
-            color: muted,
-          }}
+          className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium shrink-0"
+          style={{ color: mutedInk }}
         >
-          <PiHeadphones size={14} /> LISTEN
+          <PiHeadphones className="h-4 w-4" aria-hidden="true" />
+          Audio
         </span>
 
         {!isSupported ? (
-          <p style={{ fontSize: "15px", color: muted }}>
+          <p className="text-xs sm:text-sm flex-1" style={{ color: mutedInk }}>
             Audio playback is not supported in this browser.
           </p>
         ) : !isPlaying ? (
           <button
+            type="button"
             onClick={onPlay}
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-opacity hover:opacity-90"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontSize: "15px",
-              fontFamily: "var(--font-mono)",
-              color: dark ? "#141414" : "#fff",
-              background: dark ? "#e8e6e3" : "#2a2520",
-              border: "none",
-              padding: "8px 16px",
-              cursor: "pointer",
+              backgroundColor: ink,
+              color: dark ? "#121211" : "#F7F7F4",
             }}
           >
-            <PiPlayFill size={14} /> Play
+            <PiPlayFill className="h-3.5 w-3.5" aria-hidden="true" />
+            Play
           </button>
         ) : (
-          <>
+          <div className="flex items-center gap-1">
             <button
+              type="button"
               onClick={onPrev}
               title="Previous paragraph"
               aria-label="Previous paragraph"
-              style={{
-                background: "none",
-                border: `1px solid ${borderColor}`,
-                color: textColor,
-                padding: "7px",
-                cursor: "pointer",
-                lineHeight: 1,
-              }}
+              className="h-8 w-8 rounded-full border flex items-center justify-center transition-opacity hover:opacity-80"
+              style={{ borderColor: borderCol, color: ink }}
             >
-              <PiCaretLeft size={15} />
+              <PiCaretLeft className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={onPauseResume}
               title={isPaused ? "Resume" : "Pause"}
               aria-label={isPaused ? "Resume" : "Pause"}
+              className="h-8 px-3.5 rounded-full flex items-center justify-center transition-opacity hover:opacity-90"
               style={{
-                background: dark ? "#e8e6e3" : "#2a2520",
-                border: "none",
-                color: dark ? "#141414" : "#fff",
-                padding: "7px 10px",
-                cursor: "pointer",
-                lineHeight: 1,
+                backgroundColor: ink,
+                color: dark ? "#121211" : "#F7F7F4",
               }}
             >
-              {isPaused ? <PiPlayFill size={15} /> : <PiPauseFill size={15} />}
+              {isPaused ? (
+                <PiPlayFill className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <PiPauseFill className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
             </button>
             <button
+              type="button"
               onClick={onNext}
               title="Next paragraph"
               aria-label="Next paragraph"
-              style={{
-                background: "none",
-                border: `1px solid ${borderColor}`,
-                color: textColor,
-                padding: "7px",
-                cursor: "pointer",
-                lineHeight: 1,
-              }}
+              className="h-8 w-8 rounded-full border flex items-center justify-center transition-opacity hover:opacity-80"
+              style={{ borderColor: borderCol, color: ink }}
             >
-              <PiCaretRight size={15} />
+              <PiCaretRight className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={onStop}
-              title="Stop"
-              aria-label="Stop"
-              style={{
-                background: "none",
-                border: "none",
-                color: muted,
-                padding: "7px",
-                cursor: "pointer",
-                lineHeight: 1,
-              }}
+              title="Stop narration"
+              aria-label="Stop narration"
+              className="h-8 w-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+              style={{ color: mutedInk }}
             >
-              <PiStopFill size={14} />
+              <PiStopFill className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
-          </>
+          </div>
         )}
 
         <span
-          className="tnum shrink-0"
-          style={{ fontSize: "13px", fontFamily: "var(--font-mono)", color: muted }}
+          className="font-mono text-xs tnum shrink-0"
+          style={{ color: mutedInk }}
         >
-          {totalParas > 0 ? `${Math.min(currentPara + 1, totalParas)}/${totalParas}` : "—"}
+          {totalParas > 0
+            ? `${Math.min(currentPara + 1, totalParas)}/${totalParas}`
+            : "-"}
         </span>
 
         <select
           value={String(rate)}
-          onChange={e => onRateChange(Number(e.target.value))}
+          onChange={(e) => onRateChange(Number(e.target.value))}
           title="Playback speed"
           aria-label="Playback speed"
-          style={{
-            fontSize: "13px",
-            fontFamily: "var(--font-mono)",
-            color: textColor,
-            background: "none",
-            border: `1px solid ${borderColor}`,
-            padding: "6px 4px",
-            cursor: "pointer",
-          }}
+          className="h-8 rounded-full border bg-transparent px-2.5 font-mono text-xs cursor-pointer"
+          style={{ borderColor: borderCol, color: ink }}
         >
-          {RATES.map(r => (
-            <option key={r} value={r}>
+          {RATES.map((r) => (
+            <option key={r} value={r} style={{ backgroundColor: surfaceBg, color: ink }}>
               {r}x
             </option>
           ))}
@@ -218,24 +192,21 @@ export default function ListenBar(props: ListenBarProps) {
         {voices.length > 0 && (
           <select
             value={voiceURI}
-            onChange={e => onVoiceChange(e.target.value)}
+            onChange={(e) => onVoiceChange(e.target.value)}
             title="Voice"
-            aria-label="Voice"
-            className="hidden sm:block"
-            style={{
-              fontSize: "13px",
-              fontFamily: "var(--font-mono)",
-              color: textColor,
-              background: "none",
-              border: `1px solid ${borderColor}`,
-              padding: "6px 4px",
-              cursor: "pointer",
-              maxWidth: "160px",
-            }}
+            aria-label="Narration voice"
+            className="hidden sm:block h-8 max-w-[165px] rounded-full border bg-transparent px-3 text-xs cursor-pointer truncate"
+            style={{ borderColor: borderCol, color: ink }}
           >
-            <option value="">Default voice</option>
-            {voices.map(v => (
-              <option key={v.voiceURI} value={v.voiceURI}>
+            <option value="" style={{ backgroundColor: surfaceBg, color: ink }}>
+              Default voice
+            </option>
+            {voices.map((v) => (
+              <option
+                key={v.voiceURI}
+                value={v.voiceURI}
+                style={{ backgroundColor: surfaceBg, color: ink }}
+              >
                 {v.name.slice(0, 28)}
               </option>
             ))}
@@ -243,20 +214,14 @@ export default function ListenBar(props: ListenBarProps) {
         )}
 
         <button
+          type="button"
           onClick={onClose}
-          title="Close player"
-          aria-label="Close player"
-          style={{
-            background: "none",
-            border: "none",
-            color: muted,
-            padding: "6px",
-            cursor: "pointer",
-            marginLeft: "auto",
-            lineHeight: 1,
-          }}
+          title="Close audio player"
+          aria-label="Close audio player"
+          className="ml-auto h-8 w-8 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 shrink-0"
+          style={{ color: mutedInk }}
         >
-          <PiX size={15} />
+          <PiX className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </div>

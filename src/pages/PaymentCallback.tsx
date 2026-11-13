@@ -6,22 +6,21 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import EmptyState from "@/components/EmptyState";
 
-/** Landing spot after Paystack hosted checkout. Verifies + fulfills. */
+/** Landing page after Paystack hosted checkout. Verifies and unlocks edition. */
 export default function PaymentCallback() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated, isAuthLoading } = useAuth();
   const started = useRef(false);
 
-  const reference =
-    params.get("reference") || params.get("trxref") || "";
+  const reference = params.get("reference") || params.get("trxref") || "";
 
   const verify = trpc.purchase.paystackVerify.useMutation({
-    onSuccess: data => {
+    onSuccess: (data) => {
       toast.success(
         data.alreadyOwned
-          ? "You already own this book"
-          : "Payment confirmed — enjoy your book"
+          ? "You already own this edition"
+          : "Payment confirmed. Enjoy your book."
       );
       navigate(`/book/${data.book.slug ?? data.book.id}`);
     },
@@ -39,10 +38,10 @@ export default function PaymentCallback() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <EmptyState
-          icon={<PiXCircle size={24} />}
+          icon={<PiXCircle className="h-5 w-5" aria-hidden="true" />}
           title="Missing payment reference"
-          body="We couldn't find which payment this was for. If you were charged, contact support."
-          actionLabel="Back to library"
+          body="We could not locate the payment reference for this order. If you were charged, please contact support."
+          actionLabel="Back to catalog"
           onAction={() => navigate("/home")}
         />
       </div>
@@ -53,10 +52,10 @@ export default function PaymentCallback() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <EmptyState
-          icon={<PiSpinner size={24} />}
+          icon={<PiSpinner className="h-5 w-5" aria-hidden="true" />}
           title="One more step"
-          body="Log back in to finish confirming your payment. Your purchase is safe — nothing is charged twice."
-          actionLabel="Log in"
+          body="Sign back in to finish verifying your payment. Your purchase is safe and will not be charged twice."
+          actionLabel="Sign in"
           onAction={() => navigate("/login")}
         />
       </div>
@@ -67,7 +66,7 @@ export default function PaymentCallback() {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <EmptyState
-          icon={<PiXCircle size={24} />}
+          icon={<PiXCircle className="h-5 w-5" aria-hidden="true" />}
           title="Payment not confirmed"
           body={`${verify.error.message} Reference: ${reference}`}
           actionLabel="Check my library"
@@ -79,16 +78,16 @@ export default function PaymentCallback() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="flex flex-col items-center text-center">
-        <span className="grid h-14 w-14 place-items-center rounded-full border border-border bg-card">
+      <div className="flex flex-col items-center text-center max-w-sm">
+        <span className="grid h-14 w-14 place-items-center rounded-full border border-border bg-card shadow-soft">
           {verify.isSuccess ? (
-            <PiCheckCircle size={24} className="text-p-green-fg" />
+            <PiCheckCircle className="h-6 w-6 text-p-green-fg" aria-hidden="true" />
           ) : (
-            <PiSpinner size={24} className="animate-spin text-muted-foreground" />
+            <PiSpinner className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
           )}
         </span>
-        <h1 className="mt-5 font-serif text-2xl tracking-tight text-baobab">
-          {verify.isSuccess ? "Confirmed" : "Confirming your payment…"}
+        <h1 className="mt-5 font-serif text-2xl font-medium tracking-tight text-foreground">
+          {verify.isSuccess ? "Order confirmed" : "Confirming your payment..."}
         </h1>
         <p className="tnum mt-2 font-mono text-xs text-muted-foreground">
           {reference}

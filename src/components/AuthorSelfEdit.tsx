@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/providers/trpc";
 import { toast } from "sonner";
+import { PiCaretDown, PiCaretUp } from "react-icons/pi";
 
 interface SelfAuthor {
   id: number;
@@ -46,175 +47,149 @@ export default function AuthorSelfEdit({
   });
 
   const set = (k: keyof typeof form) => (value: string) =>
-    setForm(f => ({ ...f, [k]: value }));
+    setForm((f) => ({ ...f, [k]: value }));
 
   return (
-    <div
-      className="border border-border bg-card"
-      style={{ marginBottom: "12px" }}
-    >
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <button
-        onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-accent"
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3.5 p-4 text-left transition-colors hover:bg-secondary/45"
       >
-        {form.avatar || author.avatar ? (
-          <img
-            src={form.avatar || author.avatar || ""}
-            alt={author.name}
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "9999px",
-              objectFit: "cover",
-              border: "1px solid hsl(var(--border))",
-              flexShrink: 0,
-            }}
-          />
-        ) : (
-          <div
-            className="flex items-center justify-center"
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "9999px",
-              border: "1px solid hsl(var(--border))",
-              fontFamily: "var(--font-serif)",
-              fontSize: "18px",
-              flexShrink: 0,
-            }}
-          >
-            {author.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[17px] text-foreground">
+        <div className="h-11 w-11 rounded-full border border-border bg-secondary overflow-hidden flex items-center justify-center shrink-0">
+          {form.avatar || author.avatar ? (
+            <img
+              src={form.avatar || author.avatar || ""}
+              alt={author.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="font-serif text-lg font-medium text-foreground">
+              {author.name.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="font-serif text-lg font-medium text-foreground truncate">
             {author.name}
-          </span>
-          <span className="block font-mono text-xs text-muted-foreground">
-            /author/{author.slug} · {open ? "close" : "edit profile"}
-          </span>
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {author.bio ? "Public profile live" : "Add a bio and social links"}
+          </p>
+        </div>
+
+        <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground shrink-0">
+          {open ? (
+            <>
+              Close <PiCaretUp className="h-3.5 w-3.5" aria-hidden="true" />
+            </>
+          ) : (
+            <>
+              Edit <PiCaretDown className="h-3.5 w-3.5" aria-hidden="true" />
+            </>
+          )}
         </span>
       </button>
 
       {open && (
-        <div className="space-y-3 border-t border-border p-4">
-          <div>
-            <label className="field-label mb-1.5" htmlFor={`bio-${author.id}`}>
-              Bio
-            </label>
-            <textarea
-              id={`bio-${author.id}`}
-              value={form.bio}
-              onChange={e => set("bio")(e.target.value)}
-              placeholder="Who you are, what you write"
-              rows={3}
-              maxLength={2000}
-              className="field-input"
-            />
-          </div>
-          <div>
-            <label
-              className="field-label mb-1.5"
-              htmlFor={`dedication-${author.id}`}
-            >
-              Dedication
-            </label>
-            <input
-              id={`dedication-${author.id}`}
-              value={form.dedication}
-              onChange={e => set("dedication")(e.target.value)}
-              placeholder="e.g. Dedicated to freedom fighters"
-              maxLength={500}
-              className="field-input"
-            />
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <div className="border-t border-border p-5 space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label
-                className="field-label mb-1.5"
-                htmlFor={`avatar-${author.id}`}
-              >
-                Photo URL
-              </label>
+              <label className="field-label mb-1.5">Location</label>
               <input
-                id={`avatar-${author.id}`}
-                value={form.avatar}
-                onChange={e => set("avatar")(e.target.value)}
-                placeholder="https://…"
+                type="text"
                 className="field-input"
-              />
-            </div>
-            <div>
-              <label
-                className="field-label mb-1.5"
-                htmlFor={`location-${author.id}`}
-              >
-                Location
-              </label>
-              <input
-                id={`location-${author.id}`}
+                placeholder="Lagos, Nigeria"
                 value={form.location}
-                onChange={e => set("location")(e.target.value)}
-                placeholder="City, Country"
-                maxLength={120}
-                className="field-input"
+                onChange={(e) => set("location")(e.target.value)}
               />
             </div>
             <div>
-              <label
-                className="field-label mb-1.5"
-                htmlFor={`website-${author.id}`}
-              >
-                Website
-              </label>
+              <label className="field-label mb-1.5">Avatar URL</label>
               <input
-                id={`website-${author.id}`}
-                value={form.website}
-                onChange={e => set("website")(e.target.value)}
-                placeholder="https://…"
+                type="url"
                 className="field-input"
-              />
-            </div>
-            <div>
-              <label
-                className="field-label mb-1.5"
-                htmlFor={`twitter-${author.id}`}
-              >
-                X handle
-              </label>
-              <input
-                id={`twitter-${author.id}`}
-                value={form.twitter}
-                onChange={e => set("twitter")(e.target.value)}
-                placeholder="without @"
-                maxLength={120}
-                className="field-input"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label
-                className="field-label mb-1.5"
-                htmlFor={`instagram-${author.id}`}
-              >
-                Instagram
-              </label>
-              <input
-                id={`instagram-${author.id}`}
-                value={form.instagram}
-                onChange={e => set("instagram")(e.target.value)}
-                placeholder="without @"
-                maxLength={120}
-                className="field-input"
+                placeholder="https://example.com/photo.jpg"
+                value={form.avatar}
+                onChange={(e) => set("avatar")(e.target.value)}
               />
             </div>
           </div>
-          <button
-            onClick={() => saveMutation.mutate({ id: author.id, ...form })}
-            disabled={saveMutation.isPending}
-            className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-60"
-          >
-            {saveMutation.isPending ? "Saving…" : "Save profile"}
-          </button>
+
+          <div>
+            <label className="field-label mb-1.5">Author bio</label>
+            <textarea
+              rows={3}
+              className="field-input"
+              placeholder="Write a brief biography for readers..."
+              value={form.bio}
+              onChange={(e) => set("bio")(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="field-label mb-1.5">Dedication quote</label>
+            <input
+              type="text"
+              className="field-input"
+              placeholder="Optional epigraph or dedication shown in italics"
+              value={form.dedication}
+              onChange={(e) => set("dedication")(e.target.value)}
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className="field-label mb-1.5">Website</label>
+              <input
+                type="text"
+                className="field-input"
+                placeholder="author.com"
+                value={form.website}
+                onChange={(e) => set("website")(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="field-label mb-1.5">X / Twitter</label>
+              <input
+                type="text"
+                className="field-input"
+                placeholder="@handle"
+                value={form.twitter}
+                onChange={(e) => set("twitter")(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="field-label mb-1.5">Instagram</label>
+              <input
+                type="text"
+                className="field-input"
+                placeholder="@handle"
+                value={form.instagram}
+                onChange={(e) => set("instagram")(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-full border border-border px-4 py-2 text-xs font-medium text-foreground hover:bg-secondary transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={saveMutation.isPending}
+              onClick={() => saveMutation.mutate({ id: author.id, ...form })}
+              className="rounded-full bg-primary text-primary-foreground px-5 py-2 text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+            >
+              {saveMutation.isPending ? "Saving..." : "Save profile"}
+            </button>
+          </div>
         </div>
       )}
     </div>

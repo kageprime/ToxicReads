@@ -20,7 +20,7 @@ export default function Register() {
       await utils.auth.me.invalidate();
       navigate("/home");
     },
-    onError: err => {
+    onError: (err) => {
       setError(err.message);
     },
   });
@@ -36,15 +36,15 @@ export default function Register() {
     setError("");
 
     if (!username.trim() || !password.trim()) {
-      setError("Username and password are required");
+      setError("Username and password are required.");
       return;
     }
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Passwords do not match.");
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("Password must be at least 6 characters.");
       return;
     }
 
@@ -58,36 +58,31 @@ export default function Register() {
   return (
     <AuthShell
       backHref="/login"
-      eyebrow="Create account"
-      title="Join the story"
-      sub="Buy, read, and publish African speculative fiction."
+      eyebrow="New account"
+      title="Create your account"
+      sub="Save editions, sync reading progress, and submit manuscripts."
       switchText="Already have an account?"
-      switchLabel="Log in"
+      switchLabel="Sign in"
       switchHref="/login"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="reg-username"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="reg-username" className="field-label mb-1.5">
             Username
           </label>
           <input
             id="reg-username"
             type="text"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
+            placeholder="Choose a username"
             className="field-input"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="reg-name"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="reg-name" className="field-label mb-1.5">
             Display name{" "}
             <span className="font-normal text-muted-foreground">(optional)</span>
           </label>
@@ -95,64 +90,61 @@ export default function Register() {
             id="reg-name"
             type="text"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             autoComplete="name"
+            placeholder="Your name or pen name"
             className="field-input"
           />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label
-              htmlFor="reg-password"
-              className="mb-1.5 block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="reg-password" className="field-label mb-1.5">
               Password
             </label>
             <input
               id="reg-password"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+              placeholder="Min. 6 characters"
               className="field-input"
             />
           </div>
 
           <div>
-            <label
-              htmlFor="reg-confirm"
-              className="mb-1.5 block text-sm font-medium text-foreground"
-            >
-              Confirm
+            <label htmlFor="reg-confirm" className="field-label mb-1.5">
+              Confirm password
             </label>
             <input
               id="reg-confirm"
               type="password"
               value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
+              placeholder="Repeat password"
               className="field-input"
             />
           </div>
         </div>
 
         {error && (
-          <p
+          <div
             role="alert"
-            className="flex items-start gap-2 border border-p-red-fg bg-p-red px-3 py-2.5 text-sm text-p-red-fg"
+            className="form-note form-note--alert flex items-start gap-2.5 text-sm"
           >
-            <PiWarningCircle size={16} className="mt-0.5 shrink-0" />
-            {error}
-          </p>
+            <PiWarningCircle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
         )}
 
         <button
           type="submit"
           disabled={registerMutation.isPending}
-          className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-70"
+          className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {registerMutation.isPending ? "Creating account…" : "Sign up"}
+          {registerMutation.isPending ? "Creating account..." : "Create account"}
         </button>
       </form>
     </AuthShell>

@@ -18,7 +18,7 @@ export default function Login() {
       await utils.auth.me.invalidate();
       navigate("/home");
     },
-    onError: err => {
+    onError: (err) => {
       setError(err.message);
     },
   });
@@ -32,7 +32,10 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!username.trim() || !password.trim()) return;
+    if (!username.trim() || !password.trim()) {
+      setError("Enter both your username and password.");
+      return;
+    }
     loginMutation.mutate({
       username: username.trim(),
       password: password.trim(),
@@ -42,64 +45,60 @@ export default function Login() {
   return (
     <AuthShell
       backHref="/"
-      eyebrow="Sign in"
+      eyebrow="Reader sign in"
       title="Welcome back"
-      sub="Log in to keep reading."
-      switchText="New here?"
+      sub="Sign in to access your library and bookmarks."
+      switchText="New to ToxicReads?"
       switchLabel="Create an account"
       switchHref="/register"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="login-username"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="login-username" className="field-label mb-1.5">
             Username
           </label>
           <input
             id="login-username"
             type="text"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
+            placeholder="Your username"
             className="field-input"
           />
         </div>
 
         <div>
-          <label
-            htmlFor="login-password"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
+          <label htmlFor="login-password" className="field-label mb-1.5">
             Password
           </label>
           <input
             id="login-password"
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            placeholder="Your password"
             className="field-input"
           />
         </div>
 
         {error && (
-          <p
+          <div
             role="alert"
-            className="flex items-start gap-2 border border-p-red-fg bg-p-red px-3 py-2.5 text-sm text-p-red-fg"
+            className="form-note form-note--alert flex items-start gap-2.5 text-sm"
           >
-            <PiWarningCircle size={16} className="mt-0.5 shrink-0" />
-            {error}
-          </p>
+            <PiWarningCircle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
         )}
 
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 active:scale-[0.98] disabled:opacity-70"
+          className="w-full rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {loginMutation.isPending ? "Logging in…" : "Log in"}
+          {loginMutation.isPending ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </AuthShell>

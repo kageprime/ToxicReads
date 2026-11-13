@@ -1,27 +1,34 @@
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
+import BrandMark from "@/components/BrandMark";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="text-center max-w-sm">
-        <p
-          className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4"
+    <div className="min-h-dvh bg-background text-foreground flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="mb-8">
+        <BrandMark to="/" />
+      </div>
+
+      <p className="font-mono text-xs text-signal tnum mb-2">404</p>
+      <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground">
+        Page not found
+      </h1>
+      <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md text-pretty leading-relaxed">
+        The edition or page you are looking for may have moved or been removed from the catalog.
+      </p>
+
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          to="/home"
+          className="rounded-full bg-primary text-primary-foreground px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
         >
-          Error 404
-        </p>
-        <h1
-          className="font-serif font-normal text-foreground mb-3"
-          style={{ fontSize: "72px", lineHeight: 1, letterSpacing: "-0.02em" }}
+          Browse catalog
+        </Link>
+        <Link
+          to="/"
+          className="rounded-full border border-border bg-card text-foreground px-5 py-2.5 text-sm font-medium hover:bg-secondary transition-colors"
         >
-          Not Found
-        </h1>
-        <p className="text-muted-foreground mb-8" style={{ fontSize: "17px" }}>
-          The page you are looking for does not exist.
-        </p>
-        <Button asChild className="w-full">
-          <Link to="/">Back to Home</Link>
-        </Button>
+          Back home
+        </Link>
       </div>
     </div>
   );

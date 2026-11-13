@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { PiWarningCircle, PiUpload, PiFileText } from "react-icons/pi";
+import { PiFileText } from "react-icons/pi";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/providers/trpc";
 import { Field } from "@/components/Field";
+import ImageUpload from "@/components/ImageUpload";
+import { toast } from "sonner";
 
 export default function AddBook() {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isLoading: authLoading } = useAuth();
   const utils = trpc.useUtils();
-  const [uploading, setUploading] = useState(false);
   const [contentUploading, setContentUploading] = useState(false);
+  const [validationError, setValidationError] = useState("");
+
+  const { data: categories } = trpc.book.categories.useQuery();
+  const categoryList = categories || ["Sci-Fi", "Horror", "Thriller"];
 
   const [form, setForm] = useState({
     title: "",
@@ -19,42 +24,25 @@ export default function AddBook() {
     content: "",
     price: "",
     coverImage: "",
-    category: "Sci-Fi",
+    category: categoryList[0] || "Sci-Fi",
   });
-
-  const [coverError, setCoverError] = useState(false);
 
   const createBook = trpc.book.create.useMutation({
     onSuccess: () => {
       utils.book.list.invalidate();
+      utils.book.adminList.invalidate();
+      toast.success("Edition published to catalog");
       navigate("/home");
     },
   });
 
-  if (!isAdmin) {
-    navigate("/");
-    return null;
-  }
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
-      const data = await res.json();
-      if (data.url) {
-        setForm({ ...form, coverImage: data.url });
-      }
-    } catch {
-      // fallback to default
-    } finally {
-      setUploading(false);
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      navigate("/");
     }
-  };
+  }, [authLoading, isAdmin, navigate]);
+
+  if (authLoading || !isAdmin) return null;
 
   const handleContentUpload = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -68,280 +56,218 @@ export default function AddBook() {
       fd.append("file", file);
       const res = await fetch("/api/extract-text", {
         method: "POST",
+        credentials: "include",
         body: fd,
       });
-      const data = await res.json();
-      if (data.text) {
-        setForm({ ...form, content: data.text });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.text) {
+        setForm((f) => ({ ...f, content: data.text }));
+        toast.success("Manuscript text imported");
+      } else {
+        toast.error(data.error || "Could not extract text from file.");
       }
     } catch {
-      // fallback
+      toast.error("Failed to extract text from file.");
     } finally {
       setContentUploading(false);
       e.target.value = "";
     }
   };
 
-  const handleSubmit = () => {
-    if (!form.title || !form.author || !form.price || !form.description) return;
-    if (!form.coverImage) {
-      setCoverError(true);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError("");
+
+    if (!form.title.trim() || !form.author.trim() || !form.price.trim() || !form.description.trim()) {
+      setValidationError("Title, author, cover price, and description are required.");
       return;
     }
+    if (!form.coverImage.trim()) {
+      setValidationError("Upload a cover image or supply an image URL.");
+      return;
+    }
+
     createBook.mutate({
-      title: form.title,
-      author: form.author,
-      description: form.description,
+      title: form.title.trim(),
+      author: form.author.trim(),
+      description: form.description.trim(),
       content: form.content,
-      price: form.price,
-      coverImage: form.coverImage,
+      price: form.price.trim(),
+      coverImage: form.coverImage.trim(),
       category: form.category,
     });
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "hsl(var(--background))" }}
-    >
-      <div
-        className="mx-auto measure"
-        style={{ padding: "40px 24px 96px" }}
-      >
-        <div className="grid md:grid-cols-[280px_1fr] gap-12">
-          {/* ── Meta rail ── */}
-          <aside className="md:sticky md:top-24 self-start">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
-              Admin
-            </p>
-            <h1
-              className="font-serif text-foreground mb-4"
-              style={{
-                fontSize: "42px",
-                lineHeight: 1.04,
-                letterSpacing: "-0.02em",
-                fontWeight: 400,
-              }}
-            >
-              Add Book
-            </h1>
-            <p
-              className="text-muted-foreground mb-6"
-              style={{ fontSize: "16px", lineHeight: 1.6 }}
-            >
-              Publish a new title directly to the catalog — no review step
-              required.
-            </p>
-
-            <div className="form-note form-note--alert mb-6">
-              <div className="flex gap-2.5 items-start">
-                <PiWarningCircle
-                  size={16}
-                  style={{
-                    color: "rgb(var(--color-p-red-fg))",
-                    marginTop: "2px",
-                    flexShrink: 0,
-                  }}
-                />
-                <div>
-                  <p
-                    className="font-mono uppercase"
-                    style={{
-                      fontSize: "11px",
-                      letterSpacing: "0.14em",
-                      color: "rgb(var(--color-p-red-fg))",
-                    }}
-                  >
-                    No AI content
-                  </p>
-                  <p
-                    className="text-foreground"
-                    style={{ fontSize: "14px", lineHeight: 1.55, marginTop: "4px" }}
-                  >
-                    ToxicReads does not accept AI-generated work. Every
-                    submission is reviewed.
-                  </p>
-                </div>
-              </div>
+    <div className="min-h-full bg-background">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-8 pb-20">
+        <div className="grid md:grid-cols-[270px_1fr] gap-10 lg:gap-14 items-start">
+          {/* Sticky Meta Rail */}
+          <aside className="md:sticky md:top-8 space-y-5">
+            <div>
+              <p className="text-xs font-medium text-signal mb-1.5">
+                Editorial publishing
+              </p>
+              <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-foreground leading-[1.08]">
+                Add edition
+              </h1>
+              <p className="mt-2.5 text-sm text-muted-foreground leading-relaxed text-pretty">
+                Publish a finished edition directly to the live storefront without a queue step.
+              </p>
             </div>
 
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-1">
-              Accepted formats
-            </p>
-            <div>
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-medium text-foreground mb-2.5">
+                Typical word counts (words)
+              </p>
               <div className="spec-row">
-                <span>Flash Fiction</span>
-                <span>&lt; 1,000</span>
-              </div>
-              <div className="spec-row">
-                <span>Short Story</span>
-                <span>1,000 – 7,500</span>
-              </div>
-              <div className="spec-row">
-                <span>Novelette</span>
-                <span>7,500 – 17,500</span>
+                <span>Short fiction</span>
+                <span className="font-mono tnum">1,000 - 7,500</span>
               </div>
               <div className="spec-row">
                 <span>Novella</span>
-                <span>17,500 – 40,000</span>
+                <span className="font-mono tnum">7,500 - 17,500</span>
               </div>
               <div className="spec-row">
                 <span>Novel</span>
-                <span>40,000+</span>
+                <span className="font-mono tnum">17,500 - 40,000+</span>
               </div>
             </div>
           </aside>
 
-          {/* ── Form ── */}
+          {/* Form */}
           <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-            className="space-y-7"
+            onSubmit={handleSubmit}
+            className="rounded-xl border border-border bg-card p-6 sm:p-8 space-y-6"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Title" required>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field label="Book title" required>
                 <input
-                  className="field-input"
+                  type="text"
                   value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  placeholder="The Last Frequency"
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Title of the work"
+                  className="field-input"
                 />
               </Field>
-              <Field label="Author" required>
+
+              <Field label="Author name" required>
                 <input
-                  className="field-input"
+                  type="text"
                   value={form.author}
-                  onChange={e => setForm({ ...form, author: e.target.value })}
-                  placeholder="A. Okafor"
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                  placeholder="Author name"
+                  className="field-input"
                 />
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Field label="Price" required hint="Nigerian Naira">
+            <div className="grid sm:grid-cols-2 gap-5">
+              <Field label="Cover price (NGN)" required>
                 <input
-                  className="field-input"
+                  type="number"
+                  min="0"
+                  step="50"
                   value={form.price}
-                  onChange={e => setForm({ ...form, price: e.target.value })}
-                  placeholder="₦2,500"
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                  placeholder="1000"
+                  className="field-input font-mono tnum"
                 />
               </Field>
-              <Field label="Genre">
+
+              <Field label="Genre" required>
                 <select
-                  className="field-input"
                   value={form.category}
-                  onChange={e => setForm({ ...form, category: e.target.value })}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="field-input cursor-pointer"
                 >
-                  {["Sci-Fi", "Horror", "Thriller"].map(c => (
-                    <option key={c} value={c}>
-                      {c}
+                  {categoryList.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
                     </option>
                   ))}
                 </select>
               </Field>
             </div>
 
-            <Field label="Cover Image" required>
-              <div className="flex gap-4 items-start">
-                <div
-                  style={{
-                    width: "96px",
-                    height: "128px",
-                    border: "1px solid hsl(var(--border))",
-                    flexShrink: 0,
-                    overflow: "hidden",
-                    backgroundColor: "hsl(var(--muted))",
-                  }}
-                >
-                  {uploading ? (
-                    <div className="flex items-center justify-center h-full">
-                      <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-                        Uploading
-                      </span>
-                    </div>
-                  ) : form.coverImage ? (
-                    <img
-                      src={form.coverImage}
-                      alt="Cover preview"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full px-2">
-                      <span className="font-mono text-[11px] text-center text-muted-foreground">
-                        No file
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0 pt-1">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleUpload}
-                    style={{ display: "none" }}
-                    id="cover-upload"
-                  />
-                  <label htmlFor="cover-upload" className="field-action">
-                    <PiUpload size={14} />
-                    {uploading ? "Uploading..." : "Choose file"}
-                  </label>
-                  {coverError && !form.coverImage && (
-                    <p
-                      className="mt-2 text-[13px]"
-                      style={{ color: "rgb(var(--color-p-red-fg))" }}
-                    >
-                      Please upload a cover image
-                    </p>
-                  )}
-                </div>
-              </div>
-            </Field>
+            <ImageUpload
+              label="Book cover *"
+              value={form.coverImage}
+              onChange={(url) => {
+                setForm((f) => ({ ...f, coverImage: url }));
+                if (validationError) setValidationError("");
+              }}
+            />
 
-            <Field label="Description" required>
+            <Field label="Synopsis" required>
               <textarea
-                className="field-input"
                 rows={4}
                 value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-                placeholder="A short, compelling summary of your book."
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                placeholder="Book blurb and editorial description..."
+                className="field-input"
               />
             </Field>
 
             <Field
-              label="Reading Content"
-              hint="Optional — paste text or upload a document."
+              label="Manuscript text"
+              hint="Optional. Paste text or import a .docx / .txt document."
             >
-              <input
-                type="file"
-                accept=".docx,.pdf,.epub"
-                onChange={handleContentUpload}
-                style={{ display: "none" }}
-                id="content-upload"
-              />
-              <label htmlFor="content-upload" className="field-action">
-                <PiFileText size={14} />
-                {contentUploading
-                  ? "Extracting..."
-                  : "Upload .docx / .pdf / .epub"}
-              </label>
-              <textarea
-                className="field-input mt-3"
-                rows={8}
-                value={form.content}
-                onChange={e => setForm({ ...form, content: e.target.value })}
-                placeholder="Paste your content here, or upload a document above."
-              />
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label className="field-action">
+                    <PiFileText className="h-4 w-4" aria-hidden="true" />
+                    {contentUploading
+                      ? "Extracting text..."
+                      : "Import .docx / .txt file"}
+                    <input
+                      type="file"
+                      accept=".txt,.md,.doc,.docx"
+                      onChange={handleContentUpload}
+                      disabled={contentUploading}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {form.content && (
+                    <span className="font-mono text-xs text-muted-foreground tnum">
+                      {form.content.length.toLocaleString()} chars
+                    </span>
+                  )}
+                </div>
+
+                <textarea
+                  rows={8}
+                  value={form.content}
+                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                  placeholder="Paste full edition content here..."
+                  className="field-input font-serif text-[16px]"
+                />
+              </div>
             </Field>
 
-            <button
-              type="submit"
-              disabled={createBook.isPending}
-              className="w-full py-3 bg-primary text-primary-foreground font-mono uppercase tracking-[0.14em] text-[13px] hover:opacity-90 active:scale-[0.985] transition disabled:opacity-70"
-            >
-              {createBook.isPending ? "Adding..." : "Add Book"}
-            </button>
+            {(validationError || createBook.error) && (
+              <div role="alert" className="form-note form-note--alert text-sm">
+                {validationError || createBook.error?.message}
+              </div>
+            )}
+
+            <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => navigate("/admin")}
+                className="w-full sm:w-auto rounded-full border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createBook.isPending}
+                className="w-full sm:w-auto rounded-full bg-primary text-primary-foreground px-7 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60"
+              >
+                {createBook.isPending ? "Publishing..." : "Publish edition"}
+              </button>
+            </div>
           </form>
         </div>
       </div>
